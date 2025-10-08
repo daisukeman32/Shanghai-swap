@@ -7,6 +7,7 @@ function ConversationScene({ gameData, playerName, onComplete, onBadEnd }) {
   const [isTyping, setIsTyping] = useState(false);
   const [showChoices, setShowChoices] = useState(false);
   const [currentChoices, setCurrentChoices] = useState([]);
+  const [selectedChoiceIndex, setSelectedChoiceIndex] = useState(0);
 
   const currentDialogue = gameData?.dialogues?.find(
     d => d.dialogue_id === currentDialogueId
@@ -59,6 +60,7 @@ function ConversationScene({ gameData, playerName, onComplete, onBadEnd }) {
             c.choice_id.startsWith(choiceId)
           );
           setCurrentChoices(choices);
+          setSelectedChoiceIndex(0);
           setShowChoices(true);
         }
       }
@@ -72,17 +74,34 @@ function ConversationScene({ gameData, playerName, onComplete, onBadEnd }) {
     };
   }, [currentDialogueId, currentDialogue, gameData, playerName]);
 
-  // キーボード・クリックイベントで次へ進む
+  // キーボード・クリックイベントで次へ進む / 選択肢操作
   useEffect(() => {
     const handleKeyPress = (e) => {
-      if (!showChoices) {
+      if (showChoices) {
+        // 選択肢表示中：カーソルキーで選択、Enterで決定
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          setSelectedChoiceIndex(prev =>
+            prev > 0 ? prev - 1 : currentChoices.length - 1
+          );
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          setSelectedChoiceIndex(prev =>
+            prev < currentChoices.length - 1 ? prev + 1 : 0
+          );
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          handleChoice(currentChoices[selectedChoiceIndex]);
+        }
+      } else {
+        // 通常の会話進行
         handleNext();
       }
     };
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [isTyping, showChoices, currentDialogue]);
+  }, [isTyping, showChoices, currentDialogue, currentChoices, selectedChoiceIndex]);
 
   // 次のダイアログへ進む
   const handleNext = () => {
@@ -183,10 +202,13 @@ function ConversationScene({ gameData, playerName, onComplete, onBadEnd }) {
           {currentChoices.map((choice, index) => (
             <button
               key={index}
-              className="choice-button"
+              className={`choice-button ${selectedChoiceIndex === index ? 'selected' : ''}`}
               onClick={() => handleChoice(choice)}
             >
               ▶ {choice.choice_text}
+              {selectedChoiceIndex === index && (
+                <span className="choice-indicator">✓</span>
+              )}
             </button>
           ))}
         </div>
