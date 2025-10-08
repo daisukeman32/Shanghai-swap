@@ -14,11 +14,10 @@ const TILE_TYPES = [
 
 /**
  * 簡易レイアウト（3層・48枚）を生成
- * 必ずクリア可能な配置を保証
+ * 逆順生成アルゴリズム：必ずクリア可能な配置を保証
  * @returns {Array} 牌配列
  */
 export function generateTutorialLayout() {
-  const tiles = [];
   let id = 0;
 
   // レイヤー0（最下層）- 24枚
@@ -44,54 +43,125 @@ export function generateTutorialLayout() {
 
   const patterns = [layer0Pattern, layer1Pattern, layer2Pattern];
 
-  // 牌の位置を収集
-  const positions = [];
+  // 全ての空きスロット位置を収集
+  const allSlots = [];
   patterns.forEach((pattern, layer) => {
     pattern.forEach((row, y) => {
       row.forEach((cell, x) => {
         if (cell === 1) {
-          positions.push({ x, y, layer });
+          allSlots.push({ x, y, layer });
         }
       });
     });
   });
 
-  // 位置をシャッフル
-  shuffleArray(positions);
-
-  // ペアで牌を配置（必ず2枚ずつ）
-  const tileCount = positions.length;
+  // ペアリストを作成してシャッフル
+  const tileCount = allSlots.length;
   const pairCount = Math.floor(tileCount / 2);
-
+  const pairs = [];
   for (let i = 0; i < pairCount; i++) {
-    const type = TILE_TYPES[i % TILE_TYPES.length];
+    pairs.push(TILE_TYPES[i % TILE_TYPES.length]);
+  }
+  shuffleArray(pairs);
 
-    // 1枚目
-    const pos1 = positions[i * 2];
+  // 逆順生成：空の盤面から配置可能なスロットにペアを配置
+  const tiles = [];
+
+  for (const pairType of pairs) {
+    // 配置可能なスロット（現時点で選択可能になる位置）を探す
+    const availableSlots = findAvailableSlotsForPlacement(tiles, allSlots);
+
+    if (availableSlots.length < 2) {
+      // 配置可能なスロットが不足：ランダムに2つ選択（フォールバック）
+      const remainingSlots = allSlots.filter(slot =>
+        !tiles.some(t => t.x === slot.x && t.y === slot.y && t.layer === slot.layer)
+      );
+      shuffleArray(remainingSlots);
+
+      const slot1 = remainingSlots[0];
+      const slot2 = remainingSlots[1];
+
+      if (slot1 && slot2) {
+        tiles.push({
+          id: id++,
+          type: pairType,
+          x: slot1.x,
+          y: slot1.y,
+          layer: slot1.layer,
+          isRemoved: false
+        });
+        tiles.push({
+          id: id++,
+          type: pairType,
+          x: slot2.x,
+          y: slot2.y,
+          layer: slot2.layer,
+          isRemoved: false
+        });
+      }
+      continue;
+    }
+
+    // 配置可能なスロットからランダムに2つ選択
+    shuffleArray(availableSlots);
+    const slot1 = availableSlots[0];
+    const slot2 = availableSlots[1];
+
     tiles.push({
       id: id++,
-      type,
-      x: pos1.x,
-      y: pos1.y,
-      layer: pos1.layer,
+      type: pairType,
+      x: slot1.x,
+      y: slot1.y,
+      layer: slot1.layer,
       isRemoved: false
     });
-
-    // 2枚目（ペア）
-    if (positions[i * 2 + 1]) {
-      const pos2 = positions[i * 2 + 1];
-      tiles.push({
-        id: id++,
-        type,
-        x: pos2.x,
-        y: pos2.y,
-        layer: pos2.layer,
-        isRemoved: false
-      });
-    }
+    tiles.push({
+      id: id++,
+      type: pairType,
+      x: slot2.x,
+      y: slot2.y,
+      layer: slot2.layer,
+      isRemoved: false
+    });
   }
 
   return tiles;
+}
+
+/**
+ * 配置可能なスロットを探す（逆順生成用）
+ * 現在の盤面で、配置したら「選択可能」になる空きスロットを返す
+ * @param {Array} currentTiles - 現在配置されている牌
+ * @param {Array} allSlots - 全スロット位置
+ * @returns {Array} 配置可能なスロット配列
+ */
+function findAvailableSlotsForPlacement(currentTiles, allSlots) {
+  // 空きスロット（まだ牌が配置されていない位置）を抽出
+  const emptySlots = allSlots.filter(slot =>
+    !currentTiles.some(t => t.x === slot.x && t.y === slot.y && t.layer === slot.layer)
+  );
+
+  // 各空きスロットについて、配置したら選択可能かチェック
+  const availableSlots = emptySlots.filter(slot => {
+    // 仮に牌を配置
+    const tempTile = {
+      id: -1,
+      type: 'temp',
+      x: slot.x,
+      y: slot.y,
+      layer: slot.layer,
+      isRemoved: false
+    };
+
+    // この牌が選択可能かチェック
+    const tempTiles = [...currentTiles, tempTile];
+    return isSelectable(tempTile, tempTiles);
+  });
+
+  // 上層から優先的に返す（Layer 2 → 1 → 0）
+  availableSlots.sort((a, b) => b.layer - a.layer);
+
+  return availableSlots;
 }
 
 /**
