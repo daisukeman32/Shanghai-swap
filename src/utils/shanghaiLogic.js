@@ -14,6 +14,7 @@ const TILE_TYPES = [
 
 /**
  * 簡易レイアウト（3層・48枚）を生成
+ * 必ずクリア可能な配置を保証
  * @returns {Array} 牌配列
  */
 export function generateTutorialLayout() {
@@ -43,41 +44,65 @@ export function generateTutorialLayout() {
 
   const patterns = [layer0Pattern, layer1Pattern, layer2Pattern];
 
-  // 牌を配置
+  // 牌の位置を収集
+  const positions = [];
   patterns.forEach((pattern, layer) => {
     pattern.forEach((row, y) => {
       row.forEach((cell, x) => {
         if (cell === 1) {
-          tiles.push({
-            id: id++,
-            type: TILE_TYPES[Math.floor(Math.random() * TILE_TYPES.length)],
-            x,
-            y,
-            layer,
-            isRemoved: false
-          });
+          positions.push({ x, y, layer });
         }
       });
     });
   });
 
-  // ペアになるように調整（すべての牌を2枚ずつ）
-  const adjustedTiles = [];
-  const halfCount = Math.floor(tiles.length / 2);
+  // 位置をシャッフル
+  shuffleArray(positions);
 
-  for (let i = 0; i < halfCount; i++) {
+  // ペアで牌を配置（必ず2枚ずつ）
+  const tileCount = positions.length;
+  const pairCount = Math.floor(tileCount / 2);
+
+  for (let i = 0; i < pairCount; i++) {
     const type = TILE_TYPES[i % TILE_TYPES.length];
-    if (tiles[i * 2]) {
-      tiles[i * 2].type = type;
-      adjustedTiles.push(tiles[i * 2]);
-    }
-    if (tiles[i * 2 + 1]) {
-      tiles[i * 2 + 1].type = type;
-      adjustedTiles.push(tiles[i * 2 + 1]);
+
+    // 1枚目
+    const pos1 = positions[i * 2];
+    tiles.push({
+      id: id++,
+      type,
+      x: pos1.x,
+      y: pos1.y,
+      layer: pos1.layer,
+      isRemoved: false
+    });
+
+    // 2枚目（ペア）
+    if (positions[i * 2 + 1]) {
+      const pos2 = positions[i * 2 + 1];
+      tiles.push({
+        id: id++,
+        type,
+        x: pos2.x,
+        y: pos2.y,
+        layer: pos2.layer,
+        isRemoved: false
+      });
     }
   }
 
-  return adjustedTiles;
+  return tiles;
+}
+
+/**
+ * 配列をシャッフル（Fisher-Yates algorithm）
+ */
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
 }
 
 /**

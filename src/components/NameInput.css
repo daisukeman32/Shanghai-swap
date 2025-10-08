@@ -1,0 +1,231 @@
+.name-input-screen {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.name-input-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #FFE5EC 0%, #FFC2D4 50%, #FFB3C6 100%);
+  z-index: 0;
+}
+
+/* 背景エフェクト */
+.name-input-bg::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.1) 2px, transparent 2px);
+  background-size: 60px 60px;
+  animation: float-pattern 30s linear infinite;
+  opacity: 0.3;
+}
+
+@keyframes float-pattern {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(60px);
+  }
+}
+
+.name-input-content {
+  position: relative;
+  z-index: 1;
+  width: 90%;
+  max-width: 600px;
+}
+
+/* 入力ボックス */
+.name-input-box {
+  background: rgba(255, 255, 255, 0.95);
+  border: 5px solid #FFD700;
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+.name-input-title {
+  font-size: 28px;
+  font-weight: bold;
+  color: #FF69B4;
+  margin-bottom: 30px;
+  text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.5);
+}
+
+/* 入力フィールド */
+.input-group {
+  margin-bottom: 15px;
+}
+
+.name-input-field {
+  width: 100%;
+  padding: 20px;
+  font-size: 24px;
+  border: 3px solid #FFB3C6;
+  border-radius: 10px;
+  text-align: center;
+  background: white;
+  color: #333;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.name-input-field:focus {
+  border-color: #FF69B4;
+  box-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
+  transform: scale(1.02);
+}
+
+.name-input-field::placeholder {
+  color: #999;
+  font-weight: normal;
+}
+
+/* ヒントテキスト */
+.input-hint {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 30px;
+  font-style: italic;
+}
+
+/* ボタングループ */
+.button-group {
+  margin-top: 20px;
+}
+
+.submit-button {
+  width: 100%;
+  padding: 20px 40px;
+  font-size: 24px;
+  font-weight: bold;
+  color: white;
+  background: linear-gradient(to bottom, #667eea, #764ba2);
+  border: 3px solid white;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.submit-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 20px rgba(255, 215, 0, 0.6);
+  background: linear-gradient(to bottom, #764ba2, #667eea);
+}
+
+.submit-button:active {
+  transform: scale(0.95);
+}
+
+/* キャラクタープレビュー */
+.character-preview {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.preview-character {
+  width: 100px;
+  height: 150px;
+  background: linear-gradient(135deg, #FFB6C1, #FF69B4);
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  margin-bottom: 15px;
+  position: relative;
+  animation: character-bounce 2s ease-in-out infinite;
+}
+
+@keyframes character-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.preview-character::after {
+  content: '👤';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 60px;
+  opacity: 0.8;
+}
+
+.preview-text {
+  font-size: 18px;
+  color: #667eea;
+  font-weight: bold;
+  font-style: italic;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* フェードインアニメーション */
+.fade-in {
+  animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* レスポンシブ */
+@media (max-width: 768px) {
+  .name-input-box {
+    padding: 30px 20px;
+  }
+
+  .name-input-title {
+    font-size: 22px;
+  }
+
+  .name-input-field {
+    font-size: 20px;
+    padding: 15px;
+  }
+
+  .submit-button {
+    font-size: 20px;
+    padding: 15px 30px;
+  }
+
+  .preview-character {
+    width: 80px;
+    height: 120px;
+  }
+
+  .preview-character::after {
+    font-size: 40px;
+  }
+
+  .preview-text {
+    font-size: 16px;
+  }
+}

@@ -14,7 +14,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #FF69B4 0%, #FF1493 100%);
+  background: linear-gradient(135deg, #FFE5EC 0%, #FFB3C6 50%, #FF69B4 100%);
   z-index: 0;
 }
 

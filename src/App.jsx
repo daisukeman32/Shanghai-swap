@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './styles/App.css';
 import TitleScreen from './components/TitleScreen';
+import NameInput from './components/NameInput';
 import ConversationScene from './components/ConversationScene';
 import ShanghaiPuzzle from './components/ShanghaiPuzzle';
 import RewardScene from './components/RewardScene';
@@ -25,6 +26,11 @@ function App() {
         // セーブデータ読み込み
         const save = loadSaveData();
         setSaveData(save);
+
+        // セーブデータに名前があれば設定
+        if (save.playerName) {
+          setPlayerName(save.playerName);
+        }
 
         setLoading(false);
       } catch (error) {
@@ -73,10 +79,20 @@ function App() {
     <div className="app">
       {currentScene === 'title' && (
         <TitleScreen
-          onStart={() => changeScene('conversation')}
+          onStart={() => changeScene('nameInput')}
           onContinue={() => changeScene('conversation')}
           onGallery={() => changeScene('gallery')}
           saveData={saveData}
+        />
+      )}
+
+      {currentScene === 'nameInput' && (
+        <NameInput
+          defaultName={playerName}
+          onSubmit={(name) => {
+            setName(name);
+            changeScene('conversation');
+          }}
         />
       )}
 
