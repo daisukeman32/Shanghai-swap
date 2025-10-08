@@ -1,0 +1,220 @@
+.conversation-scene {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  transition: background 0.5s ease;
+}
+
+/* キャラクター立ち絵（仮素材） */
+.character-sprite {
+  position: absolute;
+  right: 100px;
+  bottom: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1;
+}
+
+.character-sprite-dummy {
+  width: 200px;
+  height: 350px;
+  border-radius: 15px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.emotion-label {
+  font-size: 24px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  text-transform: uppercase;
+}
+
+.character-name-label {
+  margin-top: 10px;
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* スライドインアニメーション */
+.slide-in-right {
+  animation: slideInRight 0.8s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* テキストボックス */
+.textbox {
+  position: relative;
+  z-index: 2;
+  width: 90%;
+  max-width: 1000px;
+  margin: 0 auto 50px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 3px solid white;
+  border-radius: 15px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+  animation: textboxSlideUp 0.5s ease-out;
+}
+
+@keyframes textboxSlideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.textbox-header {
+  padding: 10px 20px;
+  background: linear-gradient(to right, #667eea, #764ba2);
+  border-radius: 12px 12px 0 0;
+}
+
+.speaker-name {
+  font-size: 20px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.textbox-content {
+  padding: 30px;
+  min-height: 120px;
+}
+
+.dialogue-text {
+  font-size: 22px;
+  line-height: 1.8;
+  color: white;
+  margin: 0;
+}
+
+.next-indicator {
+  text-align: center;
+  padding: 10px;
+  font-size: 16px;
+  color: #FFD700;
+  cursor: pointer;
+  animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* 選択肢 */
+.choices-container {
+  position: absolute;
+  bottom: 180px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 80%;
+  max-width: 600px;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.choice-button {
+  width: 100%;
+  padding: 20px 30px;
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+  background: linear-gradient(to right, #667eea, #764ba2);
+  border: 3px solid white;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.choice-button:hover {
+  transform: translateX(10px) scale(1.02);
+  box-shadow: 0 8px 16px rgba(255, 215, 0, 0.6);
+  background: linear-gradient(to right, #764ba2, #667eea);
+}
+
+.choice-button:active {
+  transform: translateX(10px) scale(0.98);
+}
+
+/* レスポンシブ */
+@media (max-width: 768px) {
+  .character-sprite {
+    right: 20px;
+    bottom: 150px;
+  }
+
+  .character-sprite-dummy {
+    width: 150px;
+    height: 250px;
+  }
+
+  .textbox {
+    width: 95%;
+    margin-bottom: 30px;
+  }
+
+  .textbox-content {
+    padding: 20px;
+    min-height: 100px;
+  }
+
+  .dialogue-text {
+    font-size: 18px;
+  }
+
+  .choices-container {
+    width: 90%;
+  }
+
+  .choice-button {
+    padding: 15px 20px;
+    font-size: 16px;
+  }
+}

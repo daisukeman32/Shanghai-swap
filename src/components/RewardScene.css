@@ -1,0 +1,257 @@
+.reward-scene {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.reward-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #FF69B4 0%, #FF1493 100%);
+  z-index: 0;
+}
+
+/* キラキラエフェクト */
+.reward-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.4) 2px, transparent 2px),
+    radial-gradient(circle, rgba(255, 215, 0, 0.3) 2px, transparent 2px);
+  background-size: 100px 100px, 150px 150px;
+  background-position: 0 0, 50px 50px;
+  animation: sparkleMove 10s linear infinite;
+  opacity: 0.5;
+}
+
+@keyframes sparkleMove {
+  from {
+    background-position: 0 0, 50px 50px;
+  }
+  to {
+    background-position: 100px 100px, 150px 150px;
+  }
+}
+
+.reward-content {
+  position: relative;
+  z-index: 1;
+  width: 90%;
+  max-width: 800px;
+  padding: 40px;
+}
+
+.message-container {
+  background: rgba(255, 255, 255, 0.95);
+  border: 5px solid #FFD700;
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+.congratulations {
+  font-size: 48px;
+  font-weight: bold;
+  color: #FF1493;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  margin-bottom: 20px;
+  animation: bounce 1s ease-in-out;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.reward-text {
+  font-size: 24px;
+  color: #333;
+  line-height: 1.8;
+  margin-bottom: 30px;
+}
+
+/* ご褒美画像（仮素材） */
+.reward-image-container {
+  margin: 30px 0;
+}
+
+.reward-image-dummy {
+  width: 100%;
+  height: 300px;
+  background: linear-gradient(135deg, #FFB6C1, #FF69B4);
+  border: 3px solid #FFD700;
+  border-radius: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  animation: rewardReveal 1.5s ease-out;
+}
+
+@keyframes rewardReveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+    filter: blur(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+
+.reward-label {
+  font-size: 36px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+  margin-bottom: 10px;
+}
+
+.reward-note {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  font-style: italic;
+}
+
+/* 説明テキスト */
+.reward-description {
+  text-align: left;
+  margin: 30px 0;
+  padding: 20px;
+  background: rgba(255, 182, 193, 0.3);
+  border-radius: 10px;
+}
+
+.reward-description p {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.reward-description ul {
+  list-style: none;
+  padding: 0;
+}
+
+.reward-description li {
+  font-size: 18px;
+  color: #555;
+  margin: 10px 0;
+  padding-left: 30px;
+  position: relative;
+}
+
+.reward-description li::before {
+  content: '✨';
+  position: absolute;
+  left: 0;
+}
+
+/* 続けるボタン */
+.continue-button {
+  width: 100%;
+  padding: 20px 40px;
+  font-size: 24px;
+  font-weight: bold;
+  color: white;
+  background: linear-gradient(to bottom, #FF69B4, #FF1493);
+  border: 4px solid #FFD700;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  margin-top: 30px;
+}
+
+.continue-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 20px rgba(255, 215, 0, 0.6);
+}
+
+.continue-button:active {
+  transform: scale(0.95);
+}
+
+/* DEMOエンド通知 */
+.demo-end-notice {
+  margin-top: 40px;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+.demo-end-notice p {
+  font-size: 20px;
+  font-weight: bold;
+  color: #FF1493;
+  margin: 5px 0;
+}
+
+/* フェードインアニメーション */
+.fade-in {
+  animation: fadeIn 1.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* レスポンシブ */
+@media (max-width: 768px) {
+  .reward-content {
+    width: 95%;
+    padding: 20px;
+  }
+
+  .message-container {
+    padding: 20px;
+  }
+
+  .congratulations {
+    font-size: 32px;
+  }
+
+  .reward-text {
+    font-size: 18px;
+  }
+
+  .reward-image-dummy {
+    height: 200px;
+  }
+
+  .reward-label {
+    font-size: 24px;
+  }
+
+  .continue-button {
+    font-size: 20px;
+    padding: 15px 30px;
+  }
+}

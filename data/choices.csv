@@ -1,0 +1,4 @@
+choice_id,scene_id,choice_text,next_dialogue_id,is_correct
+choice_1_1,opening,もちろん！何でも手伝うよ！,4,true
+choice_1_2,opening,忙しいから無理かな…,bad_1,false
+choice_1_3,opening,勉強苦手なんだよね…,bad_2,false

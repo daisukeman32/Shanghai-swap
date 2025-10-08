@@ -1,0 +1,5 @@
+scene_id,scene_name,background_color,bgm_file,description
+opening,オープニング,#FFB6C1,,放課後の教室
+puzzle_start,パズル開始,#4B0082,,不思議な空間
+reward,ご褒美,#FF69B4,,愛莉の部屋
+ending,エンディング,#FF8C00,,屋上
