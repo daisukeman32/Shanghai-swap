@@ -20,18 +20,36 @@ function ConversationScene({ gameData, playerName, onComplete, onBadEnd }) {
   useEffect(() => {
     if (!currentDialogue) return;
 
-    const fullText = currentDialogue.text;
+    // プレイヤー名のプレースホルダーを置き換え
+    const fullText = currentDialogue.text.replace(/{playerName}/g, playerName || 'あなた');
     setDisplayedText('');
     setIsTyping(true);
     setShowChoices(false);
 
     let index = 0;
-    const timer = setInterval(() => {
+    let timeoutId = null;
+    let isCancelled = false;
+
+    const typeNextChar = () => {
+      if (isCancelled) return;
+
       if (index < fullText.length) {
         setDisplayedText(fullText.slice(0, index + 1));
+        const currentChar = fullText[index];
+
+        // 句読点で待機時間を調整
+        let currentDelay;
+        if (currentChar === '。' || currentChar === '！' || currentChar === '？') {
+          currentDelay = 300; // 文末は長めの間
+        } else if (currentChar === '、' || currentChar === '…') {
+          currentDelay = 150; // 読点は中間の間
+        } else {
+          currentDelay = 50; // 通常の文字
+        }
+
         index++;
+        timeoutId = setTimeout(typeNextChar, currentDelay);
       } else {
-        clearInterval(timer);
         setIsTyping(false);
 
         // 選択肢チェック
@@ -44,16 +62,34 @@ function ConversationScene({ gameData, playerName, onComplete, onBadEnd }) {
           setShowChoices(true);
         }
       }
-    }, 50); // 50ms/文字
+    };
 
-    return () => clearInterval(timer);
-  }, [currentDialogueId, currentDialogue, gameData]);
+    typeNextChar();
+
+    return () => {
+      isCancelled = true;
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [currentDialogueId, currentDialogue, gameData, playerName]);
+
+  // キーボード・クリックイベントで次へ進む
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      if (!showChoices) {
+        handleNext();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [isTyping, showChoices, currentDialogue]);
 
   // 次のダイアログへ進む
   const handleNext = () => {
     if (isTyping) {
       // タイピング中の場合はスキップ
-      setDisplayedText(currentDialogue.text);
+      const fullText = currentDialogue.text.replace(/{playerName}/g, playerName || 'あなた');
+      setDisplayedText(fullText);
       setIsTyping(false);
       return;
     }
@@ -106,10 +142,17 @@ function ConversationScene({ gameData, playerName, onComplete, onBadEnd }) {
 
   const characterColor = emotionColors[currentDialogue.emotion] || '#87CEEB';
 
+  // 画面全体をクリックで次へ進む
+  const handleScreenClick = () => {
+    if (!showChoices) {
+      handleNext();
+    }
+  };
+
   return (
-    <div className="conversation-scene" style={{ background: bgColor }}>
+    <div className="conversation-scene" style={{ background: bgColor }} onClick={handleScreenClick}>
       {/* キャラクター立ち絵（仮素材） */}
-      <div className="character-sprite slide-in-right">
+      <div className={`character-sprite slide-in-right ${isTyping ? 'talking' : ''}`}>
         <div
           className="character-sprite-dummy"
           style={{ background: `linear-gradient(135deg, ${characterColor}, ${characterColor}dd)` }}

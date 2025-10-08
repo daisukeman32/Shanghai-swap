@@ -14,11 +14,25 @@
 .character-sprite {
   position: absolute;
   right: 100px;
-  bottom: 150px;
+  bottom: 260px;
   display: flex;
   flex-direction: column;
   align-items: center;
   z-index: 1;
+}
+
+/* 会話中のアニメーション（口パク風） */
+.character-sprite.talking .character-sprite-dummy {
+  animation: talking-bounce 0.4s ease-in-out infinite alternate;
+}
+
+@keyframes talking-bounce {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    transform: translateY(-3px) scale(1.02);
+  }
 }
 
 .character-sprite-dummy {
@@ -192,7 +206,7 @@
 @media (max-width: 768px) {
   .character-sprite {
     right: 20px;
-    bottom: 150px;
+    bottom: 240px;
   }
 
   .character-sprite-dummy {

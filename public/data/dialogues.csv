@@ -1,6 +1,6 @@
 dialogue_id,scene_id,character_id,emotion,text,next_dialogue_id
-1,opening,airi,smile,こんにちは！今日も良い天気だね,2
-2,opening,airi,normal,ねえ、ちょっとお願いがあるんだけど…,3
+1,opening,airi,smile,あ、{playerName}くん！こんにちは！,2
+2,opening,airi,normal,今日も良い天気だね♪　ねえ、ちょっとお願いがあるんだけど…,3
 3,opening,airi,shy,今度のテスト、一緒に勉強してくれない？,choice_1
 4,opening,airi,smile,やった！ありがとう！,5
 5,opening,airi,normal,実は…お礼に面白いものを見せてあげる♪,6
