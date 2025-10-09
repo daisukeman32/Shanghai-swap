@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mahjong Solitaire - 組み込みサンプル</title>
+    <link rel="stylesheet" href="./mahjong-solitaire.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: rgb(10, 8, 30);
+            color: #ddd;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        #game-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .controls {
+            max-width: 1000px;
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        .controls button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: rgb(80, 29, 161);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+
+        .controls button:hover {
+            background-color: rgb(113, 29, 161);
+        }
+
+        .status-panel {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+
+        .status-panel h3 {
+            margin-top: 0;
+        }
+
+        .status-panel pre {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🀄 Mahjong Solitaire - 組み込みサンプル</h1>
+
+    <div class="controls">
+        <button onclick="restartGame()">🔄 ゲームリセット</button>
+        <button onclick="showGameStatus()">📊 ステータス表示</button>
+        <button onclick="showHint()">💡 ヒント表示</button>
+    </div>
+
+    <div id="game-container"></div>
+
+    <div class="status-panel">
+        <h3>📝 ステータス情報</h3>
+        <pre id="status-display">ゲームを開始してください...</pre>
+    </div>
+
+    <div class="status-panel">
+        <h3>📜 イベントログ</h3>
+        <pre id="event-log">待機中...</pre>
+    </div>
+
+    <script src="./mahjong-solitaire.js"></script>
+    <script>
+        let gameInstance = null;
+        const eventLog = [];
+
+        function logEvent(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            eventLog.push(`[${timestamp}] ${message}`);
+            document.getElementById('event-log').textContent = eventLog.slice(-10).join('\n');
+        }
+
+        function initGame() {
+            const container = document.getElementById('game-container');
+            gameInstance = new MahjongSolitaire();
+
+            gameInstance.init(container, {
+                imagePath: './img/',
+                showHint: true,
+                showRestart: true,
+                autoStart: true,
+                minimalUI: false
+            });
+
+            gameInstance.onGameEnd((result) => {
+                if (result.won) {
+                    logEvent('🎉 ゲームクリア！おめでとうございます！');
+                    alert('クリアしました！🎉');
+                } else {
+                    logEvent(`🚧 ゲームオーバー（残り${result.remainingTiles}枚）`);
+                    alert(`ゲームオーバー\n残りタイル: ${result.remainingTiles}枚`);
+                }
+            });
+
+            logEvent('✅ ゲームを初期化しました');
+        }
+
+        function restartGame() {
+            if (gameInstance) {
+                gameInstance.reset();
+                logEvent('🔄 ゲームをリセットしました');
+            }
+        }
+
+        function showGameStatus() {
+            if (gameInstance) {
+                const status = gameInstance.getStatus();
+                document.getElementById('status-display').textContent = JSON.stringify(status, null, 2);
+                logEvent('📊 ステータスを更新しました');
+            }
+        }
+
+        function showHint() {
+            if (gameInstance) {
+                gameInstance.showHint();
+                logEvent('💡 ヒントを表示しました');
+            }
+        }
+
+        // ページ読み込み時にゲーム初期化
+        window.addEventListener('load', () => {
+            initGame();
+        });
+
+        // 定期的にステータス更新（デモ用）
+        setInterval(() => {
+            if (gameInstance) {
+                const status = gameInstance.getStatus();
+                if (status.isRunning) {
+                    document.getElementById('status-display').textContent = JSON.stringify(status, null, 2);
+                }
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

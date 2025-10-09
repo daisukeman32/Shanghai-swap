@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './ConversationScene.css';
 
-function ConversationScene({ gameData, playerName, onComplete, onBadEnd }) {
+function ConversationScene({ gameData, playerName, selectedCharacter, onComplete, onBadEnd }) {
   const [currentDialogueId, setCurrentDialogueId] = useState('1');
   const [displayedText, setDisplayedText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -13,8 +13,9 @@ function ConversationScene({ gameData, playerName, onComplete, onBadEnd }) {
     d => d.dialogue_id === currentDialogueId
   );
 
+  // 選択されたキャラクターを使用（ダイアログのcharacter_idではなく）
   const currentCharacter = gameData?.characters?.find(
-    c => c.character_id === currentDialogue?.character_id
+    c => c.character_id === selectedCharacter
   );
 
   // テキストのタイプライター効果

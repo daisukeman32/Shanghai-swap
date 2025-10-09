@@ -1,8 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './RewardScene.css';
 
-function RewardScene({ onComplete }) {
+function RewardScene({ selectedCharacter, onComplete }) {
   const [showMessage, setShowMessage] = useState(true);
+  const videoRef = useRef(null);
+
+  const characterNames = {
+    airi: '愛莉',
+    kaho: '夏帆',
+    mitsuki: '美月'
+  };
+
+  const characterName = characterNames[selectedCharacter] || '愛莉';
+
+  // 動画自動再生
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.play().catch(err => {
+        console.warn('動画の自動再生が失敗しました:', err);
+      });
+    }
+  }, []);
 
   return (
     <div className="reward-scene">
@@ -15,15 +33,22 @@ function RewardScene({ onComplete }) {
             <p className="reward-text">
               パズルをクリアしました！
               <br />
-              愛莉と30分間入れ替わります...
+              {characterName}と30分間入れ替わります...
             </p>
 
-            {/* 仮ご褒美画像（色付き四角形） */}
+            {/* ご褒美動画 */}
             <div className="reward-image-container">
-              <div className="reward-image-dummy">
-                <span className="reward-label">ご褒美画像</span>
-                <p className="reward-note">（本番では画像・動画が表示されます）</p>
-              </div>
+              <video
+                ref={videoRef}
+                className="reward-video"
+                controls
+                loop
+                muted
+                playsInline
+              >
+                <source src="/assets/reward.mp4" type="video/mp4" />
+                お使いのブラウザは動画タグをサポートしていません。
+              </video>
             </div>
 
             <div className="reward-description">

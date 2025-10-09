@@ -6,9 +6,9 @@ function TitleScreen({ onStart, onContinue, onGallery, saveData }) {
   const [selectedCharacter, setSelectedCharacter] = useState('airi'); // デフォルトは愛莉
 
   const characters = [
-    { id: 'airi', name: '愛莉', fullName: '星野 愛莉', className: 'character-1' },
-    { id: 'kaho', name: '夏帆', fullName: '夏目 夏帆', className: 'character-2' },
-    { id: 'mitsuki', name: '美月', fullName: '水瀬 美月', className: 'character-3' }
+    { id: 'airi', name: '愛莉', fullName: '星野 愛莉', className: 'character-1', image: '/assets/characters/character1.png' },
+    { id: 'kaho', name: '夏帆', fullName: '夏目 夏帆', className: 'character-2', image: '/assets/characters/character2.png' },
+    { id: 'mitsuki', name: '美月', fullName: '水瀬 美月', className: 'character-3', image: '/assets/characters/character3.png' }
   ];
 
   const handleCharacterSelect = (characterId) => {
@@ -38,6 +38,7 @@ function TitleScreen({ onStart, onContinue, onGallery, saveData }) {
               className={`character-dummy ${char.className} ${
                 selectedCharacter === char.id ? 'selected' : ''
               }`}
+              style={{ backgroundImage: `url(${char.image})` }}
               title={char.fullName}
               onClick={() => handleCharacterSelect(char.id)}
             >
@@ -51,7 +52,7 @@ function TitleScreen({ onStart, onContinue, onGallery, saveData }) {
 
         {/* メニューボタン */}
         <div className="menu-buttons">
-          <button className="menu-button" onClick={onStart}>
+          <button className="menu-button" onClick={() => onStart(selectedCharacter)}>
             ▶ はじめから
           </button>
 

@@ -13,6 +13,7 @@ function App() {
   const [gameData, setGameData] = useState(null);
   const [saveData, setSaveData] = useState(null);
   const [playerName, setPlayerName] = useState('');
+  const [selectedCharacter, setSelectedCharacter] = useState('airi');
   const [loading, setLoading] = useState(true);
 
   // ゲーム初期化
@@ -79,7 +80,10 @@ function App() {
     <div className="app">
       {currentScene === 'title' && (
         <TitleScreen
-          onStart={() => changeScene('nameInput')}
+          onStart={(character) => {
+            setSelectedCharacter(character);
+            changeScene('nameInput');
+          }}
           onContinue={() => changeScene('conversation')}
           onGallery={() => changeScene('gallery')}
           saveData={saveData}
@@ -100,6 +104,7 @@ function App() {
         <ConversationScene
           gameData={gameData}
           playerName={playerName}
+          selectedCharacter={selectedCharacter}
           onComplete={() => changeScene('puzzle')}
           onBadEnd={() => changeScene('title')}
         />
@@ -114,6 +119,7 @@ function App() {
 
       {currentScene === 'reward' && (
         <RewardScene
+          selectedCharacter={selectedCharacter}
           onComplete={() => changeScene('title')}
         />
       )}

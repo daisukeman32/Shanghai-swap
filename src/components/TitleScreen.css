@@ -135,18 +135,6 @@
   background: linear-gradient(180deg, transparent 60%, rgba(0, 0, 0, 0.6) 100%);
 }
 
-.character-1 {
-  background-image: url('/assets/characters/character1.png');
-}
-
-.character-2 {
-  background-image: url('/assets/characters/character2.png');
-}
-
-.character-3 {
-  background-image: url('/assets/characters/character3.png');
-}
-
 .character-dummy:hover {
   transform: translateY(-10px) scale(1.05);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);

@@ -86,9 +86,19 @@
   margin-bottom: 30px;
 }
 
-/* ご褒美画像（仮素材） */
+/* ご褒美画像・動画 */
 .reward-image-container {
   margin: 30px 0;
+}
+
+.reward-video {
+  width: 100%;
+  max-height: 400px;
+  border: 3px solid #FFD700;
+  border-radius: 15px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  animation: rewardReveal 1.5s ease-out;
+  object-fit: contain;
 }
 
 .reward-image-dummy {
