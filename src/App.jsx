@@ -120,6 +120,7 @@ function App() {
       {currentScene === 'reward' && (
         <RewardScene
           selectedCharacter={selectedCharacter}
+          gameData={gameData}
           onComplete={() => changeScene('title')}
         />
       )}

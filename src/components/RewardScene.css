@@ -233,6 +233,151 @@
   }
 }
 
+/* プレースホルダー表示 */
+.reward-image-container {
+  position: relative;
+  margin: 30px 0;
+}
+
+.placeholder-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  border: 3px dashed #FFD700;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  animation: placeholderPulse 2s ease-in-out infinite;
+}
+
+@keyframes placeholderPulse {
+  0%, 100% {
+    background: rgba(255, 255, 255, 0.95);
+  }
+  50% {
+    background: rgba(255, 250, 205, 0.95);
+  }
+}
+
+.placeholder-label {
+  text-align: center;
+  padding: 30px;
+}
+
+.placeholder-label p:first-child {
+  font-size: 32px;
+  font-weight: bold;
+  color: #FF8C00;
+  margin-bottom: 15px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.placeholder-note {
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 10px;
+  font-style: italic;
+}
+
+.placeholder-path {
+  font-size: 14px;
+  color: #999;
+  font-family: 'Courier New', monospace;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 10px;
+  border-radius: 5px;
+  word-break: break-all;
+}
+
+/* ご褒美画像 */
+.reward-image {
+  width: 100%;
+  max-height: 400px;
+  border: 3px solid #FFD700;
+  border-radius: 15px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  animation: rewardReveal 1.5s ease-out;
+  object-fit: contain;
+}
+
+.image-placeholder {
+  width: 100%;
+  height: 300px;
+  background: linear-gradient(135deg, #FFB6C1, #FF69B4);
+  border: 3px solid #FFD700;
+  border-radius: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  animation: rewardReveal 1.5s ease-out;
+}
+
+.image-placeholder p:first-child {
+  font-size: 64px;
+  margin-bottom: 10px;
+}
+
+.image-placeholder p:last-child {
+  font-size: 20px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* 進行状況表示 */
+.reward-progress {
+  margin: 20px 0;
+  padding: 10px 20px;
+  background: linear-gradient(to right, #FFD700, #FFA500);
+  border-radius: 10px;
+  display: inline-block;
+}
+
+.reward-progress p {
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  margin: 0;
+}
+
+/* ご褒美タイトル */
+.reward-title {
+  font-size: 28px;
+  font-weight: bold;
+  color: #FF1493;
+  margin-bottom: 15px;
+  text-align: center;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.reward-character-note {
+  font-size: 18px;
+  font-weight: bold;
+  color: #FF69B4;
+  margin-top: 20px;
+  text-align: center;
+}
+
+/* エラー表示 */
+.error-text {
+  font-size: 20px;
+  color: #FF4500;
+  font-weight: bold;
+  margin: 20px 0;
+  padding: 15px;
+  background: rgba(255, 69, 0, 0.1);
+  border: 2px solid #FF4500;
+  border-radius: 10px;
+}
+
 /* レスポンシブ */
 @media (max-width: 768px) {
   .reward-content {

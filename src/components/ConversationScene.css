@@ -35,6 +35,35 @@
   }
 }
 
+/* 画像表示用（実際の立ち絵） */
+.character-sprite-image {
+  position: relative;
+}
+
+.character-sprite-image img {
+  width: 280px;
+  height: auto;
+  max-height: 500px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.5));
+  transition: transform 0.3s ease;
+}
+
+/* 会話中のアニメーション（画像版） */
+.character-sprite.talking .character-sprite-image img {
+  animation: talking-bounce-image 0.4s ease-in-out infinite alternate;
+}
+
+@keyframes talking-bounce-image {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-5px);
+  }
+}
+
+/* 仮素材（画像が無い場合のフォールバック） */
 .character-sprite-dummy {
   width: 200px;
   height: 350px;
@@ -256,6 +285,11 @@
   .character-sprite {
     right: 20px;
     bottom: 38vh;
+  }
+
+  .character-sprite-image img {
+    width: 200px;
+    max-height: 350px;
   }
 
   .character-sprite-dummy {

@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import './ConversationScene.css';
+import audioManager, { playBGMById, playSEById } from '../utils/audioManager';
 
 function ConversationScene({ gameData, playerName, selectedCharacter, onComplete, onBadEnd }) {
-  const [currentDialogueId, setCurrentDialogueId] = useState('1');
+  // キャラクター別の開始ダイアログID
+  const getStartDialogueId = () => {
+    return `${selectedCharacter}_1`;
+  };
+
+  const [currentDialogueId, setCurrentDialogueId] = useState(getStartDialogueId());
   const [displayedText, setDisplayedText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [showChoices, setShowChoices] = useState(false);
@@ -13,10 +19,22 @@ function ConversationScene({ gameData, playerName, selectedCharacter, onComplete
     d => d.dialogue_id === currentDialogueId
   );
 
-  // 選択されたキャラクターを使用（ダイアログのcharacter_idではなく）
+  // ダイアログのcharacter_idに応じてキャラクターを取得（美咲登場対応）
   const currentCharacter = gameData?.characters?.find(
-    c => c.character_id === selectedCharacter
+    c => c.character_id === currentDialogue?.character_id
   );
+
+  // BGM再生（会話シーン開始時）
+  useEffect(() => {
+    if (gameData?.bgm) {
+      playBGMById(gameData.bgm, 'BGM_001'); // 会話シーンのBGM
+    }
+
+    // クリーンアップ: コンポーネントアンマウント時にBGM停止
+    return () => {
+      audioManager.fadeOutBGM(500);
+    };
+  }, [gameData]);
 
   // テキストのタイプライター効果
   useEffect(() => {
@@ -82,11 +100,19 @@ function ConversationScene({ gameData, playerName, selectedCharacter, onComplete
         // 選択肢表示中：カーソルキーで選択、Enterで決定
         if (e.key === 'ArrowUp') {
           e.preventDefault();
+          // カーソル移動音
+          if (gameData?.soundEffects) {
+            playSEById(gameData.soundEffects, 'SE_004'); // カーソル移動音
+          }
           setSelectedChoiceIndex(prev =>
             prev > 0 ? prev - 1 : currentChoices.length - 1
           );
         } else if (e.key === 'ArrowDown') {
           e.preventDefault();
+          // カーソル移動音
+          if (gameData?.soundEffects) {
+            playSEById(gameData.soundEffects, 'SE_004'); // カーソル移動音
+          }
           setSelectedChoiceIndex(prev =>
             prev < currentChoices.length - 1 ? prev + 1 : 0
           );
@@ -106,6 +132,11 @@ function ConversationScene({ gameData, playerName, selectedCharacter, onComplete
 
   // 次のダイアログへ進む
   const handleNext = () => {
+    // クリック音再生
+    if (gameData?.soundEffects) {
+      playSEById(gameData.soundEffects, 'SE_001'); // クリック音
+    }
+
     if (isTyping) {
       // タイピング中の場合はスキップ
       const fullText = currentDialogue.text.replace(/{playerName}/g, playerName || 'あなた');
@@ -129,6 +160,15 @@ function ConversationScene({ gameData, playerName, selectedCharacter, onComplete
 
   // 選択肢を選ぶ
   const handleChoice = (choice) => {
+    // 選択音再生
+    if (gameData?.soundEffects) {
+      if (choice.is_correct === 'true') {
+        playSEById(gameData.soundEffects, 'SE_002'); // 正解音
+      } else {
+        playSEById(gameData.soundEffects, 'SE_003'); // 不正解音
+      }
+    }
+
     setShowChoices(false);
 
     if (choice.is_correct === 'true') {
@@ -169,16 +209,56 @@ function ConversationScene({ gameData, playerName, selectedCharacter, onComplete
     }
   };
 
+  // キャラクター立ち絵画像を取得
+  const getCharacterSprite = () => {
+    if (!gameData?.images || !currentDialogue) return null;
+
+    const sprite = gameData.images.find(
+      img => img.image_type === 'character_sprite' &&
+             img.character_id === currentDialogue.character_id &&
+             img.emotion === currentDialogue.emotion
+    );
+
+    return sprite?.file_path || null;
+  };
+
+  const spriteImagePath = getCharacterSprite();
+
   return (
     <div className="conversation-scene" style={{ background: bgColor }} onClick={handleScreenClick}>
-      {/* キャラクター立ち絵（仮素材） */}
+      {/* キャラクター立ち絵 */}
       <div className={`character-sprite slide-in-right ${isTyping ? 'talking' : ''}`}>
-        <div
-          className="character-sprite-dummy"
-          style={{ background: `linear-gradient(135deg, ${characterColor}, ${characterColor}dd)` }}
-        >
-          <span className="emotion-label">{currentDialogue.emotion}</span>
-        </div>
+        {spriteImagePath ? (
+          // 実際の画像を表示
+          <div className="character-sprite-image">
+            <img
+              src={spriteImagePath}
+              alt={`${currentCharacter.character_name} (${currentDialogue.emotion})`}
+              onError={(e) => {
+                // 画像読み込みエラー時は仮素材にフォールバック
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
+            />
+            <div
+              className="character-sprite-dummy"
+              style={{
+                background: `linear-gradient(135deg, ${characterColor}, ${characterColor}dd)`,
+                display: 'none'
+              }}
+            >
+              <span className="emotion-label">{currentDialogue.emotion}</span>
+            </div>
+          </div>
+        ) : (
+          // 仮素材（画像が見つからない場合）
+          <div
+            className="character-sprite-dummy"
+            style={{ background: `linear-gradient(135deg, ${characterColor}, ${characterColor}dd)` }}
+          >
+            <span className="emotion-label">{currentDialogue.emotion}</span>
+          </div>
+        )}
         <p className="character-name-label">{currentCharacter.character_name}</p>
       </div>
 

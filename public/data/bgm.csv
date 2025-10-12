@@ -1,0 +1,7 @@
+asset_id,scene_id,file_path,is_placeholder,title,loop,volume
+BGM_001,title,/assets/audio/bgm/BGM_001_title.mp3,true,タイトル画面BGM,true,0.7
+BGM_002,opening,/assets/audio/bgm/BGM_002_opening.mp3,true,オープニングBGM,true,0.6
+BGM_003,conversation,/assets/audio/bgm/BGM_003_conversation.mp3,true,会話シーンBGM,true,0.5
+BGM_004,puzzle,/assets/audio/bgm/BGM_004_puzzle.mp3,true,パズルBGM,true,0.6
+BGM_005,reward,/assets/audio/bgm/BGM_005_reward.mp3,true,ご褒美シーンBGM,true,0.5
+BGM_006,bad_end,/assets/audio/bgm/BGM_006_bad_end.mp3,true,バッドエンドBGM,false,0.6

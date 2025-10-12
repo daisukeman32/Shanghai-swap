@@ -91,19 +91,31 @@ export async function loadGameData() {
       characters,
       dialogues,
       choices,
-      scenes
+      scenes,
+      images,
+      rewards,
+      bgm,
+      soundEffects
     ] = await Promise.all([
       loadCSV('/data/characters.csv'),
       loadCSV('/data/dialogues.csv'),
       loadCSV('/data/choices.csv'),
-      loadCSV('/data/scenes.csv')
+      loadCSV('/data/scenes.csv'),
+      loadCSV('/data/images.csv'),
+      loadCSV('/data/rewards.csv'),
+      loadCSV('/data/bgm.csv'),
+      loadCSV('/data/sound_effects.csv')
     ]);
 
     return {
       characters,
       dialogues,
       choices,
-      scenes
+      scenes,
+      images,
+      rewards,
+      bgm,
+      soundEffects
     };
   } catch (error) {
     console.error('ゲームデータ読み込みエラー:', error);

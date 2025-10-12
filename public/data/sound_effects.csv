@@ -1,0 +1,10 @@
+asset_id,event_type,file_path,is_placeholder,description,volume
+SE_001,ui_click,/assets/audio/se/SE_001_click.mp3,true,クリック音,0.5
+SE_002,choice_select,/assets/audio/se/SE_002_choice_select.mp3,true,選択肢選択音,0.6
+SE_003,choice_confirm,/assets/audio/se/SE_003_choice_confirm.mp3,true,選択肢決定音,0.7
+SE_004,text_type,/assets/audio/se/SE_004_text_type.mp3,true,テキスト表示音,0.3
+SE_005,puzzle_match,/assets/audio/se/SE_005_puzzle_match.mp3,true,タイル一致音,0.6
+SE_006,puzzle_clear,/assets/audio/se/SE_006_puzzle_clear.mp3,true,パズルクリア音,0.8
+SE_007,reward_unlock,/assets/audio/se/SE_007_reward_unlock.mp3,true,ご褒美解放音,0.7
+SE_008,heart_beat,/assets/audio/se/SE_008_heart_beat.mp3,true,ドキドキ音（デレる瞬間）,0.5
+SE_009,bad_end,/assets/audio/se/SE_009_bad_end.mp3,true,バッドエンド音,0.6

@@ -1,4 +1,13 @@
 choice_id,scene_id,choice_text,next_dialogue_id,is_correct
-choice_1_1,opening,もちろん！何でも手伝うよ！,4,true
-choice_1_2,opening,忙しいから無理かな…,bad_1,false
-choice_1_3,opening,勉強苦手なんだよね…,bad_2,false
+choice_airi_1_1,opening,もちろん！愛莉と一緒なら頑張れる,airi_5,true
+choice_airi_1_2,opening,今日はちょっと予定が…,airi_bad_1,false
+choice_airi_1_3,opening,勉強より遊びたいかな,airi_bad_2,false
+choice_kaho_1_1,opening,面白そう！夏帆と一緒なら楽しそう,kaho_4,true
+choice_kaho_1_2,opening,運動は苦手なんだよね…,kaho_bad_1,false
+choice_kaho_1_3,opening,今日は疲れてるから無理かな,kaho_bad_2,false
+choice_mitsuki_1_1,opening,美月を手伝えるなら喜んで,mitsuki_4,true
+choice_mitsuki_1_2,opening,今は時間がないんだ、ごめん,mitsuki_bad_1,false
+choice_mitsuki_1_3,opening,委員の仕事は自分でやるべきじゃ？,mitsuki_bad_2,false
+choice_misaki_1_1,opening,先輩と一緒なら！お願いします,misaki_4,true
+choice_misaki_1_2,opening,今はちょっと時間が…,misaki_bad_1,false
+choice_misaki_1_3,opening,ゲームより他にやることが…,misaki_bad_2,false

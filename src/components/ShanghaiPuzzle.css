@@ -36,3 +36,39 @@
   position: relative;
   z-index: 1;
 }
+
+/* mahjong-wrapper */
+.mahjong-wrapper {
+  position: relative;
+  z-index: 1;
+}
+
+/* チートコントロール（開発用） */
+.cheat-controls {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+}
+
+.cheat-button {
+  padding: 15px 30px;
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+  background: linear-gradient(135deg, #ff6b6b, #ff0000);
+  border: 3px solid #ffd700;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.cheat-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 12px rgba(255, 215, 0, 0.6);
+}
+
+.cheat-button:active {
+  transform: scale(0.95);
+}
