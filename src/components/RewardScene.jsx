@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import './RewardScene.css';
+import { unlockReward } from '../utils/saveManager';
 
-function RewardScene({ selectedCharacter, gameData, onComplete }) {
-  const [currentRewardIndex, setCurrentRewardIndex] = useState(0);
+function RewardScene({ selectedCharacter, currentStage, gameData, saveData, onStageComplete }) {
   const videoRef = useRef(null);
 
   const characterNames = {
@@ -14,13 +14,18 @@ function RewardScene({ selectedCharacter, gameData, onComplete }) {
 
   const characterName = characterNames[selectedCharacter] || '星野 愛莉';
 
-  // キャラクター別のご褒美を取得
-  const characterRewards = gameData?.rewards?.filter(
-    r => r.character_id === selectedCharacter
-  ) || [];
+  // 現在のステージのご褒美を取得
+  const currentReward = gameData?.rewards?.find(
+    r => r.character_id === selectedCharacter && parseInt(r.stage) === currentStage
+  ) || null;
 
-  const currentReward = characterRewards[currentRewardIndex];
-  const totalRewards = characterRewards.length;
+  // 報酬解放（マウント時に実行）
+  useEffect(() => {
+    if (currentReward && saveData) {
+      unlockReward(saveData, currentReward.asset_id);
+      console.log(`報酬解放: ${currentReward.asset_id} (ステージ ${currentStage})`);
+    }
+  }, [currentReward, saveData, currentStage]);
 
   // 動画自動再生
   useEffect(() => {
@@ -31,12 +36,17 @@ function RewardScene({ selectedCharacter, gameData, onComplete }) {
     }
   }, [currentReward]);
 
-  // 次のご褒美へ進む
+  // 次のステージへ進む
   const handleNext = () => {
-    if (currentRewardIndex < totalRewards - 1) {
-      setCurrentRewardIndex(prev => prev + 1);
+    const nextDialogueId = currentReward?.next_dialogue_id;
+
+    if (nextDialogueId === 'complete') {
+      // 全ステージクリア（ステージ6完了）
+      console.log(`${selectedCharacter} 全ステージクリア！`);
+      onStageComplete(null); // nullを渡すとApp.jsxがタイトルへ遷移
     } else {
-      onComplete();
+      // 次のステージへ
+      onStageComplete(nextDialogueId);
     }
   };
 
@@ -47,8 +57,8 @@ function RewardScene({ selectedCharacter, gameData, onComplete }) {
           <div className="message-container">
             <h1 className="congratulations">おめでとうございます！</h1>
             <p className="reward-text">パズルをクリアしました！</p>
-            <p className="error-text">ご褒美データが見つかりません</p>
-            <button className="continue-button" onClick={onComplete}>
+            <p className="error-text">ステージ {currentStage} のご褒美データが見つかりません</p>
+            <button className="continue-button" onClick={() => onStageComplete(null)}>
               ▶ タイトルに戻る
             </button>
           </div>
@@ -74,7 +84,7 @@ function RewardScene({ selectedCharacter, gameData, onComplete }) {
 
           {/* 進行状況 */}
           <div className="reward-progress">
-            <p>ご褒美 {currentRewardIndex + 1} / {totalRewards}</p>
+            <p>ステージ {currentStage} / 6</p>
           </div>
 
           {/* ご褒美コンテンツ */}
@@ -128,25 +138,28 @@ function RewardScene({ selectedCharacter, gameData, onComplete }) {
           <div className="reward-description">
             <h2 className="reward-title">{currentReward.title}</h2>
             <p>{currentReward.description}</p>
+
+            {/* プレイヤーリアクション（擬似的な女の子体験） */}
+            {currentReward.player_reaction && (
+              <div className="player-reaction">
+                <p className="reaction-label">🔄 入れ替わった瞬間...</p>
+                <p className="reaction-text">{currentReward.player_reaction}</p>
+              </div>
+            )}
+
             <p className="reward-character-note">{characterName}の視点で30分間の秘密体験...</p>
-            <ul>
-              <li>✨ 鏡で自分（{characterName}）を確認</li>
-              <li>✨ 部屋の中を探索</li>
-              <li>✨ 彼女の秘密を知る</li>
-              <li>✨ 不思議な体験を満喫</li>
-            </ul>
           </div>
 
           <button className="continue-button" onClick={handleNext}>
-            {currentRewardIndex < totalRewards - 1
-              ? '▶ 次のご褒美へ'
-              : '▶ タイトルに戻る'}
+            {currentStage < 6
+              ? `▶ ステージ ${currentStage + 1} へ進む`
+              : '▶ 完結編へ'}
           </button>
 
-          {currentRewardIndex === totalRewards - 1 && (
+          {currentStage === 6 && (
             <div className="demo-end-notice">
-              <p>--- DEMO END ---</p>
-              <p>続きは製品版で！</p>
+              <p>--- {characterName} ルート完結 ---</p>
+              <p>おめでとうございます！</p>
             </div>
           )}
         </div>

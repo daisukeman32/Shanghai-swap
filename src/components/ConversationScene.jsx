@@ -2,9 +2,14 @@ import React, { useState, useEffect } from 'react';
 import './ConversationScene.css';
 import audioManager, { playBGMById, playSEById } from '../utils/audioManager';
 
-function ConversationScene({ gameData, playerName, selectedCharacter, onComplete, onBadEnd }) {
+function ConversationScene({ gameData, playerName, selectedCharacter, currentStage, startDialogueId, onComplete, onBadEnd }) {
   // キャラクター別の開始ダイアログID
   const getStartDialogueId = () => {
+    // startDialogueIdが指定されている場合はそれを使用（ステージ2以降）
+    if (startDialogueId) {
+      return startDialogueId;
+    }
+    // 指定がない場合は {character}_1 から開始（ステージ1）
     return `${selectedCharacter}_1`;
   };
 
@@ -23,6 +28,13 @@ function ConversationScene({ gameData, playerName, selectedCharacter, onComplete
   const currentCharacter = gameData?.characters?.find(
     c => c.character_id === currentDialogue?.character_id
   );
+
+  // startDialogueIdが変更されたときにダイアログIDをリセット
+  useEffect(() => {
+    const newDialogueId = getStartDialogueId();
+    setCurrentDialogueId(newDialogueId);
+    console.log(`ConversationScene開始: ステージ ${currentStage}, ダイアログID: ${newDialogueId}`);
+  }, [selectedCharacter, startDialogueId]); // selectedCharacterとstartDialogueIdが変更されたときに実行
 
   // BGM再生（会話シーン開始時）
   useEffect(() => {

@@ -6,7 +6,7 @@ import ConversationScene from './components/ConversationScene';
 import ShanghaiPuzzle from './components/ShanghaiPuzzle';
 import RewardScene from './components/RewardScene';
 import { loadGameData } from './utils/csvLoader';
-import { loadSaveData, autoSave } from './utils/saveManager';
+import { loadSaveData, autoSave, getCharacterStage, updateCharacterStage } from './utils/saveManager';
 
 function App() {
   const [currentScene, setCurrentScene] = useState('title');
@@ -14,6 +14,8 @@ function App() {
   const [saveData, setSaveData] = useState(null);
   const [playerName, setPlayerName] = useState('');
   const [selectedCharacter, setSelectedCharacter] = useState('airi');
+  const [currentStage, setCurrentStage] = useState(1);
+  const [nextDialogueId, setNextDialogueId] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // ゲーム初期化
@@ -68,6 +70,33 @@ function App() {
     });
   };
 
+  // キャラクター選択時：ステージをロード
+  const handleCharacterSelect = (character) => {
+    setSelectedCharacter(character);
+    const stage = getCharacterStage(saveData, character);
+    setCurrentStage(stage);
+    setNextDialogueId(null); // 初回は null（{character}_1 から開始）
+    changeScene('nameInput');
+  };
+
+  // ステージクリア時：次のステージへ進む
+  const handleStageComplete = (nextDialogueId) => {
+    const newStage = currentStage + 1;
+
+    if (newStage > 6) {
+      // ステージ6クリア → タイトルへ
+      console.log(`${selectedCharacter} 全ステージクリア！`);
+      changeScene('title');
+    } else {
+      // 次のステージへ進む
+      const updatedSaveData = updateCharacterStage(saveData, selectedCharacter, newStage);
+      setSaveData(updatedSaveData);
+      setCurrentStage(newStage);
+      setNextDialogueId(nextDialogueId); // rewards.csvのnext_dialogue_idを使用
+      changeScene('conversation');
+    }
+  };
+
   if (loading) {
     return (
       <div className="loading-screen">
@@ -80,10 +109,7 @@ function App() {
     <div className="app">
       {currentScene === 'title' && (
         <TitleScreen
-          onStart={(character) => {
-            setSelectedCharacter(character);
-            changeScene('nameInput');
-          }}
+          onStart={handleCharacterSelect}
           onContinue={() => changeScene('conversation')}
           onGallery={() => changeScene('gallery')}
           saveData={saveData}
@@ -105,6 +131,8 @@ function App() {
           gameData={gameData}
           playerName={playerName}
           selectedCharacter={selectedCharacter}
+          currentStage={currentStage}
+          startDialogueId={nextDialogueId}
           onComplete={() => changeScene('puzzle')}
           onBadEnd={() => changeScene('title')}
         />
@@ -120,8 +148,10 @@ function App() {
       {currentScene === 'reward' && (
         <RewardScene
           selectedCharacter={selectedCharacter}
+          currentStage={currentStage}
           gameData={gameData}
-          onComplete={() => changeScene('title')}
+          saveData={saveData}
+          onStageComplete={handleStageComplete}
         />
       )}
     </div>

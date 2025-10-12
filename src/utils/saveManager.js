@@ -18,6 +18,13 @@ export function getDefaultSaveData() {
       characterId: null,
       dialogueId: null
     },
+    // キャラクター別ステージ進行度
+    characterProgress: {
+      airi: { currentStage: 1, clearedStages: [] },
+      kaho: { currentStage: 1, clearedStages: [] },
+      mitsuki: { currentStage: 1, clearedStages: [] },
+      misaki: { currentStage: 1, clearedStages: [] }
+    },
     statistics: {
       totalPlayTime: 0,
       gamesPlayed: 0,
@@ -172,6 +179,68 @@ export function markCharacterCleared(saveData, characterId) {
 export function updateStatistics(saveData, stat, value) {
   if (saveData.statistics.hasOwnProperty(stat)) {
     saveData.statistics[stat] += value;
+    saveSaveData(saveData);
+  }
+  return saveData;
+}
+
+/**
+ * キャラクターの現在のステージを取得
+ * @param {Object} saveData - セーブデータ
+ * @param {string} characterId - キャラクターID
+ * @returns {number} 現在のステージ (1-6)
+ */
+export function getCharacterStage(saveData, characterId) {
+  // characterProgressが存在しない場合（古いセーブデータ対応）
+  if (!saveData.characterProgress || !saveData.characterProgress[characterId]) {
+    return 1;
+  }
+  return saveData.characterProgress[characterId].currentStage || 1;
+}
+
+/**
+ * キャラクターのステージ進行度を更新
+ * @param {Object} saveData - セーブデータ
+ * @param {string} characterId - キャラクターID
+ * @param {number} stage - ステージ番号 (1-6)
+ * @returns {Object} 更新されたセーブデータ
+ */
+export function updateCharacterStage(saveData, characterId, stage) {
+  // characterProgressが存在しない場合は初期化
+  if (!saveData.characterProgress) {
+    saveData.characterProgress = {
+      airi: { currentStage: 1, clearedStages: [] },
+      kaho: { currentStage: 1, clearedStages: [] },
+      mitsuki: { currentStage: 1, clearedStages: [] },
+      misaki: { currentStage: 1, clearedStages: [] }
+    };
+  }
+
+  if (saveData.characterProgress[characterId]) {
+    // 現在のステージを更新
+    saveData.characterProgress[characterId].currentStage = stage;
+
+    // クリア済みステージに追加（重複防止）
+    if (stage > 1 && !saveData.characterProgress[characterId].clearedStages.includes(stage - 1)) {
+      saveData.characterProgress[characterId].clearedStages.push(stage - 1);
+    }
+
+    saveSaveData(saveData);
+  }
+
+  return saveData;
+}
+
+/**
+ * キャラクターのステージをリセット（ステージ1に戻す）
+ * @param {Object} saveData - セーブデータ
+ * @param {string} characterId - キャラクターID
+ * @returns {Object} 更新されたセーブデータ
+ */
+export function resetCharacterStage(saveData, characterId) {
+  if (saveData.characterProgress && saveData.characterProgress[characterId]) {
+    saveData.characterProgress[characterId].currentStage = 1;
+    saveData.characterProgress[characterId].clearedStages = [];
     saveSaveData(saveData);
   }
   return saveData;
