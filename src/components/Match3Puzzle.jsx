@@ -639,48 +639,67 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1 }) {
       const mt = getMouseTile(pos);
 
       if (mt.valid) {
-        let swapped = false;
+        // すでに選択されているタイルをクリックした場合
         if (game.level.selectedtile.selected) {
           if (mt.x === game.level.selectedtile.column && mt.y === game.level.selectedtile.row) {
+            // 同じタイルを再クリック → 選択解除
             game.level.selectedtile.selected = false;
             return;
           } else if (canSwap(mt.x, mt.y, game.level.selectedtile.column, game.level.selectedtile.row)) {
+            // 隣接タイルをクリック → スワップ実行（クリック&クリック方式）
             mouseSwap(mt.x, mt.y, game.level.selectedtile.column, game.level.selectedtile.row);
-            swapped = true;
+            return;
+          } else {
+            // 隣接していないタイルをクリック → 新しい選択に切り替え
+            game.level.selectedtile.column = mt.x;
+            game.level.selectedtile.row = mt.y;
+            game.level.selectedtile.selected = true;
           }
-        }
-
-        if (!swapped) {
+        } else {
+          // 初回選択
           game.level.selectedtile.column = mt.x;
           game.level.selectedtile.row = mt.y;
           game.level.selectedtile.selected = true;
         }
+
+        // ドラッグ開始
+        game.drag = true;
+        game.dragStartX = mt.x;
+        game.dragStartY = mt.y;
       } else {
         game.level.selectedtile.selected = false;
       }
-
-      game.drag = true;
     };
 
     const onMouseMove = (e) => {
-      if (game.drag && game.level.selectedtile.selected && game.gamestate === game.gamestates.ready) {
-        const pos = getMousePos(canvas, e);
-        const mt = getMouseTile(pos);
+      if (!game.drag || game.gamestate !== game.gamestates.ready) return;
 
-        if (mt.valid) {
-          if (canSwap(mt.x, mt.y, game.level.selectedtile.column, game.level.selectedtile.row)) {
-            mouseSwap(mt.x, mt.y, game.level.selectedtile.column, game.level.selectedtile.row);
-          }
+      const pos = getMousePos(canvas, e);
+      const mt = getMouseTile(pos);
+
+      // ドラッグ中に隣接タイルへ移動したらスワップ（ドラッグ方式）
+      if (mt.valid && game.dragStartX !== undefined && game.dragStartY !== undefined) {
+        if ((mt.x !== game.dragStartX || mt.y !== game.dragStartY) &&
+            canSwap(mt.x, mt.y, game.dragStartX, game.dragStartY)) {
+          // ドラッグでスワップ実行
+          mouseSwap(mt.x, mt.y, game.dragStartX, game.dragStartY);
+          game.drag = false; // スワップ後はドラッグ終了
+          game.dragStartX = undefined;
+          game.dragStartY = undefined;
         }
       }
     };
 
     const onMouseUp = () => {
       game.drag = false;
+      game.dragStartX = undefined;
+      game.dragStartY = undefined;
     };
 
     const onMouseOut = () => {
       game.drag = false;
+      game.dragStartX = undefined;
+      game.dragStartY = undefined;
     };
 
     init();
