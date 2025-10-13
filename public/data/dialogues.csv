@@ -195,25 +195,25 @@ misaki_stage4_6,stage4,misaki,cruel,あらあら、必死に言い訳してる�
 misaki_stage4_7,stage4,misaki,dark,でもね、私の体に残ってる「記憶」、全部憶えてるの,misaki_stage4_8
 misaki_stage4_8,stage4,misaki,creepy,面白いことに、私は最初から全部知ってたの〜,misaki_stage4_9
 misaki_stage4_9,stage4,misaki,sinister,私の正体はね、「高校生」じゃないの,misaki_stage4_10
-misaki_stage4_10,stage4,misaki,dark,本当は、25歳の連続殺人鬼,misaki_stage4_11
-misaki_stage4_11,stage4,misaki,creepy,高校に潜入して、若い男の子を狩ってるの〜,misaki_stage4_12
-misaki_stage4_12,stage4,misaki,cruel,あなたみたいな陰キャで、特に女の子を狙うタイプは大好物なの,misaki_stage4_13
+misaki_stage4_10,stage4,misaki,dark,最近この辺りで人がいなくなってるのって、しってるぅ？,misaki_stage4_11
+misaki_stage4_11,stage4,misaki,creepy,不思議よね〜何人も...どこに消えたんでしょうね,misaki_stage4_12
+misaki_stage4_12,stage4,misaki,cruel,あなたみたいな陰キャで、女の子を狙うタイプ...私、そういうの見つけるの得意なの,misaki_stage4_13
 misaki_stage4_13,stage4,misaki,dark,さぁ、最後の「遊び」を始めましょうか〜,misaki_stage4_14
-misaki_stage4_14,stage4,protagonist,terrified,い、嫌だ...やめろ！,puzzle_start
+misaki_stage4_14,stage4,protagonist,terrified,いやっ...やめて！お願い...！,puzzle_start
 misaki_stage4_15,stage4,misaki,creepy,あなたが他の子にしたこと、今度は私がやってあげる,misaki_stage4_16
 misaki_stage4_16,stage4,misaki,sinister,でもね、私は「あなたの体」を使うの,misaki_stage4_17
 misaki_stage4_17,stage4,protagonist,shocked,え...？まさか...,misaki_stage4_18
 misaki_stage4_18,stage4,misaki,cruel,そう、私が今「男の体」で、あなたが「女の体」,misaki_stage4_19
 misaki_stage4_19,stage4,misaki,dark,つまり...あなたは自分の体に犯されるってこと〜,misaki_stage4_20
-misaki_stage4_20,stage4,protagonist,desperate,や、やめろ！来るな！,misaki_stage4_21
+misaki_stage4_20,stage4,protagonist,desperate,やだっ...やめて！来ないで！,misaki_stage4_21
 misaki_stage4_21,stage4,misaki,creepy,さぁ、愛莉ちゃん達にしたように...たっぷり可愛がってあげる,misaki_stage4_22
 misaki_stage4_22,stage4,narrator,dark,美咲は主人公の体を使って、容赦なく襲いかかってきた,misaki_stage4_23
-misaki_stage4_23,stage4,protagonist,panicked,いっ痛い！！やめろっ...！,misaki_stage4_24
+misaki_stage4_23,stage4,protagonist,panicked,いっ痛い！！やめてぇ...！,misaki_stage4_24
 misaki_stage4_24,stage4,misaki,cruel,あら、痛い？でも、これからもっと痛くなるわよ,misaki_stage4_25
-misaki_stage4_25,stage4,protagonist,screaming,うわぁっ！！スゴイ痛い！！止めて！！,misaki_stage4_26
+misaki_stage4_25,stage4,protagonist,screaming,ひゃぁっ！！すごく痛い！！やめて！！,misaki_stage4_26
 misaki_stage4_26,stage4,protagonist,crying,子宮が...子宮が壊れる...！,misaki_stage4_27
 misaki_stage4_27,stage4,misaki,mocking,壊れそう？でも、感じてるんでしょ？,misaki_stage4_28
-misaki_stage4_28,stage4,protagonist,desperate,くっ...見ないでくれ...！こんな顔...！,misaki_stage4_29
+misaki_stage4_28,stage4,protagonist,desperate,くっ...見ないで...！こんな顔...！,misaki_stage4_29
 misaki_stage4_29,stage4,misaki,dark,あら、恥ずかしいの？でも、もっと見せてあげる,misaki_stage4_30
 misaki_stage4_30,stage4,protagonist,panicked,やめ...あ、ああっ...も、漏れる...！,misaki_stage4_31
 misaki_stage4_31,stage4,misaki,cruel,何が漏れるの？言ってみて〜,misaki_stage4_32
