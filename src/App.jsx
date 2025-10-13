@@ -13,7 +13,8 @@ import {
   updateCharacterStage,
   unlockNextCharacter,
   isCharacterFullyCleared,
-  markCharacterCleared
+  markCharacterCleared,
+  resetCharacterStage
 } from './utils/saveManager';
 
 function App() {
@@ -78,11 +79,13 @@ function App() {
     });
   };
 
-  // キャラクター選択時：ステージをロード
+  // キャラクター選択時：ステージをロード（「はじめから」ボタン用）
   const handleCharacterSelect = (character) => {
     setSelectedCharacter(character);
-    const stage = getCharacterStage(saveData, character);
-    setCurrentStage(stage);
+    // 「はじめから」は常にstage1から開始 - セーブデータもリセット
+    const updatedSaveData = resetCharacterStage(saveData, character);
+    setSaveData(updatedSaveData);
+    setCurrentStage(1);
     setNextDialogueId(null); // 初回は null（{character}_1 から開始）
     changeScene('nameInput');
   };
