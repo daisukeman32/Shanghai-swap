@@ -33,7 +33,6 @@ function TitleScreen({ onStart, onContinue, onGallery, saveData }) {
             <br />
             入れ替われるパズル
           </h1>
-          <p className="sub-title">～30分間の秘密～</p>
         </div>
 
         {/* キャラクター立ち絵（仮素材：色付き四角形） */}

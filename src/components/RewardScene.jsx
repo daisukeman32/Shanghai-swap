@@ -84,7 +84,7 @@ function RewardScene({ selectedCharacter, currentStage, gameData, saveData, onSt
           <p className="reward-text">
             パズルをクリアしました！
             <br />
-            {characterName}と30分間入れ替わります...
+            {characterName}と入れ替わりました...
           </p>
 
           {/* 進行状況 */}
@@ -152,7 +152,7 @@ function RewardScene({ selectedCharacter, currentStage, gameData, saveData, onSt
               </div>
             )}
 
-            <p className="reward-character-note">{characterName}の視点で30分間の秘密体験...</p>
+            <p className="reward-character-note">{characterName}の視点で秘密体験...</p>
           </div>
 
           <button className="continue-button" onClick={handleNext}>
