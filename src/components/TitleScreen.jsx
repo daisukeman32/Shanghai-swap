@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './TitleScreen.css';
+import { isCharacterUnlocked } from '../utils/saveManager';
 
 function TitleScreen({ onStart, onContinue, onGallery, saveData }) {
   const hasSaveData = saveData && saveData.playerName;
@@ -8,10 +9,15 @@ function TitleScreen({ onStart, onContinue, onGallery, saveData }) {
   const characters = [
     { id: 'airi', name: '愛莉', fullName: '星野 愛莉', className: 'character-1', image: '/assets/characters/character1.png' },
     { id: 'kaho', name: '夏帆', fullName: '夏目 夏帆', className: 'character-2', image: '/assets/characters/character2.png' },
-    { id: 'mitsuki', name: '美月', fullName: '水瀬 美月', className: 'character-3', image: '/assets/characters/character3.png' }
+    { id: 'mitsuki', name: '美月', fullName: '水瀬 美月', className: 'character-3', image: '/assets/characters/character3.png' },
+    { id: 'misaki', name: '美咲', fullName: '木村 美咲', className: 'character-4', image: '/assets/characters/character4.png' }
   ];
 
   const handleCharacterSelect = (characterId) => {
+    // ロックされているキャラは選択不可
+    if (!isCharacterUnlocked(saveData, characterId)) {
+      return;
+    }
     setSelectedCharacter(characterId);
   };
 
@@ -32,22 +38,30 @@ function TitleScreen({ onStart, onContinue, onGallery, saveData }) {
 
         {/* キャラクター立ち絵（仮素材：色付き四角形） */}
         <div className="character-lineup">
-          {characters.map((char) => (
-            <div
-              key={char.id}
-              className={`character-dummy ${char.className} ${
-                selectedCharacter === char.id ? 'selected' : ''
-              }`}
-              style={{ backgroundImage: `url(${char.image})` }}
-              title={char.fullName}
-              onClick={() => handleCharacterSelect(char.id)}
-            >
-              <span className="character-name">{char.name}</span>
-              {selectedCharacter === char.id && (
-                <div className="selected-indicator">✓</div>
-              )}
-            </div>
-          ))}
+          {characters.map((char) => {
+            const isUnlocked = isCharacterUnlocked(saveData, char.id);
+            return (
+              <div
+                key={char.id}
+                className={`character-dummy ${char.className} ${
+                  selectedCharacter === char.id ? 'selected' : ''
+                } ${!isUnlocked ? 'locked' : ''}`}
+                style={{ backgroundImage: `url(${char.image})` }}
+                title={isUnlocked ? char.fullName : '？？？（ロック中）'}
+                onClick={() => handleCharacterSelect(char.id)}
+              >
+                <span className="character-name">
+                  {isUnlocked ? char.name : '？？？'}
+                </span>
+                {selectedCharacter === char.id && isUnlocked && (
+                  <div className="selected-indicator">✓</div>
+                )}
+                {!isUnlocked && (
+                  <div className="lock-indicator">🔒</div>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         {/* メニューボタン */}

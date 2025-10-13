@@ -12,6 +12,7 @@ export function getDefaultSaveData() {
   return {
     playerName: '',
     clearedCharacters: [],
+    unlockedCharacters: ['airi'], // 初期は愛莉のみ解放（愛莉→夏帆→美月→美咲の順）
     unlockedRewards: [],
     currentScene: 'title',
     currentProgress: {
@@ -244,4 +245,70 @@ export function resetCharacterStage(saveData, characterId) {
     saveSaveData(saveData);
   }
   return saveData;
+}
+
+/**
+ * キャラクターが解放されているかチェック
+ * @param {Object} saveData - セーブデータ
+ * @param {string} characterId - キャラクターID
+ * @returns {boolean} 解放済みならtrue
+ */
+export function isCharacterUnlocked(saveData, characterId) {
+  // unlockedCharactersが存在しない場合（古いセーブデータ対応）
+  if (!saveData.unlockedCharacters) {
+    return characterId === 'airi'; // デフォルトで愛莉のみ解放
+  }
+  return saveData.unlockedCharacters.includes(characterId);
+}
+
+/**
+ * 次のキャラクターを解放
+ * @param {Object} saveData - セーブデータ
+ * @param {string} currentCharacterId - 現在のキャラクターID
+ * @returns {Object} 更新されたセーブデータ
+ */
+export function unlockNextCharacter(saveData, currentCharacterId) {
+  // unlockedCharactersが存在しない場合は初期化
+  if (!saveData.unlockedCharacters) {
+    saveData.unlockedCharacters = ['airi'];
+  }
+
+  // キャラクター解放順序: airi → kaho → mitsuki → misaki
+  const unlockOrder = {
+    airi: 'kaho',
+    kaho: 'mitsuki',
+    mitsuki: 'misaki',
+    misaki: null // 美咲の次はなし
+  };
+
+  const nextCharacter = unlockOrder[currentCharacterId];
+
+  if (nextCharacter && !saveData.unlockedCharacters.includes(nextCharacter)) {
+    saveData.unlockedCharacters.push(nextCharacter);
+    console.log(`次のキャラクター解放: ${nextCharacter}`);
+    saveSaveData(saveData);
+  }
+
+  return saveData;
+}
+
+/**
+ * キャラクターの全ステージをクリアしたかチェック
+ * @param {Object} saveData - セーブデータ
+ * @param {string} characterId - キャラクターID
+ * @param {number} maxStage - 最大ステージ数（デフォルト: 6、美咲のみ4）
+ * @returns {boolean} 全ステージクリア済みならtrue
+ */
+export function isCharacterFullyCleared(saveData, characterId, maxStage = 6) {
+  if (!saveData.characterProgress || !saveData.characterProgress[characterId]) {
+    return false;
+  }
+
+  const progress = saveData.characterProgress[characterId];
+
+  // 美咲は4ステージのみ（BADエンド用）
+  const targetMaxStage = characterId === 'misaki' ? 4 : maxStage;
+
+  // clearedStagesに全ステージが含まれているかチェック
+  return progress.clearedStages.length >= targetMaxStage;
 }

@@ -6,7 +6,15 @@ import ConversationScene from './components/ConversationScene';
 import ShanghaiPuzzle from './components/ShanghaiPuzzle';
 import RewardScene from './components/RewardScene';
 import { loadGameData } from './utils/csvLoader';
-import { loadSaveData, autoSave, getCharacterStage, updateCharacterStage } from './utils/saveManager';
+import {
+  loadSaveData,
+  autoSave,
+  getCharacterStage,
+  updateCharacterStage,
+  unlockNextCharacter,
+  isCharacterFullyCleared,
+  markCharacterCleared
+} from './utils/saveManager';
 
 function App() {
   const [currentScene, setCurrentScene] = useState('title');
@@ -82,10 +90,21 @@ function App() {
   // ステージクリア時：次のステージへ進む
   const handleStageComplete = (nextDialogueId) => {
     const newStage = currentStage + 1;
+    const maxStage = selectedCharacter === 'misaki' ? 4 : 6; // 美咲は4ステージのみ
 
-    if (newStage > 6) {
-      // ステージ6クリア → タイトルへ
+    if (newStage > maxStage) {
+      // 全ステージクリア
       console.log(`${selectedCharacter} 全ステージクリア！`);
+
+      // キャラクターをクリア済みとしてマーク
+      let updatedSaveData = markCharacterCleared(saveData, selectedCharacter);
+
+      // 次のキャラクターを解放
+      updatedSaveData = unlockNextCharacter(updatedSaveData, selectedCharacter);
+
+      setSaveData(updatedSaveData);
+
+      // タイトルへ戻る
       changeScene('title');
     } else {
       // 次のステージへ進む

@@ -44,6 +44,11 @@ function RewardScene({ selectedCharacter, currentStage, gameData, saveData, onSt
       // 全ステージクリア（ステージ6完了）
       console.log(`${selectedCharacter} 全ステージクリア！`);
       onStageComplete(null); // nullを渡すとApp.jsxがタイトルへ遷移
+    } else if (nextDialogueId === 'bad_end') {
+      // BADエンド（美咲ルート）
+      console.log('BAD END triggered');
+      alert('GAME OVER\n\n調子に乗りすぎた代償を払うことになった...\n\nタイトルに戻ります。');
+      onStageComplete(null); // タイトルへ遷移
     } else {
       // 次のステージへ
       onStageComplete(nextDialogueId);
@@ -84,7 +89,7 @@ function RewardScene({ selectedCharacter, currentStage, gameData, saveData, onSt
 
           {/* 進行状況 */}
           <div className="reward-progress">
-            <p>ステージ {currentStage} / 6</p>
+            <p>ステージ {currentStage} / {selectedCharacter === 'misaki' ? '4' : '6'}</p>
           </div>
 
           {/* ご褒美コンテンツ */}
@@ -151,15 +156,15 @@ function RewardScene({ selectedCharacter, currentStage, gameData, saveData, onSt
           </div>
 
           <button className="continue-button" onClick={handleNext}>
-            {currentStage < 6
-              ? `▶ ステージ ${currentStage + 1} へ進む`
-              : '▶ 完結編へ'}
+            {(selectedCharacter === 'misaki' && currentStage >= 4) || (selectedCharacter !== 'misaki' && currentStage >= 6)
+              ? '▶ 完結編へ'
+              : `▶ ステージ ${currentStage + 1} へ進む`}
           </button>
 
-          {currentStage === 6 && (
+          {((selectedCharacter === 'misaki' && currentStage === 4) || (selectedCharacter !== 'misaki' && currentStage === 6)) && (
             <div className="demo-end-notice">
-              <p>--- {characterName} ルート完結 ---</p>
-              <p>おめでとうございます！</p>
+              <p>--- {characterName} ルート{currentReward?.next_dialogue_id === 'bad_end' ? 'BAD END' : '完結'} ---</p>
+              {currentReward?.next_dialogue_id !== 'bad_end' && <p>おめでとうございます！</p>}
             </div>
           )}
         </div>
