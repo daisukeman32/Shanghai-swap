@@ -3,7 +3,7 @@ import './styles/App.css';
 import TitleScreen from './components/TitleScreen';
 import NameInput from './components/NameInput';
 import ConversationScene from './components/ConversationScene';
-import ShanghaiPuzzle from './components/ShanghaiPuzzle';
+import Match3Puzzle from './components/Match3Puzzle';
 import RewardScene from './components/RewardScene';
 import { loadGameData } from './utils/csvLoader';
 import {
@@ -161,9 +161,10 @@ function App() {
       )}
 
       {currentScene === 'puzzle' && (
-        <ShanghaiPuzzle
+        <Match3Puzzle
           onClear={() => changeScene('reward')}
           onGameOver={() => changeScene('conversation')}
+          stage={currentStage}
         />
       )}
 
