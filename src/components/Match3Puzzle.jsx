@@ -54,14 +54,14 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1 }) {
   });
 
   useEffect(() => {
-    // ステージごとの難易度設定
+    // ステージごとの難易度設定（より challenging に）
     const stageDifficulty = {
-      1: { moves: 30, targetScore: 1000, timeEstimate: '3分' },
-      2: { moves: 28, targetScore: 1500, timeEstimate: '4分' },
-      3: { moves: 26, targetScore: 2000, timeEstimate: '5分' },
-      4: { moves: 24, targetScore: 2500, timeEstimate: '6分' },
-      5: { moves: 22, targetScore: 3000, timeEstimate: '8分' },
-      6: { moves: 20, targetScore: 4000, timeEstimate: '10分' }
+      1: { moves: 25, targetScore: 1500, timeEstimate: '3分' },
+      2: { moves: 23, targetScore: 2500, timeEstimate: '4分' },
+      3: { moves: 21, targetScore: 3500, timeEstimate: '5分' },
+      4: { moves: 19, targetScore: 4500, timeEstimate: '6分' },
+      5: { moves: 17, targetScore: 5500, timeEstimate: '8分' },
+      6: { moves: 15, targetScore: 7000, timeEstimate: '10分' }
     };
 
     const difficulty = stageDifficulty[Math.min(stage, 6)] || stageDifficulty[1];
@@ -337,23 +337,49 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1 }) {
       // キャラクタータイル（円形+イニシャル）の描画
       const centerX = x + game.level.tilewidth / 2;
       const centerY = y + game.level.tileheight / 2;
-      const radius = game.level.tilewidth * 0.4;
+      const radius = game.level.tilewidth * 0.42;
 
-      // 影
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
-      ctx.shadowBlur = 6;
-      ctx.shadowOffsetX = 2;
-      ctx.shadowOffsetY = 2;
+      // 外側の光彩エフェクト
+      ctx.shadowColor = `rgba(${r}, ${g}, ${b}, 0.6)`;
+      ctx.shadowBlur = 12;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+
+      // 外側のグロー（2層）
+      for (let i = 0; i < 2; i++) {
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius + (i * 2), 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${0.2 - i * 0.1})`;
+        ctx.fill();
+      }
+
+      // 影をリセット
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+
+      // 影（ドロップシャドウ）
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+      ctx.shadowBlur = 8;
+      ctx.shadowOffsetX = 3;
+      ctx.shadowOffsetY = 3;
 
       // 円形の背景
       ctx.beginPath();
       ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
 
-      // グラデーション
-      const gradient = ctx.createRadialGradient(centerX - radius / 3, centerY - radius / 3, radius / 5, centerX, centerY, radius);
-      gradient.addColorStop(0, `rgb(${Math.min(r + 40, 255)}, ${Math.min(g + 40, 255)}, ${Math.min(b + 40, 255)})`);
+      // より鮮やかなグラデーション（3段階）
+      const gradient = ctx.createRadialGradient(
+        centerX - radius / 2.5,
+        centerY - radius / 2.5,
+        radius / 8,
+        centerX,
+        centerY,
+        radius
+      );
+      gradient.addColorStop(0, `rgb(${Math.min(r + 80, 255)}, ${Math.min(g + 80, 255)}, ${Math.min(b + 80, 255)})`);
+      gradient.addColorStop(0.3, `rgb(${Math.min(r + 40, 255)}, ${Math.min(g + 40, 255)}, ${Math.min(b + 40, 255)})`);
       gradient.addColorStop(0.7, `rgb(${r}, ${g}, ${b})`);
-      gradient.addColorStop(1, `rgb(${Math.floor(r * 0.7)}, ${Math.floor(g * 0.7)}, ${Math.floor(b * 0.7)})`);
+      gradient.addColorStop(1, `rgb(${Math.floor(r * 0.6)}, ${Math.floor(g * 0.6)}, ${Math.floor(b * 0.6)})`);
 
       ctx.fillStyle = gradient;
       ctx.fill();
@@ -364,17 +390,33 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1 }) {
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 0;
 
-      // 枠線
-      ctx.strokeStyle = `rgb(${Math.floor(r * 0.5)}, ${Math.floor(g * 0.5)}, ${Math.floor(b * 0.5)})`;
-      ctx.lineWidth = 2.5;
+      // 外側の枠線（濃いめ）
+      ctx.strokeStyle = `rgb(${Math.floor(r * 0.4)}, ${Math.floor(g * 0.4)}, ${Math.floor(b * 0.4)})`;
+      ctx.lineWidth = 3;
       ctx.stroke();
 
-      // 内側の白い枠線（光沢効果）
+      // 内側の枠線（光沢効果）
       ctx.beginPath();
-      ctx.arc(centerX, centerY, radius - 3, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-      ctx.lineWidth = 1.5;
+      ctx.arc(centerX, centerY, radius - 4, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(255, 255, 255, 0.4)`;
+      ctx.lineWidth = 2;
       ctx.stroke();
+
+      // ハイライト（左上の光沢）
+      ctx.beginPath();
+      ctx.arc(centerX - radius / 3, centerY - radius / 3, radius / 3.5, 0, Math.PI * 2);
+      const highlightGradient = ctx.createRadialGradient(
+        centerX - radius / 3,
+        centerY - radius / 3,
+        0,
+        centerX - radius / 3,
+        centerY - radius / 3,
+        radius / 3.5
+      );
+      highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.5)');
+      highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      ctx.fillStyle = highlightGradient;
+      ctx.fill();
 
       // キャラクターのイニシャル
       if (tileType !== undefined && game.characters[tileType]) {
