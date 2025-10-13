@@ -24,15 +24,19 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1 }) {
       selectedtile: { selected: false, column: 0, row: 0 }
     },
     tilecolors: [
-      [220, 20, 60],    // Ruby (ルビー) - 深紅
-      [0, 201, 87],     // Emerald (エメラルド) - 深緑
-      [15, 82, 186],    // Sapphire (サファイア) - 青
-      [255, 200, 0],    // Topaz (トパーズ) - 黄金
-      [153, 50, 204],   // Amethyst (アメジスト) - 紫
-      [127, 255, 212],  // Aquamarine (アクアマリン) - 青緑
-      [230, 230, 250]   // Diamond (ダイヤモンド) - 白
+      [255, 105, 180],  // 愛莉 (Airi) - ピンク（BL漫画オタク）
+      [255, 140, 60],   // 夏帆 (Naho) - オレンジ（スポーツ少女・日焼け）
+      [100, 180, 255],  // 美月 (Mitsuki) - 水色（優等生委員長）
+      [150, 50, 200],   // 美咲 (Misaki) - 紫（ヤンデレ殺人鬼）
+      [80, 200, 120]    // 主人公 (Protagonist) - 緑
     ],
-    gemNames: ['Ruby', 'Emerald', 'Sapphire', 'Topaz', 'Amethyst', 'Aquamarine', 'Diamond'],
+    characters: [
+      { name: '愛莉', initial: 'A', description: 'BL漫画オタク' },
+      { name: '夏帆', initial: 'N', description: 'スポーツ少女' },
+      { name: '美月', initial: 'M', description: '優等生委員長' },
+      { name: '美咲', initial: 'Ms', description: 'ヤンデレ' },
+      { name: '主人公', initial: 'P', description: 'プレイヤー' }
+    ],
     clusters: [],
     moves: [],
     currentmove: { column1: 0, row1: 0, column2: 0, row2: 0 },
@@ -266,8 +270,9 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1 }) {
           const coord = getTileCoordinate(i, j, 0, (game.animationtime / game.animationtimetotal) * shift);
 
           if (game.level.tiles[i][j].type >= 0) {
-            const col = game.tilecolors[game.level.tiles[i][j].type];
-            drawTile(ctx, coord.tilex, coord.tiley, col[0], col[1], col[2]);
+            const tileType = game.level.tiles[i][j].type;
+            const col = game.tilecolors[tileType];
+            drawTile(ctx, coord.tilex, coord.tiley, col[0], col[1], col[2], tileType);
           }
 
           // 選択タイルの光る枠線
@@ -290,27 +295,30 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1 }) {
         const shiftx = game.currentmove.column2 - game.currentmove.column1;
         const shifty = game.currentmove.row2 - game.currentmove.row1;
 
+        const tile1Type = game.level.tiles[game.currentmove.column1][game.currentmove.row1].type;
+        const tile2Type = game.level.tiles[game.currentmove.column2][game.currentmove.row2].type;
+
         const coord1 = getTileCoordinate(game.currentmove.column1, game.currentmove.row1, 0, 0);
         const coord1shift = getTileCoordinate(game.currentmove.column1, game.currentmove.row1,
           (game.animationtime / game.animationtimetotal) * shiftx,
           (game.animationtime / game.animationtimetotal) * shifty);
-        const col1 = game.tilecolors[game.level.tiles[game.currentmove.column1][game.currentmove.row1].type];
+        const col1 = game.tilecolors[tile1Type];
 
         const coord2 = getTileCoordinate(game.currentmove.column2, game.currentmove.row2, 0, 0);
         const coord2shift = getTileCoordinate(game.currentmove.column2, game.currentmove.row2,
           (game.animationtime / game.animationtimetotal) * -shiftx,
           (game.animationtime / game.animationtimetotal) * -shifty);
-        const col2 = game.tilecolors[game.level.tiles[game.currentmove.column2][game.currentmove.row2].type];
+        const col2 = game.tilecolors[tile2Type];
 
-        drawTile(ctx, coord1.tilex, coord1.tiley, 0, 0, 0);
-        drawTile(ctx, coord2.tilex, coord2.tiley, 0, 0, 0);
+        drawTile(ctx, coord1.tilex, coord1.tiley, 0, 0, 0, -1);
+        drawTile(ctx, coord2.tilex, coord2.tiley, 0, 0, 0, -1);
 
         if (game.animationstate === 2) {
-          drawTile(ctx, coord1shift.tilex, coord1shift.tiley, col1[0], col1[1], col1[2]);
-          drawTile(ctx, coord2shift.tilex, coord2shift.tiley, col2[0], col2[1], col2[2]);
+          drawTile(ctx, coord1shift.tilex, coord1shift.tiley, col1[0], col1[1], col1[2], tile1Type);
+          drawTile(ctx, coord2shift.tilex, coord2shift.tiley, col2[0], col2[1], col2[2], tile2Type);
         } else {
-          drawTile(ctx, coord2shift.tilex, coord2shift.tiley, col2[0], col2[1], col2[2]);
-          drawTile(ctx, coord1shift.tilex, coord1shift.tiley, col1[0], col1[1], col1[2]);
+          drawTile(ctx, coord2shift.tilex, coord2shift.tiley, col2[0], col2[1], col2[2], tile2Type);
+          drawTile(ctx, coord1shift.tilex, coord1shift.tiley, col1[0], col1[1], col1[2], tile1Type);
         }
       }
     };
@@ -321,33 +329,29 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1 }) {
       return { tilex, tiley };
     };
 
-    const drawTile = (ctx, x, y, r, g, b) => {
-      // 宝石（ダイヤモンド型）の描画
+    const drawTile = (ctx, x, y, r, g, b, tileType) => {
+      // キャラクタータイル（円形+イニシャル）の描画
       const centerX = x + game.level.tilewidth / 2;
       const centerY = y + game.level.tileheight / 2;
-      const size = game.level.tilewidth * 0.85;
+      const radius = game.level.tilewidth * 0.4;
 
       // 影
       ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
-      ctx.shadowBlur = 4;
+      ctx.shadowBlur = 6;
       ctx.shadowOffsetX = 2;
       ctx.shadowOffsetY = 2;
 
-      // ダイヤモンド本体のパス
+      // 円形の背景
       ctx.beginPath();
-      ctx.moveTo(centerX, centerY - size / 2.2);          // 上
-      ctx.lineTo(centerX + size / 2.5, centerY);          // 右
-      ctx.lineTo(centerX, centerY + size / 2.2);          // 下
-      ctx.lineTo(centerX - size / 2.5, centerY);          // 左
-      ctx.closePath();
+      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
 
-      // メイングラデーション（上から下）
-      const mainGradient = ctx.createLinearGradient(centerX, centerY - size / 2, centerX, centerY + size / 2);
-      mainGradient.addColorStop(0, `rgb(${Math.min(r + 60, 255)}, ${Math.min(g + 60, 255)}, ${Math.min(b + 60, 255)})`);
-      mainGradient.addColorStop(0.5, `rgb(${r}, ${g}, ${b})`);
-      mainGradient.addColorStop(1, `rgb(${Math.floor(r * 0.6)}, ${Math.floor(g * 0.6)}, ${Math.floor(b * 0.6)})`);
+      // グラデーション
+      const gradient = ctx.createRadialGradient(centerX - radius / 3, centerY - radius / 3, radius / 5, centerX, centerY, radius);
+      gradient.addColorStop(0, `rgb(${Math.min(r + 40, 255)}, ${Math.min(g + 40, 255)}, ${Math.min(b + 40, 255)})`);
+      gradient.addColorStop(0.7, `rgb(${r}, ${g}, ${b})`);
+      gradient.addColorStop(1, `rgb(${Math.floor(r * 0.7)}, ${Math.floor(g * 0.7)}, ${Math.floor(b * 0.7)})`);
 
-      ctx.fillStyle = mainGradient;
+      ctx.fillStyle = gradient;
       ctx.fill();
 
       // 影をリセット
@@ -357,30 +361,39 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1 }) {
       ctx.shadowOffsetY = 0;
 
       // 枠線
-      ctx.strokeStyle = `rgb(${Math.floor(r * 0.4)}, ${Math.floor(g * 0.4)}, ${Math.floor(b * 0.4)})`;
+      ctx.strokeStyle = `rgb(${Math.floor(r * 0.5)}, ${Math.floor(g * 0.5)}, ${Math.floor(b * 0.5)})`;
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+
+      // 内側の白い枠線（光沢効果）
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius - 3, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
       ctx.lineWidth = 1.5;
       ctx.stroke();
 
-      // カット面の表現（内側の三角形）
-      ctx.beginPath();
-      ctx.moveTo(centerX, centerY - size / 2.2);
-      ctx.lineTo(centerX, centerY);
-      ctx.lineTo(centerX + size / 2.5, centerY);
-      ctx.closePath();
-      ctx.fillStyle = `rgba(255, 255, 255, 0.15)`;
-      ctx.fill();
+      // キャラクターのイニシャル
+      if (tileType !== undefined && game.characters[tileType]) {
+        const character = game.characters[tileType];
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+        ctx.font = 'bold 20px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
 
-      // ハイライト（上部の光沢）
-      ctx.beginPath();
-      ctx.arc(centerX - size / 8, centerY - size / 6, size / 8, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-      ctx.fill();
+        // テキストの影
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+        ctx.shadowBlur = 3;
+        ctx.shadowOffsetX = 1;
+        ctx.shadowOffsetY = 1;
 
-      // 小さなハイライト
-      ctx.beginPath();
-      ctx.arc(centerX + size / 10, centerY - size / 8, size / 15, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-      ctx.fill();
+        ctx.fillText(character.initial, centerX, centerY);
+
+        // 影をリセット
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+      }
     };
 
     const renderClusters = (ctx) => {
