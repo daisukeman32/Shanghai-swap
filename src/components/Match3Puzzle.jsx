@@ -24,14 +24,15 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1 }) {
       selectedtile: { selected: false, column: 0, row: 0 }
     },
     tilecolors: [
-      [255, 128, 128], // 赤
-      [128, 255, 128], // 緑
-      [128, 128, 255], // 青
-      [255, 255, 128], // 黄
-      [255, 128, 255], // マゼンタ
-      [128, 255, 255], // シアン
-      [255, 255, 255]  // 白
+      [220, 20, 60],    // Ruby (ルビー) - 深紅
+      [0, 201, 87],     // Emerald (エメラルド) - 深緑
+      [15, 82, 186],    // Sapphire (サファイア) - 青
+      [255, 200, 0],    // Topaz (トパーズ) - 黄金
+      [153, 50, 204],   // Amethyst (アメジスト) - 紫
+      [127, 255, 212],  // Aquamarine (アクアマリン) - 青緑
+      [230, 230, 250]   // Diamond (ダイヤモンド) - 白
     ],
+    gemNames: ['Ruby', 'Emerald', 'Sapphire', 'Topaz', 'Amethyst', 'Aquamarine', 'Diamond'],
     clusters: [],
     moves: [],
     currentmove: { column1: 0, row1: 0, column2: 0, row2: 0 },
@@ -269,10 +270,16 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1 }) {
             drawTile(ctx, coord.tilex, coord.tiley, col[0], col[1], col[2]);
           }
 
-          // 選択タイル
+          // 選択タイルの光る枠線
           if (game.level.selectedtile.selected) {
             if (game.level.selectedtile.column === i && game.level.selectedtile.row === j) {
-              drawTile(ctx, coord.tilex, coord.tiley, 255, 255, 0);
+              ctx.shadowColor = 'rgba(255, 255, 255, 0.9)';
+              ctx.shadowBlur = 15;
+              ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+              ctx.lineWidth = 3;
+              ctx.strokeRect(coord.tilex + 2, coord.tiley + 2, game.level.tilewidth - 4, game.level.tileheight - 4);
+              ctx.shadowColor = 'transparent';
+              ctx.shadowBlur = 0;
             }
           }
         }
@@ -315,18 +322,65 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1 }) {
     };
 
     const drawTile = (ctx, x, y, r, g, b) => {
-      // グラデーション効果
-      const gradient = ctx.createRadialGradient(x + 25, y + 25, 5, x + 25, y + 25, 25);
-      gradient.addColorStop(0, `rgb(${Math.min(r + 50, 255)}, ${Math.min(g + 50, 255)}, ${Math.min(b + 50, 255)})`);
-      gradient.addColorStop(1, `rgb(${r}, ${g}, ${b})`);
+      // 宝石（ダイヤモンド型）の描画
+      const centerX = x + game.level.tilewidth / 2;
+      const centerY = y + game.level.tileheight / 2;
+      const size = game.level.tilewidth * 0.85;
 
-      ctx.fillStyle = gradient;
-      ctx.fillRect(x + 2, y + 2, game.level.tilewidth - 4, game.level.tileheight - 4);
+      // 影
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+      ctx.shadowBlur = 4;
+      ctx.shadowOffsetX = 2;
+      ctx.shadowOffsetY = 2;
+
+      // ダイヤモンド本体のパス
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY - size / 2.2);          // 上
+      ctx.lineTo(centerX + size / 2.5, centerY);          // 右
+      ctx.lineTo(centerX, centerY + size / 2.2);          // 下
+      ctx.lineTo(centerX - size / 2.5, centerY);          // 左
+      ctx.closePath();
+
+      // メイングラデーション（上から下）
+      const mainGradient = ctx.createLinearGradient(centerX, centerY - size / 2, centerX, centerY + size / 2);
+      mainGradient.addColorStop(0, `rgb(${Math.min(r + 60, 255)}, ${Math.min(g + 60, 255)}, ${Math.min(b + 60, 255)})`);
+      mainGradient.addColorStop(0.5, `rgb(${r}, ${g}, ${b})`);
+      mainGradient.addColorStop(1, `rgb(${Math.floor(r * 0.6)}, ${Math.floor(g * 0.6)}, ${Math.floor(b * 0.6)})`);
+
+      ctx.fillStyle = mainGradient;
+      ctx.fill();
+
+      // 影をリセット
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
 
       // 枠線
-      ctx.strokeStyle = `rgb(${Math.floor(r * 0.7)}, ${Math.floor(g * 0.7)}, ${Math.floor(b * 0.7)})`;
-      ctx.lineWidth = 2;
-      ctx.strokeRect(x + 2, y + 2, game.level.tilewidth - 4, game.level.tileheight - 4);
+      ctx.strokeStyle = `rgb(${Math.floor(r * 0.4)}, ${Math.floor(g * 0.4)}, ${Math.floor(b * 0.4)})`;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // カット面の表現（内側の三角形）
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY - size / 2.2);
+      ctx.lineTo(centerX, centerY);
+      ctx.lineTo(centerX + size / 2.5, centerY);
+      ctx.closePath();
+      ctx.fillStyle = `rgba(255, 255, 255, 0.15)`;
+      ctx.fill();
+
+      // ハイライト（上部の光沢）
+      ctx.beginPath();
+      ctx.arc(centerX - size / 8, centerY - size / 6, size / 8, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+      ctx.fill();
+
+      // 小さなハイライト
+      ctx.beginPath();
+      ctx.arc(centerX + size / 10, centerY - size / 8, size / 15, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.fill();
     };
 
     const renderClusters = (ctx) => {
