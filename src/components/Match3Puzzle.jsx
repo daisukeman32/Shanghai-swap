@@ -50,7 +50,10 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1 }) {
     animationtimetotal: 0.3,
     drag: false,
     gameover: false,
-    cleared: false
+    cleared: false,
+    particles: [],  // パーティクルエフェクト用
+    specialEffects: [],  // 特殊エフェクト用
+    screenShake: { active: false, intensity: 0, duration: 0 }  // 画面揺れ用
   });
 
   useEffect(() => {
@@ -118,6 +121,30 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1 }) {
 
     // ゲーム状態更新
     const update = (dt) => {
+      // パーティクル更新
+      game.particles = game.particles.filter(p => {
+        p.life -= dt;
+        p.x += p.vx * dt * 60;
+        p.y += p.vy * dt * 60;
+        p.vy += p.gravity * dt * 60;
+        p.alpha = Math.max(0, p.life / p.maxLife);
+        return p.life > 0;
+      });
+
+      // 特殊エフェクト更新
+      game.specialEffects = game.specialEffects.filter(e => {
+        e.time += dt;
+        return e.time < e.duration;
+      });
+
+      // 画面揺れ更新
+      if (game.screenShake.active) {
+        game.screenShake.duration -= dt;
+        if (game.screenShake.duration <= 0) {
+          game.screenShake.active = false;
+        }
+      }
+
       if (game.gamestate === game.gamestates.ready) {
         // ゲームオーバーチェック
         if (game.movesLeft <= 0 && !game.cleared) {
@@ -222,17 +249,36 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1 }) {
       // 残り手数
       ctx.fillText(`Moves: ${game.movesLeft}`, 250, 60);
 
+      // 画面揺れ適用
+      if (game.screenShake.active) {
+        const shakeX = (Math.random() - 0.5) * game.screenShake.intensity;
+        const shakeY = (Math.random() - 0.5) * game.screenShake.intensity;
+        ctx.save();
+        ctx.translate(shakeX, shakeY);
+      }
+
       // レベル背景
       const levelwidth = game.level.columns * game.level.tilewidth;
       const levelheight = game.level.rows * game.level.tileheight;
       ctx.fillStyle = '#000000';
       ctx.fillRect(game.level.x - 4, game.level.y - 4, levelwidth + 8, levelheight + 8);
 
+      // 特殊エフェクト描画（背景）
+      renderSpecialEffects(ctx);
+
       // タイル描画
       renderTiles(ctx);
 
       // クラスター描画
       renderClusters(ctx);
+
+      // パーティクル描画
+      renderParticles(ctx);
+
+      // 画面揺れリセット
+      if (game.screenShake.active) {
+        ctx.restore();
+      }
 
       // ゲームオーバー/クリア表示
       if (game.gameover) {
@@ -511,6 +557,98 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1 }) {
       }
     };
 
+    // パーティクル描画
+    const renderParticles = (ctx) => {
+      game.particles.forEach(p => {
+        ctx.save();
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 10;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+    };
+
+    // 特殊エフェクト描画
+    const renderSpecialEffects = (ctx) => {
+      game.specialEffects.forEach(e => {
+        const progress = e.time / e.duration;
+        ctx.save();
+
+        if (e.type === 'lineBomb') {
+          // ラインボムエフェクト（ビーム）
+          const alpha = 1 - progress;
+          ctx.globalAlpha = alpha;
+
+          const gradient = e.horizontal
+            ? ctx.createLinearGradient(e.x1, e.y1, e.x2, e.y1)
+            : ctx.createLinearGradient(e.x1, e.y1, e.x1, e.y2);
+
+          gradient.addColorStop(0, 'rgba(255, 255, 0, 0)');
+          gradient.addColorStop(0.5, `rgba(255, 255, 0, ${alpha})`);
+          gradient.addColorStop(1, 'rgba(255, 255, 0, 0)');
+
+          ctx.fillStyle = gradient;
+          ctx.shadowColor = '#ffff00';
+          ctx.shadowBlur = 20;
+
+          const width = e.horizontal ? e.x2 - e.x1 : 30;
+          const height = e.horizontal ? 30 : e.y2 - e.y1;
+          ctx.fillRect(e.x1 - (e.horizontal ? 0 : 15), e.y1 - (e.horizontal ? 15 : 0), width, height);
+
+        } else if (e.type === 'colorBomb') {
+          // カラーボムエフェクト（爆発波）
+          const radius = e.radius * progress;
+          const alpha = 1 - progress;
+          ctx.globalAlpha = alpha;
+
+          // 外側の波
+          ctx.strokeStyle = `rgba(255, 100, 0, ${alpha})`;
+          ctx.lineWidth = 10;
+          ctx.shadowColor = '#ff6400';
+          ctx.shadowBlur = 30;
+          ctx.beginPath();
+          ctx.arc(e.x, e.y, radius, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // 内側の波
+          if (progress > 0.3) {
+            const innerRadius = e.radius * (progress - 0.3) / 0.7;
+            ctx.strokeStyle = `rgba(255, 200, 0, ${alpha * 0.7})`;
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.arc(e.x, e.y, innerRadius, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+        }
+
+        ctx.restore();
+      });
+    };
+
+    // パーティクル生成
+    const createParticles = (x, y, count, color) => {
+      for (let i = 0; i < count; i++) {
+        const angle = (Math.PI * 2 * i) / count + Math.random() * 0.5;
+        const speed = 3 + Math.random() * 5;
+        game.particles.push({
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 2,
+          gravity: 0.3,
+          size: 3 + Math.random() * 4,
+          color: color || `hsl(${Math.random() * 360}, 100%, 60%)`,
+          life: 0.8 + Math.random() * 0.4,
+          maxLife: 1.2,
+          alpha: 1
+        });
+      }
+    };
+
     // 新しいゲーム
     const newGame = () => {
       game.score = 0;
@@ -756,30 +894,92 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1 }) {
     const activateLineBomb = (col, row) => {
       console.log(`ラインボム発動！ at (${col}, ${row})`);
 
-      // ランダムで横または縦を決定（より戦略的にするなら、より多く消せる方を選択）
+      // ランダムで横または縦を決定
       const horizontal = Math.random() < 0.5;
 
+      // タイル座標を取得
+      const coord = getTileCoordinate(col, row, 0, 0);
+      const centerX = coord.tilex + game.level.tilewidth / 2;
+      const centerY = coord.tiley + game.level.tileheight / 2;
+
+      // ビームエフェクト追加
       if (horizontal) {
+        game.specialEffects.push({
+          type: 'lineBomb',
+          horizontal: true,
+          x1: game.level.x,
+          y1: centerY,
+          x2: game.level.x + game.level.columns * game.level.tilewidth,
+          y2: centerY,
+          time: 0,
+          duration: 0.4
+        });
+
         // 横1列削除
         for (let i = 0; i < game.level.columns; i++) {
+          const tileCoord = getTileCoordinate(i, row, 0, 0);
+          createParticles(
+            tileCoord.tilex + game.level.tilewidth / 2,
+            tileCoord.tiley + game.level.tileheight / 2,
+            8,
+            '#ffff00'
+          );
           game.level.tiles[i][row].type = -1;
           game.level.tiles[i][row].special = null;
         }
-        game.score += 500; // ボーナススコア
       } else {
+        game.specialEffects.push({
+          type: 'lineBomb',
+          horizontal: false,
+          x1: centerX,
+          y1: game.level.y,
+          x2: centerX,
+          y2: game.level.y + game.level.rows * game.level.tileheight,
+          time: 0,
+          duration: 0.4
+        });
+
         // 縦1列削除
         for (let j = 0; j < game.level.rows; j++) {
+          const tileCoord = getTileCoordinate(col, j, 0, 0);
+          createParticles(
+            tileCoord.tilex + game.level.tilewidth / 2,
+            tileCoord.tiley + game.level.tileheight / 2,
+            8,
+            '#ffff00'
+          );
           game.level.tiles[col][j].type = -1;
           game.level.tiles[col][j].special = null;
         }
-        game.score += 500; // ボーナススコア
       }
+
+      game.score += 500; // ボーナススコア
       setScore(game.score);
     };
 
     // カラーボム発動：周囲3×3を爆破
     const activateColorBomb = (col, row) => {
       console.log(`カラーボム発動！ at (${col}, ${row})`);
+
+      // タイル座標を取得
+      const coord = getTileCoordinate(col, row, 0, 0);
+      const centerX = coord.tilex + game.level.tilewidth / 2;
+      const centerY = coord.tiley + game.level.tileheight / 2;
+
+      // 爆発エフェクト追加
+      game.specialEffects.push({
+        type: 'colorBomb',
+        x: centerX,
+        y: centerY,
+        radius: game.level.tilewidth * 2.5,
+        time: 0,
+        duration: 0.6
+      });
+
+      // 画面揺れ
+      game.screenShake.active = true;
+      game.screenShake.intensity = 10;
+      game.screenShake.duration = 0.3;
 
       // 周囲3×3範囲を削除
       for (let i = -1; i <= 1; i++) {
@@ -789,6 +989,13 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1 }) {
 
           if (targetCol >= 0 && targetCol < game.level.columns &&
               targetRow >= 0 && targetRow < game.level.rows) {
+            const tileCoord = getTileCoordinate(targetCol, targetRow, 0, 0);
+            createParticles(
+              tileCoord.tilex + game.level.tilewidth / 2,
+              tileCoord.tiley + game.level.tileheight / 2,
+              12,
+              '#ff6400'
+            );
             game.level.tiles[targetCol][targetRow].type = -1;
             game.level.tiles[targetCol][targetRow].special = null;
           }
