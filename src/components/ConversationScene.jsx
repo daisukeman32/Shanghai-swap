@@ -19,6 +19,7 @@ function ConversationScene({ gameData, playerName, selectedCharacter, currentSta
   const [showChoices, setShowChoices] = useState(false);
   const [currentChoices, setCurrentChoices] = useState([]);
   const [selectedChoiceIndex, setSelectedChoiceIndex] = useState(0);
+  const [isMouthOpen, setIsMouthOpen] = useState(false); // 口パク状態管理
 
   const currentDialogue = gameData?.dialogues?.find(
     d => d.dialogue_id === currentDialogueId
@@ -47,6 +48,46 @@ function ConversationScene({ gameData, playerName, selectedCharacter, currentSta
       audioManager.fadeOutBGM(500);
     };
   }, [gameData]);
+
+  // 口パクアニメーション & タイピング音
+  useEffect(() => {
+    let mouthAnimationInterval = null;
+    let typingSoundId = null;
+
+    if (isTyping) {
+      // タイピング音を再生（ループ）
+      if (gameData?.soundEffects) {
+        // 主人公かナレーターの場合はSE_011、それ以外はSE_010
+        const seAssetId = (currentDialogue?.character_id === 'protagonist' || currentDialogue?.character_id === 'narrator')
+          ? 'SE_011'
+          : 'SE_010';
+        const typingSE = gameData.soundEffects.find(se => se.asset_id === seAssetId);
+        if (typingSE) {
+          typingSoundId = audioManager.playSE(typingSE.file_path, true, parseFloat(typingSE.volume) || 0.3);
+        }
+      }
+
+      // 口パクアニメーション（emotionがdefaultの時のみ）
+      if (currentDialogue?.character_id !== 'narrator' && currentDialogue?.emotion === 'default') {
+        mouthAnimationInterval = setInterval(() => {
+          setIsMouthOpen(prev => !prev);
+        }, 200);
+      }
+    } else {
+      // タイピング終了時
+      setIsMouthOpen(false);
+      if (typingSoundId) {
+        audioManager.stopSE();
+      }
+    }
+
+    return () => {
+      if (mouthAnimationInterval) {
+        clearInterval(mouthAnimationInterval);
+      }
+      audioManager.stopSE();
+    };
+  }, [isTyping, currentDialogue, gameData]);
 
   // テキストのタイプライター効果
   useEffect(() => {
@@ -199,9 +240,10 @@ function ConversationScene({ gameData, playerName, selectedCharacter, currentSta
     );
   }
 
-  // 背景色取得
+  // 背景色・背景画像取得
   const scene = gameData?.scenes?.find(s => s.scene_id === currentDialogue.scene_id);
   const bgColor = scene?.background_color || '#FFB6C1';
+  const bgImage = scene?.background_image || null;
 
   // 感情に応じた色（仮素材用）
   const emotionColors = {
@@ -221,15 +263,43 @@ function ConversationScene({ gameData, playerName, selectedCharacter, currentSta
     }
   };
 
-  // キャラクター立ち絵画像を取得
+  // キャラクター立ち絵画像を取得（口パク対応）
   const getCharacterSprite = () => {
     if (!gameData?.images || !currentDialogue) return null;
 
-    const sprite = gameData.images.find(
+    // ナレーターの場合は立ち絵を表示しない
+    if (currentDialogue.character_id === 'narrator') {
+      return null;
+    }
+
+    const targetCharacterId = currentDialogue.character_id;
+    const targetEmotion = currentDialogue.emotion;
+
+    // 口パク中かつemotionがdefaultの場合のみ talk 画像を優先
+    if (isMouthOpen && currentDialogue.character_id !== 'narrator' && targetEmotion === 'default') {
+      const talkSprite = gameData.images.find(
+        img => img.image_type === 'character_sprite' &&
+               img.character_id === targetCharacterId &&
+               img.emotion === 'talk'
+      );
+      if (talkSprite) return talkSprite.file_path;
+    }
+
+    // 通常の感情画像を取得
+    let sprite = gameData.images.find(
       img => img.image_type === 'character_sprite' &&
-             img.character_id === currentDialogue.character_id &&
-             img.emotion === currentDialogue.emotion
+             img.character_id === targetCharacterId &&
+             img.emotion === targetEmotion
     );
+
+    // 指定されたemotionの画像が見つからない場合は、defaultにフォールバック
+    if (!sprite) {
+      sprite = gameData.images.find(
+        img => img.image_type === 'character_sprite' &&
+               img.character_id === targetCharacterId &&
+               img.emotion === 'default'
+      );
+    }
 
     return sprite?.file_path || null;
   };
@@ -238,6 +308,13 @@ function ConversationScene({ gameData, playerName, selectedCharacter, currentSta
 
   return (
     <div className="conversation-scene" style={{ background: bgColor }} onClick={handleScreenClick}>
+      {/* 背景画像レイヤー */}
+      {bgImage && (
+        <div className="background-layer">
+          <img src={bgImage} alt="背景" className="background-image" />
+        </div>
+      )}
+
       {/* キャラクター立ち絵 */}
       <div className={`character-sprite slide-in-right ${isTyping ? 'talking' : ''}`}>
         {spriteImagePath ? (

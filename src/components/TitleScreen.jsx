@@ -7,11 +7,29 @@ function TitleScreen({ onStart, onContinue, onGallery, saveData }) {
   const [selectedCharacter, setSelectedCharacter] = useState('airi'); // デフォルトは愛莉
 
   const characters = [
-    { id: 'airi', name: '愛莉', fullName: '星野 愛莉', className: 'character-1', image: '/assets/characters/character1.png' },
+    { id: 'airi', name: '愛莉', fullName: '星野 愛莉', className: 'character-1', image: '/assets/characters/airi/airi_default.png' },
     { id: 'kaho', name: '夏帆', fullName: '夏目 夏帆', className: 'character-2', image: '/assets/characters/character2.png' },
     { id: 'mitsuki', name: '美月', fullName: '水瀬 美月', className: 'character-3', image: '/assets/characters/character3.png' },
     { id: 'misaki', name: '美咲', fullName: '木村 美咲', className: 'character-4', image: '/assets/characters/character4.png' }
   ];
+
+  // 続きから情報を取得
+  const getContinueInfo = () => {
+    if (!saveData || !saveData.currentProgress) return null;
+
+    const currentCharId = saveData.currentProgress.characterId;
+    if (!currentCharId) return null;
+
+    const char = characters.find(c => c.id === currentCharId);
+    const stage = saveData.characterProgress?.[currentCharId]?.currentStage || 1;
+
+    return {
+      characterName: char ? char.name : '不明',
+      stage: stage
+    };
+  };
+
+  const continueInfo = getContinueInfo();
 
   const handleCharacterSelect = (characterId) => {
     // ロックされているキャラは選択不可
@@ -70,8 +88,13 @@ function TitleScreen({ onStart, onContinue, onGallery, saveData }) {
           </button>
 
           {hasSaveData && (
-            <button className="menu-button" onClick={onContinue}>
-              ▶ つづきから
+            <button className="menu-button continue-button" onClick={onContinue}>
+              <div className="button-main">▶ つづきから</div>
+              {continueInfo && (
+                <div className="button-sub">
+                  {continueInfo.characterName} ステージ{continueInfo.stage}から
+                </div>
+              )}
             </button>
           )}
 

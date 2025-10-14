@@ -1,5 +1,9 @@
-scene_id,scene_name,background_color,bgm_file,description
-opening,オープニング,#FFB6C1,,放課後の教室
-puzzle_start,パズル開始,#4B0082,,不思議な空間
-reward,ご褒美,#FF69B4,,愛莉の部屋
-ending,エンディング,#FF8C00,,屋上
+scene_id,scene_name,background_color,background_image,bgm_file,description
+stage1,ステージ1,#FFB6C1,/assets/backgrounds/classroom_evening.jpeg,,放課後の教室
+stage2,ステージ2,#FFC2D4,/assets/backgrounds/classroom_evening.jpeg,,入れ替わり中
+stage3,ステージ3,#FFD4E5,/assets/backgrounds/classroom_evening.jpeg,,支配の深化
+stage4,ステージ4,#FFE0F0,/assets/backgrounds/classroom_evening.jpeg,,完全調教
+stage5,ステージ5,#FFF0F5,/assets/backgrounds/classroom_evening.jpeg,,目覚めと混乱
+stage6,ステージ6,#FFFAFC,/assets/backgrounds/classroom_evening.jpeg,,脅迫と屈服
+puzzle_start,パズル開始,#4B0082,/assets/backgrounds/ゲームセンター.jpeg,,不思議な空間
+reward,ご褒美,#FF69B4,,,愛莉の部屋

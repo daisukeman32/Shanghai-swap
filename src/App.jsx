@@ -165,6 +165,7 @@ function App() {
           onClear={() => changeScene('reward')}
           onGameOver={() => changeScene('conversation')}
           stage={currentStage}
+          selectedCharacter={selectedCharacter}
         />
       )}
 

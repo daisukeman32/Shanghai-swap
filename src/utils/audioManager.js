@@ -6,6 +6,7 @@
 class AudioManager {
   constructor() {
     this.bgm = null; // 現在再生中のBGM
+    this.currentSE = null; // 現在再生中の効果音（ループ用）
     this.bgmVolume = 0.5; // BGM音量（0.0～1.0）
     this.seVolume = 0.7; // 効果音音量（0.0～1.0）
     this.isMuted = false; // ミュート状態
@@ -73,23 +74,46 @@ class AudioManager {
   }
 
   /**
-   * 効果音を再生（ワンショット）
+   * 効果音を再生
    * @param {string} filePath - 効果音ファイルパス
+   * @param {boolean} loop - ループ再生するか（デフォルト: false）
+   * @param {number} volume - 音量（0.0～1.0、nullの場合はデフォルト音量）
+   * @returns {Audio} Audio オブジェクト（ループ再生時の停止用）
    */
-  playSE(filePath) {
-    if (!filePath) return;
+  playSE(filePath, loop = false, volume = null) {
+    if (!filePath) return null;
 
     try {
       const se = new Audio(filePath);
-      se.volume = this.isMuted ? 0 : this.seVolume;
+      se.loop = loop;
+      se.volume = volume !== null ? volume : (this.isMuted ? 0 : this.seVolume);
 
       se.play().catch(err => {
         console.warn('効果音再生エラー:', err);
       });
 
-      console.log('🔊 効果音再生:', filePath);
+      // ループ再生の場合は保持
+      if (loop) {
+        this.currentSE = se;
+      }
+
+      console.log('🔊 効果音再生:', filePath, loop ? '(ループ)' : '');
+      return se;
     } catch (error) {
       console.error('効果音読み込みエラー:', error);
+      return null;
+    }
+  }
+
+  /**
+   * 現在再生中の効果音を停止
+   */
+  stopSE() {
+    if (this.currentSE) {
+      this.currentSE.pause();
+      this.currentSE.currentTime = 0;
+      this.currentSE = null;
+      console.log('⏹️ 効果音停止');
     }
   }
 
@@ -133,6 +157,7 @@ class AudioManager {
    */
   stopAll() {
     this.stopBGM();
+    this.stopSE();
     console.log('🔇 全音声停止');
   }
 }

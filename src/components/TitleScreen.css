@@ -14,33 +14,33 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #FFE5EC 0%, #FFC2D4 50%, #FFB3C6 100%);
+  background: linear-gradient(135deg, #1a0a0a 0%, #2d1b1b 50%, #4a2424 100%);
   z-index: 0;
 }
 
-/* 桜の花びらエフェクト（オプション） */
+/* 暗闇エフェクト（血の粒子） */
 .title-bg::before {
   content: '';
   position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background-image:
-    radial-gradient(circle, rgba(255, 182, 193, 0.3) 1px, transparent 1px),
-    radial-gradient(circle, rgba(255, 192, 203, 0.2) 1px, transparent 1px);
-  background-size: 50px 50px, 80px 80px;
-  background-position: 0 0, 25px 25px;
-  animation: float-sakura 20s linear infinite;
-  opacity: 0.4;
+    radial-gradient(circle, rgba(139, 0, 0, 0.3) 2px, transparent 2px),
+    radial-gradient(circle, rgba(80, 0, 0, 0.2) 2px, transparent 2px);
+  background-size: 100px 100px, 150px 150px;
+  background-position: 0 0, 50px 50px;
+  animation: sparkleMove 10s linear infinite;
+  opacity: 0.3;
 }
 
-@keyframes float-sakura {
+@keyframes sparkleMove {
   from {
-    transform: translateY(-10%);
+    background-position: 0 0, 50px 50px;
   }
   to {
-    transform: translateY(10%);
+    background-position: 100px 100px, 150px 150px;
   }
 }
 
@@ -58,34 +58,31 @@
 
 .main-title {
   font-size: 36px;
-  font-weight: 800;
-  font-family: 'Shippori Mincho', serif;
-  color: #FF69B4;
+  font-weight: 900;
+  font-family: 'Shippori Mincho', 'Noto Serif JP', serif;
+  color: #DC143C;
   text-shadow:
-    0 0 10px rgba(255, 255, 255, 1),
-    0 0 20px rgba(255, 182, 193, 0.8),
-    0 0 30px rgba(255, 105, 180, 0.6),
-    3px 3px 6px rgba(0, 0, 0, 0.3);
+    0 0 10px rgba(220, 20, 60, 0.8),
+    0 0 20px rgba(139, 0, 0, 0.6),
+    3px 3px 8px rgba(0, 0, 0, 0.9);
   line-height: 1.4;
   margin-bottom: 10px;
-  animation: title-glow 2s ease-in-out infinite alternate;
+  animation: sinister-title-pulse 3s ease-in-out infinite;
   letter-spacing: 3px;
 }
 
-@keyframes title-glow {
-  from {
+@keyframes sinister-title-pulse {
+  0%, 100% {
     text-shadow:
-      0 0 10px rgba(255, 255, 255, 0.8),
-      0 0 20px rgba(255, 182, 193, 0.6),
-      0 0 30px rgba(255, 105, 180, 0.4),
-      2px 2px 4px rgba(0, 0, 0, 0.5);
+      0 0 10px rgba(220, 20, 60, 0.8),
+      0 0 20px rgba(139, 0, 0, 0.6),
+      3px 3px 8px rgba(0, 0, 0, 0.9);
   }
-  to {
+  50% {
     text-shadow:
-      0 0 15px rgba(255, 255, 255, 1),
-      0 0 30px rgba(255, 182, 193, 0.8),
-      0 0 45px rgba(255, 105, 180, 0.6),
-      2px 2px 4px rgba(0, 0, 0, 0.5);
+      0 0 15px rgba(220, 20, 60, 1),
+      0 0 30px rgba(139, 0, 0, 0.8),
+      3px 3px 8px rgba(0, 0, 0, 0.9);
   }
 }
 
@@ -94,8 +91,8 @@
   font-style: italic;
   font-family: 'Shippori Mincho', serif;
   font-weight: 500;
-  color: #FF1493;
-  text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8);
+  color: #CD5C5C;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
   opacity: 0.9;
   letter-spacing: 2px;
 }
@@ -244,16 +241,16 @@
   font-size: 26px;
   font-weight: 700;
   font-family: 'Zen Maru Gothic', sans-serif;
-  color: #FF1493;
+  color: #DC143C;
   background: transparent;
   border: none;
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   text-shadow:
-    0 0 10px rgba(255, 20, 147, 0.8),
-    0 0 20px rgba(255, 105, 180, 0.6),
-    2px 2px 4px rgba(0, 0, 0, 0.3);
+    0 0 10px rgba(220, 20, 60, 0.8),
+    0 0 20px rgba(139, 0, 0, 0.6),
+    2px 2px 4px rgba(0, 0, 0, 0.9);
   box-shadow: none;
   position: relative;
   overflow: visible;
@@ -268,7 +265,7 @@
   transform: translate(-50%, -50%);
   width: 0;
   height: 0;
-  background: radial-gradient(circle, rgba(255, 105, 180, 0.3), transparent);
+  background: radial-gradient(circle, rgba(220, 20, 60, 0.3), transparent);
   border-radius: 50%;
   transition: width 0.5s ease, height 0.5s ease;
   z-index: -1;
@@ -277,10 +274,10 @@
 .menu-button:hover {
   transform: translateY(-8px) scale(1.08);
   text-shadow:
-    0 0 20px rgba(255, 20, 147, 1),
-    0 0 40px rgba(255, 105, 180, 0.8),
-    3px 3px 6px rgba(0, 0, 0, 0.5);
-  color: #FF69B4;
+    0 0 20px rgba(220, 20, 60, 1),
+    0 0 40px rgba(139, 0, 0, 0.8),
+    3px 3px 6px rgba(0, 0, 0, 0.9);
+  color: #FF1493;
 }
 
 .menu-button:hover::before {
@@ -292,14 +289,38 @@
   transform: translateY(-5px) scale(1.02);
 }
 
+/* 続きからボタン専用スタイル */
+.menu-button.continue-button {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 12px 30px;
+}
+
+.menu-button .button-main {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.menu-button .button-sub {
+  font-size: 16px;
+  font-weight: 500;
+  color: #CD5C5C;
+  text-shadow:
+    0 0 5px rgba(205, 92, 92, 0.8),
+    1px 1px 2px rgba(0, 0, 0, 0.9);
+  letter-spacing: 1px;
+  opacity: 0.9;
+}
+
 /* バージョン情報 */
 .version-info {
   position: absolute;
   bottom: 20px;
   right: 20px;
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.7);
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  color: rgba(205, 92, 92, 0.7);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
 }
 
 /* フェードインアニメーション */

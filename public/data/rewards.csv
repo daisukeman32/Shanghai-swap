@@ -1,23 +1,23 @@
-asset_id,character_id,stage,reward_type,file_path,is_placeholder,unlock_condition,title,description,player_reaction,next_dialogue_id
-RWD_001,airi,1,image,/assets/rewards/RWD_001_airi_1.jpg,true,puzzle_clear,愛莉の秘密発見,眠っている愛莉の部屋でBL本を発見...弱みを握った,ククク...これは使える。クラスで一番人気の才女が、こんな変態本を隠し持ってるなんてな,airi_stage2_1
-RWD_002,airi,2,image,/assets/rewards/RWD_002_airi_2.jpg,true,puzzle_clear,睡眠中の身体観察,意識のない愛莉のCカップを揉んで...反応を記録,意識がないから抵抗しない。Cカップ...思ったより柔らかい。乳首も敏感に反応する...完璧だ,airi_stage3_1
-RWD_003,airi,3,video,/assets/rewards/RWD_003_airi_3.mp4,true,puzzle_clear,証拠動画撮影,スマホで愛莉の裸体を撮影...これで弱みは完璧,カメラを回す...これで完璧な証拠が手に入った。愛莉は逃げられない,airi_stage4_1
-RWD_004,airi,4,video,/assets/rewards/RWD_004_airi_advanced.mp4,true,puzzle_clear,支配の深化,眠っている愛莉をさらに...もう後戻りできない,もう限界を超えた。でも...この快感は止められない。愛莉は俺のものだ,airi_stage5_1
-RWD_005,airi,5,video,/assets/rewards/RWD_005_airi_awakening.mp4,true,puzzle_clear,目覚めと混乱,愛莉が目覚めて混乱...何が起きたのか分からない様子,目覚めた愛莉は混乱している...自分に何が起きたか理解できていない。完璧だ,airi_stage6_1
-RWD_006,airi,6,video,/assets/rewards/RWD_006_airi_submission.mp4,true,puzzle_clear,脅迫と屈服,証拠動画を見せて脅迫...愛莉は俺の言いなりに,これで愛莉は俺の奴隷だ。BL趣味もバレたくないだろう？従うしかない,complete
-RWD_011,kaho,1,image,/assets/rewards/RWD_011_kaho_1.jpg,true,puzzle_clear,夏帆の弱点発見,眠っている夏帆のスポーツ理論書を発見...間違いだらけ,スポーツバカの夏帆...理論が全部間違ってる。これは使えるぞ,kaho_stage2_1
-RWD_012,kaho,2,image,/assets/rewards/RWD_012_kaho_2.jpg,true,puzzle_clear,アスリート身体観察,意識のない夏帆のDカップを揉んで...筋肉質な身体,運動してるだけあって引き締まってる。でもDカップは柔らかい...最高だ,kaho_stage3_1
-RWD_013,kaho,3,video,/assets/rewards/RWD_013_kaho_3.mp4,true,puzzle_clear,トレーニング道具で,体育用具を使って夏帆を...恥ずかしい姿を撮影,縄跳びとか使って...これは芸術だな。証拠動画も完璧,kaho_stage4_1
-RWD_014,kaho,4,video,/assets/rewards/RWD_014_kaho_advanced.mp4,true,puzzle_clear,スポーツ理論で支配,間違ったトレーニングを教えて...身体を好きに,「これがスポーツ科学だ」って教えてやる。夏帆は信じ込むバカだから,kaho_stage5_1
-RWD_015,kaho,5,video,/assets/rewards/RWD_015_kaho_awakening.mp4,true,puzzle_clear,目覚めと困惑,夏帆が目覚めて身体の違和感に気づく...何かおかしい,目覚めた夏帆は身体の違和感に戸惑ってる。でも証拠はない...完璧だ,kaho_stage6_1
-RWD_016,kaho,6,video,/assets/rewards/RWD_016_kaho_submission.mp4,true,puzzle_clear,コーチとして支配,証拠を見せて「俺がコーチだ」と...夏帆は従う,スポーツ理論を教える「コーチ」として...夏帆は俺の指示に従うしかない,complete
-RWD_021,mitsuki,1,image,/assets/rewards/RWD_021_mitsuki_1.jpg,true,puzzle_clear,美月の秘密発見,眠っている美月の学級日誌...完璧主義の裏の顔,完璧な委員長...でも日誌には本音が。これは使える弱みだ,mitsuki_stage2_1
-RWD_022,mitsuki,2,image,/assets/rewards/RWD_022_mitsuki_2.jpg,true,puzzle_clear,メガネ依存の身体,意識のない美月のメガネを外して...Cカップを観察,メガネないと何も見えない美月...無防備なCカップ。クールな顔が崩れる,mitsuki_stage3_1
-RWD_023,mitsuki,3,video,/assets/rewards/RWD_023_mitsuki_3.mp4,true,puzzle_clear,権威の破壊,委員長の制服を脱がせて...恥ずかしい姿を撮影,完璧な委員長の裸体を撮影。これで権威は崩壊だ,mitsuki_stage4_1
-RWD_024,mitsuki,4,video,/assets/rewards/RWD_024_mitsuki_advanced.mp4,true,puzzle_clear,メガネで支配,メガネがないと何もできない美月を...好きに操る,メガネを人質にすれば何でもできる。美月は俺なしでは生きられない,mitsuki_stage5_1
-RWD_025,mitsuki,5,video,/assets/rewards/RWD_025_mitsuki_awakening.mp4,true,puzzle_clear,目覚めと混乱,美月が目覚めてメガネを探す...身体の違和感にパニック,メガネを探してパニックになる美月...何が起きたか分からない。完璧だ,mitsuki_stage6_1
-RWD_026,mitsuki,6,video,/assets/rewards/RWD_026_mitsuki_submission.mp4,true,puzzle_clear,秘書として服従,証拠と日誌を見せて脅迫...美月は個人秘書に,完璧主義の委員長が俺の「個人秘書」として従う...最高の復讐だ,complete
-RWD_031,misaki,1,image,/assets/rewards/RWD_031_misaki_1.jpg,true,puzzle_clear,美咲先輩の身体,眠っている美咲先輩のEカップを...大人びた身体つき,大人びた身体...Eカップ柔らかい。他の子とは何か違う気がする,misaki_stage2_1
-RWD_032,misaki,2,image,/assets/rewards/RWD_032_misaki_2.jpg,true,puzzle_clear,エスカレート,調子に乗ってさらに...美咲先輩の裸体を撮影,もう止まらない。美咲先輩も俺のものだ。完璧な証拠,misaki_stage3_1
-RWD_033,misaki,3,video,/assets/rewards/RWD_033_misaki_3.mp4,true,puzzle_clear,限界を超えて,さらに過激に...もう後戻りできない領域へ,もう限界を超えた...でもこの快感は止められない。美咲先輩も俺の奴隷に,misaki_stage4_1
-RWD_034,misaki,4,video,/assets/rewards/RWD_034_misaki_badend.mp4,true,puzzle_clear,逆レイプ処刑,美咲（主人公の男体）に犯され快楽の絶頂で死ぬ,自分の体に犯されて...女の快楽で...絶頂と同時にスワップ解除...美咲に首を絞められ...終わる...,misaki_stage4_15
+asset_id,character_id,stage,reward_type,file_path,is_placeholder,unlock_condition,title,description,player_reaction,sinister_phrase,next_dialogue_id
+RWD_001,airi,1,video,/assets/rewards/RWD_001_airi_1.mp4,false,puzzle_clear,愛莉の秘密発見,眠っている愛莉の部屋でBL本を発見...弱みを握った,ククク...これは使える。クラスで一番人気の才女が、こんな変態本を隠し持ってるなんてな,やった...星野 愛莉に入れ替わった...,airi_stage2_1
+RWD_002,airi,2,image,/assets/rewards/RWD_002_airi_2.jpg,true,puzzle_clear,睡眠中の身体観察,意識のない愛莉のCカップを揉んで...反応を記録,意識がないから抵抗しない。Cカップ...思ったより柔らかい。乳首も敏感に反応する...完璧だ,ぐちゃぐちゃにしてやる！,airi_stage3_1
+RWD_003,airi,3,video,/assets/rewards/RWD_003_airi_3.mp4,true,puzzle_clear,証拠動画撮影,スマホで愛莉の裸体を撮影...これで弱みは完璧,カメラを回す...これで完璧な証拠が手に入った。愛莉は逃げられない,証拠は完璧だ...もう逃げられない,airi_stage4_1
+RWD_004,airi,4,video,/assets/rewards/RWD_004_airi_advanced.mp4,true,puzzle_clear,支配の深化,眠っている愛莉をさらに...もう後戻りできない,もう限界を超えた。でも...この快感は止められない。愛莉は俺のものだ,もう限界を超えた...止められない,airi_stage5_1
+RWD_005,airi,5,video,/assets/rewards/RWD_005_airi_awakening.mp4,true,puzzle_clear,目覚めと混乱,愛莉が目覚めて混乱...何が起きたのか分からない様子,目覚めた愛莉は混乱している...自分に何が起きたか理解できていない。完璧だ,目覚めた愛莉は何も気づいていない,airi_stage6_1
+RWD_006,airi,6,video,/assets/rewards/RWD_006_airi_submission.mp4,true,puzzle_clear,脅迫と屈服,証拠動画を見せて脅迫...愛莉は俺の言いなりに,これで愛莉は俺の奴隷だ。BL趣味もバレたくないだろう？従うしかない,これで愛莉は俺の奴隷だ,complete
+RWD_011,kaho,1,image,/assets/rewards/RWD_011_kaho_1.jpg,true,puzzle_clear,夏帆の弱点発見,眠っている夏帆のスポーツ理論書を発見...間違いだらけ,スポーツバカの夏帆...理論が全部間違ってる。これは使えるぞ,やった...田中 夏帆に入れ替わった...,kaho_stage2_1
+RWD_012,kaho,2,image,/assets/rewards/RWD_012_kaho_2.jpg,true,puzzle_clear,アスリート身体観察,意識のない夏帆のDカップを揉んで...筋肉質な身体,運動してるだけあって引き締まってる。でもDカップは柔らかい...最高だ,こんなに思い通りに動かせるのか！！！,kaho_stage3_1
+RWD_013,kaho,3,video,/assets/rewards/RWD_013_kaho_3.mp4,true,puzzle_clear,トレーニング道具で,体育用具を使って夏帆を...恥ずかしい姿を撮影,縄跳びとか使って...これは芸術だな。証拠動画も完璧,縄跳びで縛って...これは芸術だな,kaho_stage4_1
+RWD_014,kaho,4,video,/assets/rewards/RWD_014_kaho_advanced.mp4,true,puzzle_clear,スポーツ理論で支配,間違ったトレーニングを教えて...身体を好きに,「これがスポーツ科学だ」って教えてやる。夏帆は信じ込むバカだから,間違った理論を教えてやる,kaho_stage5_1
+RWD_015,kaho,5,video,/assets/rewards/RWD_015_kaho_awakening.mp4,true,puzzle_clear,目覚めと困惑,夏帆が目覚めて身体の違和感に気づく...何かおかしい,目覚めた夏帆は身体の違和感に戸惑ってる。でも証拠はない...完璧だ,違和感に気づいても証拠はない,kaho_stage6_1
+RWD_016,kaho,6,video,/assets/rewards/RWD_016_kaho_submission.mp4,true,puzzle_clear,コーチとして支配,証拠を見せて「俺がコーチだ」と...夏帆は従う,スポーツ理論を教える「コーチ」として...夏帆は俺の指示に従うしかない,俺が「コーチ」だ...従うしかない,complete
+RWD_021,mitsuki,1,image,/assets/rewards/RWD_021_mitsuki_1.jpg,true,puzzle_clear,美月の秘密発見,眠っている美月の学級日誌...完璧主義の裏の顔,完璧な委員長...でも日誌には本音が。これは使える弱みだ,やった...佐藤 美月に入れ替わった...,mitsuki_stage2_1
+RWD_022,mitsuki,2,image,/assets/rewards/RWD_022_mitsuki_2.jpg,true,puzzle_clear,メガネ依存の身体,意識のない美月のメガネを外して...Cカップを観察,メガネないと何も見えない美月...無防備なCカップ。クールな顔が崩れる,完璧主義の委員長も裸にすれば...,mitsuki_stage3_1
+RWD_023,mitsuki,3,video,/assets/rewards/RWD_023_mitsuki_3.mp4,true,puzzle_clear,権威の破壊,委員長の制服を脱がせて...恥ずかしい姿を撮影,完璧な委員長の裸体を撮影。これで権威は崩壊だ,権威を破壊してやる,mitsuki_stage4_1
+RWD_024,mitsuki,4,video,/assets/rewards/RWD_024_mitsuki_advanced.mp4,true,puzzle_clear,メガネで支配,メガネがないと何もできない美月を...好きに操る,メガネを人質にすれば何でもできる。美月は俺なしでは生きられない,メガネなしでは生きられない...,mitsuki_stage5_1
+RWD_025,mitsuki,5,video,/assets/rewards/RWD_025_mitsuki_awakening.mp4,true,puzzle_clear,目覚めと混乱,美月が目覚めてメガネを探す...身体の違和感にパニック,メガネを探してパニックになる美月...何が起きたか分からない。完璧だ,パニックになる美月...完璧だ,mitsuki_stage6_1
+RWD_026,mitsuki,6,video,/assets/rewards/RWD_026_mitsuki_submission.mp4,true,puzzle_clear,秘書として服従,証拠と日誌を見せて脅迫...美月は個人秘書に,完璧主義の委員長が俺の「個人秘書」として従う...最高の復讐だ,委員長が俺の「秘書」になる,complete
+RWD_031,misaki,1,image,/assets/rewards/RWD_031_misaki_1.jpg,true,puzzle_clear,美咲先輩の身体,眠っている美咲先輩のEカップを...大人びた身体つき,大人びた身体...Eカップ柔らかい。他の子とは何か違う気がする,やった...山本 美咲に入れ替わった...,misaki_stage2_1
+RWD_032,misaki,2,image,/assets/rewards/RWD_032_misaki_2.jpg,true,puzzle_clear,エスカレート,調子に乗ってさらに...美咲先輩の裸体を撮影,もう止まらない。美咲先輩も俺のものだ。完璧な証拠,先輩の身体...もっと触りたい,misaki_stage3_1
+RWD_033,misaki,3,video,/assets/rewards/RWD_033_misaki_3.mp4,true,puzzle_clear,限界を超えて,さらに過激に...もう後戻りできない領域へ,もう限界を超えた...でもこの快感は止められない。美咲先輩も俺の奴隷に,もう止まらない...限界を超える,misaki_stage4_1
+RWD_034,misaki,4,video,/assets/rewards/RWD_034_misaki_badend.mp4,true,puzzle_clear,逆レイプ処刑,美咲（主人公の男体）に犯され快楽の絶頂で死ぬ,自分の体に犯されて...女の快楽で...絶頂と同時にスワップ解除...美咲に首を絞められ...終わる...,快楽の絶頂で...終わる...,misaki_stage4_15

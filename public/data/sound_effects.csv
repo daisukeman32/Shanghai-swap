@@ -8,3 +8,5 @@ SE_006,puzzle_clear,/assets/audio/se/SE_006_puzzle_clear.mp3,true,パズルク�
 SE_007,reward_unlock,/assets/audio/se/SE_007_reward_unlock.mp3,true,ご褒美解放音,0.7
 SE_008,heart_beat,/assets/audio/se/SE_008_heart_beat.mp3,true,ドキドキ音（デレる瞬間）,0.5
 SE_009,bad_end,/assets/audio/se/SE_009_bad_end.mp3,true,バッドエンド音,0.6
+SE_010,message_typing,/assets/audio/se/message_typing.mp3,false,メッセージタイピング音（ループ再生）,0.3
+SE_011,protagonist_typing,/assets/audio/se/message_typing2.mp3,false,主人公タイピング音（ループ再生）,0.3
