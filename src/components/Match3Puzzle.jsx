@@ -14,9 +14,15 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
   const canvasRef = useRef(null);
 
   // タイマー・ゴールカウンター用ステート
-  const [timeRemaining, setTimeRemaining] = useState(60); // 60秒（1分）
-  const [hypnosisCount, setHypnosisCount] = useState(0); // 催眠成功カウント
+  const [timeRemaining, setTimeRemaining] = useState(180); // 180秒（3分）
+  const timeRemainingRef = useRef(180); // Canvas描画用のリアルタイム参照
+  const [hypnosisCount, setHypnosisCount] = useState(0); // ハート揃えカウント
   const [showGameOverDialog, setShowGameOverDialog] = useState(false);
+  const [showCutin, setShowCutin] = useState(true); // カットイン表示フラグ（初回は即表示）
+  const [cutinType, setCutinType] = useState('start'); // カットインの種類（初回はstart）
+  const [retryCount, setRetryCount] = useState(0); // リトライ回数
+  const [gameKey, setGameKey] = useState(0); // ゲームリセット用キー
+  const [gameStarted, setGameStarted] = useState(false); // ゲーム開始フラグ
 
   const gameStateRef = useRef({
     level: {
@@ -30,16 +36,18 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
       selectedtile: { selected: false, column: 0, row: 0 }
     },
     tilecolors: [
-      [255, 140, 80],   // 催眠タイル（オレンジ）
-      [100, 180, 255],  // マッシュルームタイル（青）
-      [255, 100, 150],  // 時計タイル（ピンク）
-      [255, 68, 68]     // ドクロタイル（赤）
+      [255, 100, 150],  // ハートタイル（ピンク）
+      [100, 180, 255],  // ブランクキノコ（青）
+      [255, 200, 80],   // 時計タイル（黄色）
+      [255, 68, 68],    // ドクロタイル（赤）
+      [200, 200, 200]   // ブランク星（グレー）
     ],
     characters: [
-      { name: '催眠', initial: '🌀', description: '催眠成功' },
-      { name: 'キノコ', initial: '🍄', description: '効果なし' },
-      { name: '時計', initial: '⏰', description: '時間延長' },
-      { name: 'ドクロ', initial: '💀', description: '時間減少' }
+      { name: 'ハート', initial: '❤️', description: 'ゴールカウンター+1' },
+      { name: 'キノコ', initial: '🍄', description: 'ブランク（効果なし）' },
+      { name: '時計', initial: '⏰', description: '時間回復' },
+      { name: 'ドクロ', initial: '💀', description: '時間減少' },
+      { name: '星', initial: '⭐', description: 'ブランク（効果なし）' }
     ],
     clusters: [],
     moves: [],
@@ -52,6 +60,11 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
     animationtime: 0,
     animationtimetotal: 0.3,
     drag: false,
+    isDragging: false,
+    dragStartX: 0,
+    dragStartY: 0,
+    dragStartTileX: -1,
+    dragStartTileY: -1,
     gameover: false,
     cleared: false,
     isShuffling: false,
@@ -61,13 +74,18 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
     playerImage: null,
     enemyImage: null,
     characterBgImage: null,
+    cutinImage: null,
+    startCutinImage: null,
+    excellentCutinImage: null,
+    clearCompleteCutinImage: null,
     imagesLoaded: false,
     // タイルアイコン画像
     tileImages: {
-      hypnosis: null,
-      mushroom: null,
+      heart: null,
+      blank_mushroom: null,
       clock: null,
-      skull: null
+      skull: null,
+      blank_star: null
     },
     tileImagesLoaded: false
   });
@@ -76,7 +94,7 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
   useEffect(() => {
     const game = gameStateRef.current;
     let loadedCount = 0;
-    const totalImages = 7; // 主人公 + 相手キャラ + キャラ背景 + タイル4種
+    const totalImages = 12; // 主人公 + 相手キャラ + キャラ背景 + タイル5種 + カットイン4種
 
     // 主人公の画像（500×500の正方形画像）
     const playerImg = new Image();
@@ -141,12 +159,37 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
       checkImagesLoaded();
     };
 
+    // カットイン画像の読み込み（4種類）
+    const cutinImages = {
+      cutin: { path: '/assets/ui/cutin.png', prop: 'cutinImage', name: '1回目ハート' },
+      start: { path: '/assets/ui/start.png', prop: 'startCutinImage', name: 'スタート' },
+      excellent: { path: '/assets/ui/excellent.png', prop: 'excellentCutinImage', name: 'Excellent' },
+      clearComplete: { path: '/assets/ui/clear_complete.png', prop: 'clearCompleteCutinImage', name: '解除完了' }
+    };
+
+    Object.values(cutinImages).forEach(({ path, prop, name }) => {
+      const img = new Image();
+      img.src = path;
+      img.onload = () => {
+        game[prop] = img;
+        loadedCount++;
+        checkImagesLoaded();
+        console.log(`✅ ${name}カットイン画像読み込み完了`);
+      };
+      img.onerror = () => {
+        console.warn(`${name}カットイン画像の読み込み失敗: ${path}`);
+        loadedCount++;
+        checkImagesLoaded();
+      };
+    });
+
     // タイルアイコン画像の読み込み（新しいパス）
     const tileImagePaths = {
-      hypnosis: '/assets/tiles/hypnosis.png',
-      mushroom: '/assets/tiles/mushroom.png',
+      heart: '/assets/tiles/heart.png',
+      blank_mushroom: '/assets/tiles/blank_mushroom.png',
       clock: '/assets/tiles/clock.png',
-      skull: '/assets/tiles/skull.png'
+      skull: '/assets/tiles/skull.png',
+      blank_star: '/assets/tiles/blank_star.png'
     };
 
     Object.keys(tileImagePaths).forEach(key => {
@@ -173,20 +216,58 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
     }
   }, [selectedCharacter]);
 
-  // タイマー処理
+  // ゲームリセット時の処理（初回マウント時は gameKey=0 なのでスキップ）
   useEffect(() => {
+    if (gameKey > 0) {
+      // リトライ時のみ実行
+      setTimeRemaining(180);
+      timeRemainingRef.current = 180;
+      setHypnosisCount(0);
+      setCutinType('start');
+      setShowCutin(true);
+      console.log('🔄 ゲームリセット - スタートカットイン表示');
+    }
+  }, [gameKey]);
+
+  // タイマー処理（1秒ごとにカウントダウン）
+  useEffect(() => {
+    console.log('⏱️ タイマー useEffect 起動', {
+      gameKey,
+      showCutin,
+      cutinType,
+      gameover: gameStateRef.current.gameover,
+      cleared: gameStateRef.current.cleared
+    });
+
+    // スタートカットイン表示中はタイマーを開始しない
+    if (showCutin && cutinType === 'start') {
+      console.log('⏱️ スタートカットイン表示中のためタイマー起動しない');
+      return;
+    }
+
+    if (gameStateRef.current.gameover || gameStateRef.current.cleared) {
+      console.log('⏱️ ゲーム終了状態のためタイマー起動しない');
+      return; // ゲームオーバーまたはクリア時はタイマー起動しない
+    }
+
+    console.log('⏱️ タイマー setInterval 開始');
     const timer = setInterval(() => {
-      setTimeRemaining(prev => {
-        if (prev <= 0) {
-          clearInterval(timer);
-          return 0;
-        }
-        return prev - 1;
-      });
+      console.log('⏱️ タイマーチック', { gameover: gameStateRef.current.gameover, cleared: gameStateRef.current.cleared });
+      if (!gameStateRef.current.gameover && !gameStateRef.current.cleared) {
+        setTimeRemaining(prev => {
+          const newTime = prev <= 0 ? 0 : prev - 1;
+          timeRemainingRef.current = newTime; // Refも同時更新
+          console.log('⏱️ タイムカウントダウン', prev, '->', newTime);
+          return newTime;
+        });
+      }
     }, 1000);
 
-    return () => clearInterval(timer);
-  }, []);
+    return () => {
+      console.log('⏱️ タイマー clearInterval');
+      clearInterval(timer);
+    };
+  }, [gameKey, showCutin, cutinType]); // スタートカットインの状態も監視
 
   // タイムアップチェック
   useEffect(() => {
@@ -198,9 +279,34 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
 
   // 催眠カウント達成チェック
   useEffect(() => {
-    if (hypnosisCount >= 2 && !gameStateRef.current.cleared) {
+    if (hypnosisCount === 1 && !gameStateRef.current.cleared) {
+      // 1回目のハート揃え成功時にカットイン表示
+      setCutinType('first');
+      setShowCutin(true);
+      setTimeout(() => setShowCutin(false), 2500); // 2.5秒表示
+    }
+
+    if (hypnosisCount === 2 && !gameStateRef.current.cleared) {
+      // 2回目のハート揃え成功時、即座にクリアフラグを立ててタイマーを停止
       gameStateRef.current.cleared = true;
-      setTimeout(() => onClear(), 1500);
+      console.log('🎉 クリア判定！タイマー停止');
+
+      // Excellentカットイン表示
+      setCutinType('excellent');
+      setShowCutin(true);
+      setTimeout(() => {
+        setShowCutin(false);
+        // Excellent表示後、解除完了カットインを表示
+        setTimeout(() => {
+          setCutinType('clearComplete');
+          setShowCutin(true);
+          setTimeout(() => {
+            setShowCutin(false);
+            // 解除完了表示後、次のシーンへ
+            onClear();
+          }, 2500);
+        }, 500);
+      }, 2500);
     }
   }, [hypnosisCount, onClear]);
 
@@ -377,12 +483,13 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
       ctx.fillRect(0, 0, logicalWidth, headerHeight);
 
       // タイマー表示（中央）
-      const isWarning = timeRemaining <= 30;
+      const currentTime = timeRemainingRef.current; // Refから最新値を取得
+      const isWarning = currentTime <= 30;
       ctx.textAlign = 'center';
       ctx.font = 'bold 28px sans-serif';
 
-      const minutes = Math.floor(timeRemaining / 60);
-      const seconds = timeRemaining % 60;
+      const minutes = Math.floor(currentTime / 60);
+      const seconds = currentTime % 60;
       const timeText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
       if (isWarning) {
@@ -403,13 +510,13 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
       ctx.textAlign = 'right';
       ctx.font = 'bold 18px sans-serif';
       ctx.fillStyle = hypnosisCount >= 2 ? '#00ff00' : '#ffffff';
-      ctx.fillText(`催眠成功: ${hypnosisCount}/2`, logicalWidth - 30, 35);
+      ctx.fillText(`スワップ完了まで: ${hypnosisCount}/2`, logicalWidth - 30, 35);
 
       // 説明文（左）
       ctx.textAlign = 'left';
       ctx.font = '14px sans-serif';
       ctx.fillStyle = '#cccccc';
-      ctx.fillText('🌀を5個揃えると催眠成功！', 30, 70);
+      ctx.fillText('❤️を5個揃えよう！', 30, 70);
 
       ctx.textAlign = 'left';
 
@@ -516,17 +623,17 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
       }
 
       if (game.cleared) {
-        ctx.fillStyle = 'rgba(0, 100, 0, 0.85)';
+        ctx.fillStyle = 'rgba(255, 20, 147, 0.85)';
         ctx.fillRect(game.level.x, game.level.y, levelwidth, levelheight);
 
         ctx.textAlign = 'center';
-        ctx.fillStyle = '#00ff00';
+        ctx.fillStyle = '#ff69b4';
         ctx.font = 'bold 36px sans-serif';
-        ctx.fillText('催眠成功！', game.level.x + levelwidth / 2, game.level.y + levelheight / 2 - 20);
+        ctx.fillText('クリア！', game.level.x + levelwidth / 2, game.level.y + levelheight / 2 - 20);
 
         ctx.fillStyle = '#ffffff';
         ctx.font = '18px sans-serif';
-        ctx.fillText('入れ替わりに成功した...', game.level.x + levelwidth / 2, game.level.y + levelheight / 2 + 20);
+        ctx.fillText('ハート2回揃えに成功！', game.level.x + levelwidth / 2, game.level.y + levelheight / 2 + 20);
         ctx.textAlign = 'left';
       }
     };
@@ -606,7 +713,7 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
         const character = game.characters[tileType];
 
         // タイル画像が読み込まれていれば画像を表示
-        const tileImageKeys = ['hypnosis', 'mushroom', 'clock', 'skull'];
+        const tileImageKeys = ['heart', 'blank_mushroom', 'clock', 'skull', 'blank_star'];
         const tileImageKey = tileImageKeys[tileType];
         const tileImage = game.tileImagesLoaded && game.tileImages[tileImageKey];
 
@@ -736,7 +843,7 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
     // タイル効果を適用
     const applyTileEffects = () => {
       // 色ごとの合計マッチ数を集計
-      const colorMatches = { 0: 0, 1: 0, 2: 0, 3: 0 };
+      const colorMatches = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 };
 
       for (let i = 0; i < game.clusters.length; i++) {
         const cluster = game.clusters[i];
@@ -744,19 +851,19 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
         colorMatches[tileType] += cluster.length;
       }
 
-      // 催眠タイル（type 0）: 5個マッチで催眠成功
+      // ハートタイル（type 0）: 5個マッチでゴールカウンター+1
       if (colorMatches[0] >= 5) {
         setHypnosisCount(prev => prev + 1);
         addFloatingText(
           game.level.x + (game.level.columns * game.level.tilewidth) / 2,
           game.level.y + (game.level.rows * game.level.tileheight) / 2,
-          `催眠成功！ ${hypnosisCount + 1}/2`,
-          '#ffff00'
+          `ハート成功！ ${hypnosisCount + 1}/2`,
+          '#ff69b4'
         );
-        console.log('🌀 催眠成功！');
+        console.log('❤️ ハート成功！');
       }
 
-      // 時計タイル（type 2）: 時間延長
+      // 時計タイル（type 2）: 時間回復
       if (colorMatches[2] >= 3) {
         const timeBonus = colorMatches[2] >= 4 ? 6 : 3;
         setTimeRemaining(prev => prev + timeBonus);
@@ -766,10 +873,10 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
           `+${timeBonus}秒`,
           '#00ff00'
         );
-        console.log(`⏰ 時間延長: +${timeBonus}秒`);
+        console.log(`⏰ 時間回復: +${timeBonus}秒`);
       }
 
-      // ドクロタイル（type 3）: 時間減少（3個のみ）
+      // ドクロタイル（type 3）: 時間減少（3個のみペナルティ、4個以上はペナルティなし）
       if (colorMatches[3] === 3) {
         setTimeRemaining(prev => Math.max(0, prev - 10));
         addFloatingText(
@@ -779,9 +886,17 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
           '#ff4444'
         );
         console.log('💀 ドクロペナルティ: -10秒');
+      } else if (colorMatches[3] >= 4) {
+        addFloatingText(
+          game.level.x + (game.level.columns * game.level.tilewidth) / 2,
+          game.level.y + (game.level.rows * game.level.tileheight) / 2,
+          '回避！',
+          '#ffff00'
+        );
+        console.log('💀 ドクロ4個以上：ペナルティ回避');
       }
 
-      // マッシュルームタイル（type 1）: 効果なし
+      // ブランクキノコ（type 1）とブランク星（type 4）: 効果なし
     };
 
     // 新しいゲーム
@@ -811,7 +926,7 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
     };
 
     const getRandomTile = () => {
-      return Math.floor(Math.random() * 4);
+      return Math.floor(Math.random() * 5);
     };
 
     // クラスター検出
@@ -887,12 +1002,17 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
           const row = cluster.row + (cluster.horizontal ? 0 : j);
 
           const coord = getTileCoordinate(col, row, 0, 0);
-          createParticles(
-            coord.tilex + game.level.tilewidth / 2,
-            coord.tiley + game.level.tileheight / 2,
-            8,
-            `rgb(${game.tilecolors[game.level.tiles[col][row].type].join(',')})`
-          );
+          const tileType = game.level.tiles[col][row].type;
+
+          // タイルタイプが有効な場合のみパーティクルを生成
+          if (tileType >= 0 && tileType < game.tilecolors.length) {
+            createParticles(
+              coord.tilex + game.level.tilewidth / 2,
+              coord.tiley + game.level.tileheight / 2,
+              8,
+              `rgb(${game.tilecolors[tileType].join(',')})`
+            );
+          }
 
           game.level.tiles[col][row].type = -1;
         }
@@ -1006,6 +1126,13 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
         const ty = Math.floor((pos.y - game.level.y) / game.level.tileheight);
 
         if (tx >= 0 && tx < game.level.columns && ty >= 0 && ty < game.level.rows) {
+          // ドラッグ開始位置を記録
+          game.dragStartX = pos.x;
+          game.dragStartY = pos.y;
+          game.dragStartTileX = tx;
+          game.dragStartTileY = ty;
+          game.isDragging = false;
+
           if (game.level.selectedtile.selected) {
             const dx = Math.abs(tx - game.level.selectedtile.column);
             const dy = Math.abs(ty - game.level.selectedtile.row);
@@ -1039,15 +1166,71 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
     };
 
     const onMouseMove = (e) => {
-      // マウス移動処理（必要に応じて実装）
+      if (!game.drag || game.gamestate !== game.gamestates.ready) return;
+      if (game.dragStartTileX === -1 || game.dragStartTileY === -1) return;
+      if (game.isDragging) return; // 既にスワップ実行済み
+
+      const pos = getMousePos(canvas, e);
+      const DRAG_THRESHOLD = 20; // ドラッグと判定する最小距離（ピクセル）
+
+      const deltaX = pos.x - game.dragStartX;
+      const deltaY = pos.y - game.dragStartY;
+      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+      if (distance >= DRAG_THRESHOLD) {
+        // 方向を判定（より大きい軸を優先）
+        let targetTileX = game.dragStartTileX;
+        let targetTileY = game.dragStartTileY;
+
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+          // 横方向
+          if (deltaX > 0) {
+            targetTileX = game.dragStartTileX + 1; // 右
+          } else {
+            targetTileX = game.dragStartTileX - 1; // 左
+          }
+        } else {
+          // 縦方向
+          if (deltaY > 0) {
+            targetTileY = game.dragStartTileY + 1; // 下
+          } else {
+            targetTileY = game.dragStartTileY - 1; // 上
+          }
+        }
+
+        // 範囲チェック
+        if (targetTileX >= 0 && targetTileX < game.level.columns &&
+            targetTileY >= 0 && targetTileY < game.level.rows) {
+          // スワップ実行
+          game.currentmove = {
+            column1: game.dragStartTileX,
+            row1: game.dragStartTileY,
+            column2: targetTileX,
+            row2: targetTileY
+          };
+          game.level.selectedtile.selected = false;
+          game.gamestate = game.gamestates.resolve;
+          game.animationstate = 2;
+          game.animationtime = 0;
+          game.isDragging = true; // ドラッグスワップ実行済みフラグ
+
+          console.log(`🎮 ドラッグスワップ: (${game.dragStartTileX},${game.dragStartTileY}) → (${targetTileX},${targetTileY})`);
+        }
+      }
     };
 
     const onMouseUp = (e) => {
       game.drag = false;
+      game.isDragging = false;
+      game.dragStartTileX = -1;
+      game.dragStartTileY = -1;
     };
 
     const onMouseOut = (e) => {
       game.drag = false;
+      game.isDragging = false;
+      game.dragStartTileX = -1;
+      game.dragStartTileY = -1;
     };
 
     init();
@@ -1059,16 +1242,88 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
       canvas.removeEventListener('mouseup', onMouseUp);
       canvas.removeEventListener('mouseout', onMouseOut);
     };
-  }, [hypnosisCount]);
+  }, [hypnosisCount, gameKey]);
+
+  // リトライ処理
+  const handleRetry = () => {
+    if (retryCount < 3) {
+      setRetryCount(prev => prev + 1);
+      setShowGameOverDialog(false);
+      gameStateRef.current.gameover = false;
+      gameStateRef.current.cleared = false;
+      setGameKey(prev => prev + 1); // ゲームリセット
+    }
+  };
+
+  // スタートボタンクリック処理
+  const handleStartClick = () => {
+    console.log('🎮 STARTボタンクリック - ゲーム開始！');
+    // カットインを即座に閉じる（これによりタイマーが自動的に開始される）
+    setShowCutin(false);
+  };
 
   return (
     <div className="match3-container">
       <canvas ref={canvasRef} className="match3-canvas" />
+
+      {/* カットイン表示 */}
+      {showCutin && (() => {
+        const game = gameStateRef.current;
+        let cutinImageSrc = null;
+        let cutinImage = null;
+
+        switch (cutinType) {
+          case 'start':
+            cutinImage = game.startCutinImage;
+            cutinImageSrc = '/assets/ui/start.png';
+            break;
+          case 'first':
+            cutinImage = game.cutinImage;
+            cutinImageSrc = '/assets/ui/cutin.png';
+            break;
+          case 'excellent':
+            cutinImage = game.excellentCutinImage;
+            cutinImageSrc = '/assets/ui/excellent.png';
+            break;
+          case 'clearComplete':
+            cutinImage = game.clearCompleteCutinImage;
+            cutinImageSrc = '/assets/ui/clear_complete.png';
+            break;
+          default:
+            return null;
+        }
+
+        // 画像読み込み完了を待たずにオーバーレイを即座に表示
+        return (
+          <div className="cutin-overlay">
+            <div className="cutin-image-wrapper">
+              <img
+                src={cutinImageSrc}
+                alt={`カットイン_${cutinType}`}
+                className={`cutin-image ${cutinType === 'clearComplete' ? 'clear-complete' : ''}`}
+              />
+              {/* スタートカットイン時のみSTARTボタンを画像の中央に表示 */}
+              {cutinType === 'start' && (
+                <button
+                  className="start-button"
+                  onClick={handleStartClick}
+                >
+                  START
+                </button>
+              )}
+            </div>
+          </div>
+        );
+      })()}
+
       {showGameOverDialog && (
         <div className="game-over-dialog">
           <h2>タイムアップ</h2>
-          <p>時間切れです。もう一度挑戦しますか？</p>
-          <button onClick={() => window.location.reload()}>リトライ</button>
+          <p>時間切れです。{retryCount < 3 ? 'もう一度挑戦しますか？' : 'リトライ回数が上限に達しました。'}</p>
+          <p style={{ fontSize: '14px', color: '#aaa' }}>リトライ回数: {retryCount}/3</p>
+          {retryCount < 3 && (
+            <button onClick={handleRetry}>リトライ（残り{3 - retryCount}回）</button>
+          )}
           <button onClick={onGameOver}>タイトルへ</button>
         </div>
       )}
