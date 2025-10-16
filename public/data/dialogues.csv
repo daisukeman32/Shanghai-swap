@@ -8,46 +8,46 @@ airi_6,stage1,protagonist,smirk,制限時間はない...好きなだけ好き放
 airi_7,stage1,protagonist,default,愛莉の秘密も、弱みも、全部探れる,airi_8
 airi_8,stage1,protagonist,dark,後で脅迫すれば、あいつは俺の言いなりだ,airi_9
 airi_9,stage1,protagonist,smirk,まずはこのパズルをクリアしないとな,puzzle_start
-airi_stage2_1,stage2,protagonist,default,うわ、愛莉の体だ...まさか本当に入れ替わるなんて,airi_stage2_2
-airi_stage2_2,stage2,protagonist,dark,愛莉は今、俺の体で意識を失っている,airi_stage2_3
-airi_stage2_3,stage2,protagonist,smirk,つまり、今なら彼女の秘密を全て探れるってことだな,choice_airi_stage2_1
-airi_stage2_4,stage2,protagonist,default,へえ、愛莉の部屋って意外と...おや、この本棚は,airi_stage2_5
-airi_stage2_5,stage2,protagonist,smirk,まさか愛莉が...こんなにドエロいBL本を隠し持ってるなんて,airi_stage2_6
-airi_stage2_6,stage2,protagonist,dark,「淫乱教師の放課後調教」「生徒会長の秘密の欲望」...,airi_stage2_7
-airi_stage2_7,stage2,protagonist,smirk,これは面白い弱み発見だな。後で絶対に使えそうだ,airi_stage2_8
-airi_stage2_8,stage2,protagonist,default,小柄だけど、意外と胸は大きいんだな...,airi_stage2_9
-airi_stage2_9,stage2,protagonist,dark,普段の地味な服装じゃ全然わからなかった,airi_stage2_10
-airi_stage2_10,stage2,protagonist,smirk,触ってみても、彼女には一切記憶が残らない...,airi_stage2_11
-airi_stage2_11,stage2,protagonist,dark,これは楽しめそうだ,airi_stage2_12
-airi_stage2_12,stage2,protagonist,smirk,彼女の秘密も弱みも、全部握ってやる,puzzle_start
-airi_stage3_1,stage3,protagonist,dark,今度は愛莉のBL趣味を利用してみよう,airi_stage3_2
-airi_stage3_2,stage3,protagonist,smirk,彼女が読んでた本の内容を真似すれば...,choice_airi_stage3_1
-airi_stage3_3,stage3,protagonist,default,証拠写真も撮っておこう,airi_stage3_4
-airi_stage3_4,stage3,protagonist,smirk,愛莉の体で恥ずかしいポーズを...,airi_stage3_5
-airi_stage3_5,stage3,protagonist,dark,これがあれば、後で脅すことも可能だ,airi_stage3_6
-airi_stage3_6,stage3,protagonist,default,スマホで完璧に記録した,airi_stage3_7
-airi_stage3_7,stage3,protagonist,smirk,この感覚、体が覚えておけばいい,airi_stage3_8
-airi_stage3_8,stage3,protagonist,dark,俺が愛莉の体の主導権を握ってる,airi_stage3_9
-airi_stage3_9,stage3,protagonist,default,これが本当の意味での「支配」だ,puzzle_start
-airi_stage4_1,stage4,protagonist,smirk,もう要領は掴んだ,airi_stage4_2
-airi_stage4_2,stage4,protagonist,dark,愛莉の体、完全に俺のものって感じだ,choice_airi_stage4_1
-airi_stage4_3,stage4,protagonist,default,今日はもっと過激なことを試してみよう,airi_stage4_4
-airi_stage4_4,stage4,protagonist,smirk,愛莉の隠し引き出しから、こんな道具まで...,airi_stage4_5
-airi_stage4_5,stage4,protagonist,dark,やっぱりBL好きは、こういうグッズも持ってるんだな,airi_stage4_6
-airi_stage4_6,stage4,protagonist,default,せっかくだから、全部使ってみよう,airi_stage4_7
-airi_stage4_7,stage4,protagonist,smirk,愛莉の体、もうすっかり俺色に染まってる,airi_stage4_8
-airi_stage4_8,stage4,protagonist,dark,どんな刺激にも反応するようになった,airi_stage4_9
-airi_stage4_9,stage4,protagonist,default,完全に調教済みの体にしてやった,puzzle_start
+airi_stage2_1,stage2,airi_swap,swap_curious,うわ、愛莉の体だ...まさか本当に入れ替わるなんて,airi_stage2_2
+airi_stage2_2,stage2,airi_swap,swap_dark,愛莉は今、俺の体で意識を失っている,airi_stage2_3
+airi_stage2_3,stage2,airi_swap,swap_smirk,つまり、今なら彼女の秘密を全て探れるってことだな,choice_airi_stage2_1
+airi_stage2_4,stage2,airi_swap,swap_curious,へえ、愛莉の部屋って意外と...おや、この本棚は,airi_stage2_5
+airi_stage2_5,stage2,airi_swap,swap_with_book,まさか愛莉が...こんなにドエロいBL本を隠し持ってるなんて,airi_stage2_6
+airi_stage2_6,stage2,airi_swap,swap_dark,「淫乱教師の放課後調教」「生徒会長の秘密の欲望」...,airi_stage2_7
+airi_stage2_7,stage2,airi_swap,swap_smirk,これは面白い弱み発見だな。後で絶対に使えそうだ,airi_stage2_8
+airi_stage2_8,stage2,airi_swap,swap_touching_chest,小柄だけど、意外と胸は大きいんだな...,airi_stage2_9
+airi_stage2_9,stage2,airi_swap,swap_dark,普段の地味な服装じゃ全然わからなかった,airi_stage2_10
+airi_stage2_10,stage2,airi_swap,swap_touching_chest,触ってみても、彼女には一切記憶が残らない...,airi_stage2_11
+airi_stage2_11,stage2,airi_swap,swap_dark,これは楽しめそうだ,airi_stage2_12
+airi_stage2_12,stage2,airi_swap,swap_smirk,彼女の秘密も弱みも、全部握ってやる,puzzle_start
+airi_stage3_1,stage3,airi_swap,swap_dark,今度は愛莉のBL趣味を利用してみよう,airi_stage3_2
+airi_stage3_2,stage3,airi_swap,swap_smirk,彼女が読んでた本の内容を真似すれば...,choice_airi_stage3_1
+airi_stage3_3,stage3,airi_swap,swap_undressing,証拠写真も撮っておこう,airi_stage3_4
+airi_stage3_4,stage3,airi_swap,swap_embarrassing_pose,愛莉の体で恥ずかしいポーズを...,airi_stage3_5
+airi_stage3_5,stage3,airi_swap,swap_exposed_top,これがあれば、後で脅すことも可能だ,airi_stage3_6
+airi_stage3_6,stage3,airi_swap,swap_exposed_top,スマホで完璧に記録した,airi_stage3_7
+airi_stage3_7,stage3,airi_swap,swap_pleasure_light,この感覚、体が覚えておけばいい,airi_stage3_8
+airi_stage3_8,stage3,airi_swap,swap_dark,俺が愛莉の体の主導権を握ってる,airi_stage3_9
+airi_stage3_9,stage3,airi_swap,swap_smirk,これが本当の意味での「支配」だ,puzzle_start
+airi_stage4_1,stage4,airi_swap,swap_smirk,もう要領は掴んだ,airi_stage4_2
+airi_stage4_2,stage4,airi_swap,swap_dark,愛莉の体、完全に俺のものって感じだ,choice_airi_stage4_1
+airi_stage4_3,stage4,airi_swap,swap_fully_exposed,今日はもっと過激なことを試してみよう,airi_stage4_4
+airi_stage4_4,stage4,airi_swap,swap_toys,愛莉の隠し引き出しから、こんな道具まで...,airi_stage4_5
+airi_stage4_5,stage4,airi_swap,swap_toys,やっぱりBL好きは、こういうグッズも持ってるんだな,airi_stage4_6
+airi_stage4_6,stage4,airi_swap,swap_fully_exposed,せっかくだから、全部使ってみよう,airi_stage4_7
+airi_stage4_7,stage4,airi_swap,swap_pleasure_medium,愛莉の体、もうすっかり俺色に染まってる,airi_stage4_8
+airi_stage4_8,stage4,airi_swap,swap_pleasure_intense,どんな刺激にも反応するようになった,airi_stage4_9
+airi_stage4_9,stage4,airi_swap,swap_climax,完全に調教済みの体にしてやった,puzzle_start
 airi_stage5_1,stage5,airi,shy,最近、なんだか体の調子が...,airi_stage5_2
 airi_stage5_2,stage5,airi,confused,変な夢を見ることが多くて...,airi_stage5_3
 airi_stage5_3,stage5,airi,blush,まるで誰かに触られてるような感覚が...,airi_stage5_4
 airi_stage5_4,stage5,protagonist,smirk,愛莉、明らかに様子がおかしい,choice_airi_stage5_1
 airi_stage5_5,stage5,protagonist,dark,体が覚えてる感覚に困惑してるな,airi_stage5_6
 airi_stage5_6,stage5,protagonist,default,今度は彼女の混乱をもっと楽しもう,airi_stage5_7
-airi_stage5_7,stage5,protagonist,smirk,おお、今日は入れ替わった瞬間から体が敏感になってる,airi_stage5_8
-airi_stage5_8,stage5,protagonist,dark,調教の効果が現れてきたってことか,airi_stage5_9
-airi_stage5_9,stage5,protagonist,default,愛莉の体、完全に俺の思い通りだ,airi_stage5_10
-airi_stage5_10,stage5,protagonist,smirk,現実と夢の境界を曖昧にしてやろう,puzzle_start
+airi_stage5_7,stage5,airi_swap,swap_pleasure_intense,おお、今日は入れ替わった瞬間から体が敏感になってる,airi_stage5_8
+airi_stage5_8,stage5,airi_swap,swap_pleasure_intense,調教の効果が現れてきたってことか,airi_stage5_9
+airi_stage5_9,stage5,airi_swap,swap_climax,愛莉の体、完全に俺の思い通りだ,airi_stage5_10
+airi_stage5_10,stage5,airi_swap,swap_climax,現実と夢の境界を曖昧にしてやろう,puzzle_start
 airi_stage6_1,stage6,protagonist,dark,もう愛莉の体は完全に俺のものだ,airi_stage6_2
 airi_stage6_2,stage6,protagonist,smirk,今度は精神的にも支配してやろう,airi_stage6_3
 airi_stage6_3,stage6,protagonist,default,BL本の秘密も、体の秘密も、全部握ってる,airi_stage6_4
@@ -72,33 +72,33 @@ kaho_5,stage1,protagonist,dark,スポーツバカの夏帆...好き勝手して�
 kaho_6,stage1,protagonist,smirk,アスリート体型を好きに操れるなんて最高だ,kaho_7
 kaho_7,stage1,protagonist,default,弱みを握って、支配してやる,kaho_8
 kaho_8,stage1,protagonist,dark,まずはパズルをクリアしないとな,puzzle_start
-kaho_stage2_1,stage2,protagonist,default,夏帆の体だ...筋肉質で引き締まってる,kaho_stage2_2
-kaho_stage2_2,stage2,protagonist,smirk,愛莉とは全然違うタイプだな,choice_kaho_stage2_1
-kaho_stage2_3,stage2,protagonist,default,おや、このスポーツ理論書...間違いだらけだ,kaho_stage2_4
-kaho_stage2_4,stage2,protagonist,smirk,スポーツバカの夏帆...理論が全部間違ってる,kaho_stage2_5
-kaho_stage2_5,stage2,protagonist,dark,これは使えるぞ,kaho_stage2_6
-kaho_stage2_6,stage2,protagonist,default,運動してるだけあって引き締まってる,kaho_stage2_7
-kaho_stage2_7,stage2,protagonist,smirk,でもDカップは柔らかい...最高だ,kaho_stage2_8
-kaho_stage2_8,stage2,protagonist,dark,この健康的な体、しばらく楽しませてもらおう,puzzle_start
-kaho_stage3_1,stage3,protagonist,smirk,今度はスポーツ理論を悪用してみよう,kaho_stage3_2
-kaho_stage3_2,stage3,protagonist,dark,間違った知識を教えれば...,choice_kaho_stage3_1
-kaho_stage3_3,stage3,protagonist,default,証拠動画も撮影しておこう,kaho_stage3_4
-kaho_stage3_4,stage3,protagonist,smirk,体育用具を使って...これは芸術だな,kaho_stage3_5
-kaho_stage3_5,stage3,protagonist,dark,縄跳びとか使って...完璧な証拠だ,kaho_stage3_6
-kaho_stage3_6,stage3,protagonist,default,夏帆の体で、新しい「トレーニング」を開発してやろう,puzzle_start
-kaho_stage4_1,stage4,protagonist,dark,夏帆の体の特性、完全に理解した,kaho_stage4_2
-kaho_stage4_2,stage4,protagonist,smirk,今度はスポーツ器具を調教に使おう,choice_kaho_stage4_1
-kaho_stage4_3,stage4,protagonist,default,ベンチプレス台、調教台として最適だな,kaho_stage4_4
-kaho_stage4_4,stage4,protagonist,smirk,バランスボールの上で無理な体勢を...,kaho_stage4_5
-kaho_stage4_5,stage4,protagonist,dark,これぞアスリート専用調教だ,kaho_stage4_6
-kaho_stage4_6,stage4,protagonist,default,この引き締まった体...もう病みつきだ,puzzle_start
+kaho_stage2_1,stage2,kaho_swap,swap_curious,夏帆の体だ...筋肉質で引き締まってる,kaho_stage2_2
+kaho_stage2_2,stage2,kaho_swap,swap_smirk,愛莉とは全然違うタイプだな,choice_kaho_stage2_1
+kaho_stage2_3,stage2,kaho_swap,swap_with_book,おや、このスポーツ理論書...間違いだらけだ,kaho_stage2_4
+kaho_stage2_4,stage2,kaho_swap,swap_smirk,スポーツバカの夏帆...理論が全部間違ってる,kaho_stage2_5
+kaho_stage2_5,stage2,kaho_swap,swap_dark,これは使えるぞ,kaho_stage2_6
+kaho_stage2_6,stage2,kaho_swap,swap_sportswear,運動してるだけあって引き締まってる,kaho_stage2_7
+kaho_stage2_7,stage2,kaho_swap,swap_touching_chest,でもDカップは柔らかい...最高だ,kaho_stage2_8
+kaho_stage2_8,stage2,kaho_swap,swap_dark,この健康的な体、しばらく楽しませてもらおう,puzzle_start
+kaho_stage3_1,stage3,kaho_swap,swap_smirk,今度はスポーツ理論を悪用してみよう,kaho_stage3_2
+kaho_stage3_2,stage3,kaho_swap,swap_dark,間違った知識を教えれば...,choice_kaho_stage3_1
+kaho_stage3_3,stage3,kaho_swap,swap_undressing_sportswear,証拠動画も撮影しておこう,kaho_stage3_4
+kaho_stage3_4,stage3,kaho_swap,swap_equipment_pose,体育用具を使って...これは芸術だな,kaho_stage3_5
+kaho_stage3_5,stage3,kaho_swap,swap_equipment_pose,縄跳びとか使って...完璧な証拠だ,kaho_stage3_6
+kaho_stage3_6,stage3,kaho_swap,swap_equipment_pose,夏帆の体で、新しい「トレーニング」を開発してやろう,puzzle_start
+kaho_stage4_1,stage4,kaho_swap,swap_dark,夏帆の体の特性、完全に理解した,kaho_stage4_2
+kaho_stage4_2,stage4,kaho_swap,swap_smirk,今度はスポーツ器具を調教に使おう,choice_kaho_stage4_1
+kaho_stage4_3,stage4,kaho_swap,swap_bench_press,ベンチプレス台、調教台として最適だな,kaho_stage4_4
+kaho_stage4_4,stage4,kaho_swap,swap_bench_press,バランスボールの上で無理な体勢を...,kaho_stage4_5
+kaho_stage4_5,stage4,kaho_swap,swap_pleasure_medium,これぞアスリート専用調教だ,kaho_stage4_6
+kaho_stage4_6,stage4,kaho_swap,swap_pleasure_medium,この引き締まった体...もう病みつきだ,puzzle_start
 kaho_stage5_1,stage5,kaho,confused,最近、トレーニング中に変な感覚が...,kaho_stage5_2
 kaho_stage5_2,stage5,kaho,shy,体のあちこちが、なんだか敏感になってて,kaho_stage5_3
 kaho_stage5_3,stage5,kaho,blush,まるで誰かに触られた記憶があるような...,kaho_stage5_4
 kaho_stage5_4,stage5,protagonist,smirk,夏帆、明らかに体の変化に気づいてる,choice_kaho_stage5_1
 kaho_stage5_5,stage5,protagonist,dark,調教の効果が、日常にも現れ始めたな,kaho_stage5_6
 kaho_stage5_6,stage5,protagonist,default,完全に調教済みの体になったってことだ,kaho_stage5_7
-kaho_stage5_7,stage5,protagonist,smirk,もうすぐ夏帆を完全に支配できる,puzzle_start
+kaho_stage5_7,stage5,kaho_swap,swap_climax,もうすぐ夏帆を完全に支配できる,puzzle_start
 kaho_stage6_1,stage6,protagonist,dark,夏帆の体は完全に俺のものになった,kaho_stage6_2
 kaho_stage6_2,stage6,protagonist,smirk,今度は精神的にも支配してやろう,kaho_stage6_3
 kaho_stage6_3,stage6,protagonist,default,スポーツの知識も、体の秘密も、全部握ってる,kaho_stage6_4
@@ -123,25 +123,25 @@ mitsuki_5,stage1,protagonist,dark,最高難度の美月を、完全に調教し�
 mitsuki_6,stage1,protagonist,smirk,メガネ美女委員長の弱みを握ってやる,mitsuki_7
 mitsuki_7,stage1,protagonist,default,知的美女を俺色に染めてやる,mitsuki_8
 mitsuki_8,stage1,protagonist,dark,まずはパズルをクリアだ,puzzle_start
-mitsuki_stage2_1,stage2,protagonist,default,美月の体...知的で清楚な美貌だ,mitsuki_stage2_2
-mitsuki_stage2_2,stage2,protagonist,smirk,メガネを外すと、こんなに可愛いのか,choice_mitsuki_stage2_1
-mitsuki_stage2_3,stage2,protagonist,default,おや、この学級日誌...本音が書いてある,mitsuki_stage2_4
-mitsuki_stage2_4,stage2,protagonist,smirk,完璧な委員長...でも日誌には弱音が,mitsuki_stage2_5
-mitsuki_stage2_5,stage2,protagonist,dark,これは使える弱みだ,mitsuki_stage2_6
-mitsuki_stage2_6,stage2,protagonist,default,視力が悪いから、メガネなしだと本当に無防備になるんだな,mitsuki_stage2_7
-mitsuki_stage2_7,stage2,protagonist,smirk,この弱点、絶対に活用してやる,puzzle_start
-mitsuki_stage3_1,stage3,protagonist,smirk,美月のメガネ依存を利用しよう,mitsuki_stage3_2
-mitsuki_stage3_2,stage3,protagonist,dark,メガネを人質にすれば...,choice_mitsuki_stage3_1
-mitsuki_stage3_3,stage3,protagonist,default,証拠写真を撮っておこう,mitsuki_stage3_4
-mitsuki_stage3_4,stage3,protagonist,smirk,完璧な委員長の裸体を撮影,mitsuki_stage3_5
-mitsuki_stage3_5,stage3,protagonist,dark,これで権威は崩壊だ,mitsuki_stage3_6
-mitsuki_stage3_6,stage3,protagonist,default,美月は今、俺の調教人形でしかない,puzzle_start
-mitsuki_stage4_1,stage4,protagonist,dark,美月の体の特性、完全にマスターした,mitsuki_stage4_2
-mitsuki_stage4_2,stage4,protagonist,smirk,生徒会室の備品、全部調教に使おう,choice_mitsuki_stage4_1
-mitsuki_stage4_3,stage4,protagonist,default,定規、コンパス、ファイル...どれも別の用途に転用可能だ,mitsuki_stage4_4
-mitsuki_stage4_4,stage4,protagonist,smirk,美月のメガネ、調教の重要アイテムだな,mitsuki_stage4_5
-mitsuki_stage4_5,stage4,protagonist,dark,かけたり外したりを繰り返して、完全に支配してやる,mitsuki_stage4_6
-mitsuki_stage4_6,stage4,protagonist,default,知的美女の理性と、調教された体の反応のギャップを楽しもう,puzzle_start
+mitsuki_stage2_1,stage2,mitsuki_swap,swap_curious,美月の体...知的で清楚な美貌だ,mitsuki_stage2_2
+mitsuki_stage2_2,stage2,mitsuki_swap,swap_no_glasses,メガネを外すと、こんなに可愛いのか,choice_mitsuki_stage2_1
+mitsuki_stage2_3,stage2,mitsuki_swap,swap_with_diary,おや、この学級日誌...本音が書いてある,mitsuki_stage2_4
+mitsuki_stage2_4,stage2,mitsuki_swap,swap_smirk,完璧な委員長...でも日誌には弱音が,mitsuki_stage2_5
+mitsuki_stage2_5,stage2,mitsuki_swap,swap_dark,これは使える弱みだ,mitsuki_stage2_6
+mitsuki_stage2_6,stage2,mitsuki_swap,swap_no_glasses,視力が悪いから、メガネなしだと本当に無防備になるんだな,mitsuki_stage2_7
+mitsuki_stage2_7,stage2,mitsuki_swap,swap_smirk,この弱点、絶対に活用してやる,puzzle_start
+mitsuki_stage3_1,stage3,mitsuki_swap,swap_smirk,美月のメガネ依存を利用しよう,mitsuki_stage3_2
+mitsuki_stage3_2,stage3,mitsuki_swap,swap_dark,メガネを人質にすれば...,choice_mitsuki_stage3_1
+mitsuki_stage3_3,stage3,mitsuki_swap,swap_undressing_no_glasses,証拠写真を撮っておこう,mitsuki_stage3_4
+mitsuki_stage3_4,stage3,mitsuki_swap,swap_exposed_no_glasses,完璧な委員長の裸体を撮影,mitsuki_stage3_5
+mitsuki_stage3_5,stage3,mitsuki_swap,swap_exposed_no_glasses,これで権威は崩壊だ,mitsuki_stage3_6
+mitsuki_stage3_6,stage3,mitsuki_swap,swap_dark,美月は今、俺の調教人形でしかない,puzzle_start
+mitsuki_stage4_1,stage4,mitsuki_swap,swap_dark,美月の体の特性、完全にマスターした,mitsuki_stage4_2
+mitsuki_stage4_2,stage4,mitsuki_swap,swap_smirk,生徒会室の備品、全部調教に使おう,choice_mitsuki_stage4_1
+mitsuki_stage4_3,stage4,mitsuki_swap,swap_with_stationary,定規、コンパス、ファイル...どれも別の用途に転用可能だ,mitsuki_stage4_4
+mitsuki_stage4_4,stage4,mitsuki_swap,swap_glasses_control,美月のメガネ、調教の重要アイテムだな,mitsuki_stage4_5
+mitsuki_stage4_5,stage4,mitsuki_swap,swap_pleasure_medium,かけたり外したりを繰り返して、完全に支配してやる,mitsuki_stage4_6
+mitsuki_stage4_6,stage4,mitsuki_swap,swap_pleasure_medium,知的美女の理性と、調教された体の反応のギャップを楽しもう,puzzle_start
 mitsuki_stage5_1,stage5,mitsuki,confused,最近、なぜか体の調子が...,mitsuki_stage5_2
 mitsuki_stage5_2,stage5,mitsuki,shy,メガネをかけていても、なんだかぼんやりすることが多くて,mitsuki_stage5_3
 mitsuki_stage5_3,stage5,mitsuki,blush,まるで誰かに見られているような、妙な感覚が...,mitsuki_stage5_4
@@ -149,7 +149,7 @@ mitsuki_stage5_4,stage5,mitsuki,serious,委員長として、こんな状態で�
 mitsuki_stage5_5,stage5,protagonist,smirk,美月、明らかに普段と様子が違う,choice_mitsuki_stage5_1
 mitsuki_stage5_6,stage5,protagonist,dark,調教の効果が、日常生活にも影響し始めた,mitsuki_stage5_7
 mitsuki_stage5_7,stage5,protagonist,default,完全に調教済みの体に改造完了ってことか,mitsuki_stage5_8
-mitsuki_stage5_8,stage5,protagonist,smirk,もうすぐ美月を完全に支配できる,puzzle_start
+mitsuki_stage5_8,stage5,mitsuki_swap,swap_climax,もうすぐ美月を完全に支配できる,puzzle_start
 mitsuki_stage6_1,stage6,protagonist,dark,美月のプライドの源泉、全部特定した,mitsuki_stage6_2
 mitsuki_stage6_2,stage6,protagonist,smirk,委員長としての権威、知的美女としての自信、メガネへの依存,mitsuki_stage6_3
 mitsuki_stage6_3,stage6,protagonist,default,これら全てを利用して、完全に屈服させてやる,mitsuki_stage6_4
@@ -174,18 +174,18 @@ misaki_4,stage1,protagonist,dark,いつも俺をキモイって顔で見てく�
 misaki_5,stage1,protagonist,smirk,美咲も同じように支配してやる,misaki_6
 misaki_6,stage1,protagonist,default,俺はもう無敵だ...誰も止められない,misaki_7
 misaki_7,stage1,protagonist,dark,パズルをクリアして、美咲の体を奪ってやる,puzzle_start
-misaki_stage2_1,stage2,protagonist,smirk,ついに美咲の体に入れ替わった,misaki_stage2_2
-misaki_stage2_2,stage2,protagonist,dark,あれ？なんか他の3人と違う,choice_misaki_stage2_1
-misaki_stage2_3,stage2,protagonist,confused,体の反応が全然違う...スレてる？,misaki_stage2_4
-misaki_stage2_4,stage2,protagonist,default,おかしいな...他の3人はすぐ反応したのに,misaki_stage2_5
-misaki_stage2_5,stage2,protagonist,dark,美咲の体、なんか抜け殻みたいだ,misaki_stage2_6
-misaki_stage2_6,stage2,protagonist,smirk,まさか、こんなギャルに手こずらされるわけないだろう,puzzle_start
-misaki_stage3_1,stage3,protagonist,dark,美咲の体、予想以上に手強い,misaki_stage3_2
-misaki_stage3_2,stage3,protagonist,smirk,でも、だからこそ燃えるんだ,choice_misaki_stage3_1
-misaki_stage3_3,stage3,protagonist,default,今までの集大成を全てぶち込んで、必ず屈服させてやる,misaki_stage3_4
-misaki_stage3_4,stage3,protagonist,confused,あれ？全然効果がない...,misaki_stage3_5
-misaki_stage3_5,stage3,protagonist,dark,おかしい...おかしいぞこれは,misaki_stage3_6
-misaki_stage3_6,stage3,protagonist,default,まさか、入れ替わりがバレてる？,puzzle_start
+misaki_stage2_1,stage2,misaki_swap,swap_curious,ついに美咲の体に入れ替わった,misaki_stage2_2
+misaki_stage2_2,stage2,misaki_swap,swap_dark,あれ？なんか他の3人と違う,choice_misaki_stage2_1
+misaki_stage2_3,stage2,misaki_swap,swap_confused,体の反応が全然違う...スレてる？,misaki_stage2_4
+misaki_stage2_4,stage2,misaki_swap,swap_confused,おかしいな...他の3人はすぐ反応したのに,misaki_stage2_5
+misaki_stage2_5,stage2,misaki_swap,swap_dark,美咲の体、なんか抜け殻みたいだ,misaki_stage2_6
+misaki_stage2_6,stage2,misaki_swap,swap_dark,まさか、こんなギャルに手こずらされるわけないだろう,puzzle_start
+misaki_stage3_1,stage3,misaki_swap,swap_dark,美咲の体、予想以上に手強い,misaki_stage3_2
+misaki_stage3_2,stage3,misaki_swap,swap_smirk,でも、だからこそ燃えるんだ,choice_misaki_stage3_1
+misaki_stage3_3,stage3,misaki_swap,swap_desperate_attempt,今までの集大成を全てぶち込んで、必ず屈服させてやる,misaki_stage3_4
+misaki_stage3_4,stage3,misaki_swap,swap_failing,あれ？全然効果がない...,misaki_stage3_5
+misaki_stage3_5,stage3,misaki_swap,swap_failing,おかしい...おかしいぞこれは,misaki_stage3_6
+misaki_stage3_6,stage3,misaki_swap,swap_failing,まさか、入れ替わりがバレてる？,puzzle_start
 misaki_stage4_1,stage4,misaki,creepy,ねぇ、陰キャくん,misaki_stage4_2
 misaki_stage4_2,stage4,misaki,dark,私の体で、何してたの？,misaki_stage4_3
 misaki_stage4_3,stage4,misaki,mocking,あ、もしかして愛莉ちゃんや夏帆ちゃん、美月ちゃんにも同じことしたの？,misaki_stage4_4
@@ -199,42 +199,42 @@ misaki_stage4_10,stage4,misaki,dark,最近この辺りで人がいなくなっ�
 misaki_stage4_11,stage4,misaki,creepy,不思議よね〜何人も...どこに消えたんでしょうね,misaki_stage4_12
 misaki_stage4_12,stage4,misaki,cruel,あなたみたいな陰キャで、女の子を狙うタイプ...私、そういうの見つけるの得意なの,misaki_stage4_13
 misaki_stage4_13,stage4,misaki,dark,さぁ、最後の「遊び」を始めましょうか〜,misaki_stage4_14
-misaki_stage4_14,stage4,protagonist,terrified,いやっ...やめて！お願い...！,puzzle_start
+misaki_stage4_14,stage4,misaki_swap,swap_desperate,いやっ...やめて！お願い...！,puzzle_start
 misaki_stage4_15,stage4,misaki,creepy,あなたが他の子にしたこと、今度は私がやってあげる,misaki_stage4_16
 misaki_stage4_16,stage4,misaki,sinister,でもね、私は「あなたの体」を使うの,misaki_stage4_17
-misaki_stage4_17,stage4,protagonist,shocked,え...？まさか...,misaki_stage4_18
+misaki_stage4_17,stage4,misaki_swap,swap_desperate,え...？まさか...,misaki_stage4_18
 misaki_stage4_18,stage4,misaki,cruel,そう、私が今「男の体」で、あなたが「女の体」,misaki_stage4_19
 misaki_stage4_19,stage4,misaki,dark,つまり...あなたは自分の体に犯されるってこと〜,misaki_stage4_20
-misaki_stage4_20,stage4,protagonist,desperate,やだっ...やめて！来ないで！,misaki_stage4_21
+misaki_stage4_20,stage4,misaki_swap,swap_desperate,やだっ...やめて！来ないで！,misaki_stage4_21
 misaki_stage4_21,stage4,misaki,creepy,さぁ、愛莉ちゃん達にしたように...たっぷり可愛がってあげる,misaki_stage4_22
 misaki_stage4_22,stage4,narrator,dark,美咲は主人公の体を使って、容赦なく襲いかかってきた,misaki_stage4_23
-misaki_stage4_23,stage4,protagonist,panicked,いっ痛い！！やめてぇ...！,misaki_stage4_24
+misaki_stage4_23,stage4,misaki_swap,swap_violated,いっ痛い！！やめてぇ...！,misaki_stage4_24
 misaki_stage4_24,stage4,misaki,cruel,あら、痛い？でも、これからもっと痛くなるわよ,misaki_stage4_25
-misaki_stage4_25,stage4,protagonist,screaming,ひゃぁっ！！すごく痛い！！やめて！！,misaki_stage4_26
-misaki_stage4_26,stage4,protagonist,crying,子宮が...子宮が壊れる...！,misaki_stage4_27
+misaki_stage4_25,stage4,misaki_swap,swap_pain,ひゃぁっ！！すごく痛い！！やめて！！,misaki_stage4_26
+misaki_stage4_26,stage4,misaki_swap,swap_pain,子宮が...子宮が壊れる...！,misaki_stage4_27
 misaki_stage4_27,stage4,misaki,mocking,壊れそう？でも、感じてるんでしょ？,misaki_stage4_28
-misaki_stage4_28,stage4,protagonist,desperate,くっ...見ないで...！こんな顔...！,misaki_stage4_29
+misaki_stage4_28,stage4,misaki_swap,swap_desperate,くっ...見ないで...！こんな顔...！,misaki_stage4_29
 misaki_stage4_29,stage4,misaki,dark,あら、恥ずかしいの？でも、もっと見せてあげる,misaki_stage4_30
-misaki_stage4_30,stage4,protagonist,panicked,やめ...あ、ああっ...も、漏れる...！,misaki_stage4_31
+misaki_stage4_30,stage4,misaki_swap,swap_climax_forced,やめ...あ、ああっ...も、漏れる...！,misaki_stage4_31
 misaki_stage4_31,stage4,misaki,cruel,何が漏れるの？言ってみて〜,misaki_stage4_32
-misaki_stage4_32,stage4,protagonist,crying,お、おしっこが...漏れる...！,misaki_stage4_33
+misaki_stage4_32,stage4,misaki_swap,swap_desperate,お、おしっこが...漏れる...！,misaki_stage4_33
 misaki_stage4_33,stage4,misaki,sinister,あははっ！女の体って最高ね〜,misaki_stage4_34
-misaki_stage4_34,stage4,protagonist,moaning,だめ...頭がおかしく...なる...！,misaki_stage4_35
+misaki_stage4_34,stage4,misaki_swap,swap_climax_forced,だめ...頭がおかしく...なる...！,misaki_stage4_35
 misaki_stage4_35,stage4,misaki,cruel,まだまだよ〜もっとイカせてあげる,misaki_stage4_36
-misaki_stage4_36,stage4,protagonist,climax,あ、ああああっ...！！イクっ...！,misaki_stage4_37
+misaki_stage4_36,stage4,misaki_swap,swap_climax_forced,あ、ああああっ...！！イクっ...！,misaki_stage4_37
 misaki_stage4_37,stage4,narrator,dark,主人公は一度目の絶頂を迎えた,misaki_stage4_38
 misaki_stage4_38,stage4,misaki,mocking,あら、もう終わり？まだまだこれからよ,misaki_stage4_39
-misaki_stage4_39,stage4,protagonist,exhausted,も、もう無理...許して...,misaki_stage4_40
+misaki_stage4_39,stage4,misaki_swap,swap_desperate,も、もう無理...許して...,misaki_stage4_40
 misaki_stage4_40,stage4,misaki,cruel,無理？でも、あなたが調教した体なんだから,misaki_stage4_41
 misaki_stage4_41,stage4,narrator,dark,美咲は容赦なく、何度も何度も主人公をイカせ続けた,misaki_stage4_42
-misaki_stage4_42,stage4,protagonist,broken,あひっ...あひゃ...もう...やだ...！,misaki_stage4_43
-misaki_stage4_43,stage4,protagonist,insane,気が...狂う...！もう...何も...！,misaki_stage4_44
+misaki_stage4_42,stage4,misaki_swap,swap_ahegao,あひっ...あひゃ...もう...やだ...！,misaki_stage4_43
+misaki_stage4_43,stage4,misaki_swap,swap_broken,気が...狂う...！もう...何も...！,misaki_stage4_44
 misaki_stage4_44,stage4,misaki,sinister,いい顔してるわ〜完全にイッちゃってる,misaki_stage4_45
-misaki_stage4_45,stage4,protagonist,ahegao,あひゃぁぁ...またイクっ...！！,misaki_stage4_46
+misaki_stage4_45,stage4,misaki_swap,swap_ahegao,あひゃぁぁ...またイクっ...！！,misaki_stage4_46
 misaki_stage4_46,stage4,narrator,dark,何度目かの絶頂を迎えた瞬間、体が光に包まれた,misaki_stage4_47
 misaki_stage4_47,stage4,protagonist,shocked,え...？体が...元に...？,misaki_stage4_48
 misaki_stage4_48,stage4,misaki,creepy,あら、やっと戻ったわね〜,misaki_stage4_49
-misaki_stage4_49,stage4,protagonist,ahegao,あ...ひ...あへぇ...,misaki_stage4_50
+misaki_stage4_49,stage4,misaki_swap,swap_ahegao,あ...ひ...あへぇ...,misaki_stage4_50
 misaki_stage4_50,stage4,protagonist,terrified,美咲...お前...元の体に...！,misaki_stage4_51
 misaki_stage4_51,stage4,misaki,sinister,そうよ。スワップは「絶頂と同時に解除」されるの,misaki_stage4_52
 misaki_stage4_52,stage4,misaki,dark,私はずっと知ってた...だから最後まで我慢してたの,misaki_stage4_53
@@ -242,10 +242,10 @@ misaki_stage4_53,stage4,protagonist,desperate,ま、まさか...わざと...！�
 misaki_stage4_54,stage4,misaki,cruel,ええ。最高のタイミングでしょ？,misaki_stage4_55
 misaki_stage4_55,stage4,misaki,creepy,さぁ、本当の「最後」を迎えましょう,misaki_stage4_56
 misaki_stage4_56,stage4,narrator,dark,美咲の手が、主人公の首に伸びた,misaki_stage4_57
-misaki_stage4_57,stage4,protagonist,choking,がっ...ぐぅ...！,misaki_stage4_58
+misaki_stage4_57,stage4,misaki_swap,swap_broken,がっ...ぐぅ...！,misaki_stage4_58
 misaki_stage4_58,stage4,misaki,sinister,ねぇ、苦しい？でも、これで終わりよ,misaki_stage4_59
 misaki_stage4_59,stage4,narrator,dark,主人公の顔はアヘ顔のまま歪んでいた,misaki_stage4_60
-misaki_stage4_60,stage4,protagonist,dying,あ...愛莉...夏帆...美月...ごめん...,misaki_stage4_61
+misaki_stage4_60,stage4,misaki_swap,swap_ahegao_dying,あ...愛莉...夏帆...美月...ごめん...,misaki_stage4_61
 misaki_stage4_61,stage4,misaki,dark,謝っても遅いわよ〜バイバイ、陰キャくん,misaki_stage4_62
 misaki_stage4_62,stage4,narrator,dark,主人公の視界が暗くなり、意識が途切れた,misaki_stage4_63
 misaki_stage4_63,stage4,narrator,dark,調子に乗った男は、アヘ顔のまま命を落とした,misaki_stage4_64

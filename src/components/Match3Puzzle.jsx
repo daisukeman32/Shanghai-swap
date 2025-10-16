@@ -7,7 +7,12 @@ import './Match3Puzzle.css';
  * Customized for: Shanghai-swap game
  */
 
-function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'airi' }) {
+// 🎨 背景画像選択（ABテスト用）
+// 'キャラ背景1.png' - カラフルで派手、強い催眠効果
+// 'キャラ背景2.png' - 青～ピンク系、落ち着いた色合い、キャラクターが見やすい
+const CHARACTER_BG = 'キャラ背景2.png'; // ← ここを変更するだけで背景切り替え可能
+
+function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'airi', saveData, updateSaveData, onResetToStage1 }) {
   const canvasRef = useRef(null);
 
   // バトル用ステート
@@ -16,38 +21,41 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
   const [playerMaxHP] = useState(100);
   const [enemyMaxHP, setEnemyMaxHP] = useState(80);
   const [defenseBonus, setDefenseBonus] = useState(0); // 防御バフ（%）
-  const [ultimateGauge, setUltimateGauge] = useState(0); // 必殺技ゲージ（0-100）
+  const [defenseTurns, setDefenseTurns] = useState(0); // 防御持続ターン数
+  const [playerUltimateGauge, setPlayerUltimateGauge] = useState(0); // プレイヤー必殺技ゲージ（0-100）
+  const [enemyUltimateGauge, setEnemyUltimateGauge] = useState(0); // 敵必殺技ゲージ（0-100）
   const [turnCount, setTurnCount] = useState(0);
   const [battleLog, setBattleLog] = useState([]);
+  const [showGameOverDialog, setShowGameOverDialog] = useState(false); // ゲームオーバーダイアログ表示
 
   const gameStateRef = useRef({
     level: {
-      x: 62,
-      y: 265,
-      columns: 5,
+      x: 47,  // 左右バランス良く配置
+      y: 360,  // 200 → 360 (立ち絵エリア160px追加)
+      columns: 7,
       rows: 5,
-      tilewidth: 85,
-      tileheight: 85,
+      tilewidth: 65,  // 少し小さめ: 65px × 7 = 455px
+      tileheight: 65,  // 正方形に
       tiles: [],
       selectedtile: { selected: false, column: 0, row: 0 }
     },
     tilecolors: [
-      [255, 60, 60],    // 🔴 赤（攻撃）
-      [60, 140, 255],   // 🔵 青（防御）
-      [60, 220, 100],   // 🟢 緑（回復）
-      [255, 220, 60],   // 🟡 黄（スキル）
-      [240, 240, 240]   // ⚪ 白（必殺技）
+      [255, 140, 80],   // 👊 オレンジ（パンチ・攻撃）
+      [100, 180, 255],  // 📱 青（スマホ・防御）
+      [255, 100, 150],  // ❤️ ピンク（ハート・回復）
+      [255, 68, 68]     // 💣 赤（爆弾・お邪魔）
     ],
     characters: [
-      { name: '攻撃', initial: '⚔', description: '相手にダメージ' },
-      { name: '防御', initial: '🛡', description: '防御バフ' },
-      { name: '回復', initial: '❤', description: 'HP回復' },
-      { name: 'スキル', initial: '⚡', description: 'コンボ倍率UP' },
-      { name: '必殺技', initial: '★', description: '必殺技ゲージ' }
+      { name: '攻撃', initial: '👊', description: '相手にダメージ' },
+      { name: '防御', initial: '🛡️', description: '防御バフ' },
+      { name: '回復', initial: '❤️', description: 'HP回復' },
+      { name: 'お邪魔', initial: '💣', description: '自分にダメージ' }
     ],
     clusters: [],
     moves: [],
     currentmove: { column1: 0, row1: 0, column2: 0, row2: 0 },
+    lastSwappedTile: { column: -1, row: -1 }, // 最後にスワップで動かしたタイルの位置
+    lastSwapDirection: 'horizontal', // 最後のスワップ方向 ('horizontal' or 'vertical')
     gamestates: { init: 0, ready: 1, resolve: 2, enemyTurn: 3 },
     gamestate: 0,
     playerHP: 100,
@@ -55,15 +63,17 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
     enemyHP: 80,
     enemyMaxHP: 80,
     defenseBonus: 0,
-    ultimateGauge: 0,
+    defenseTurns: 0,
+    playerUltimateGauge: 0,
+    enemyUltimateGauge: 0,
     turnCount: 0,
-    comboMultiplier: 1.0,
     animationstate: 0,
     animationtime: 0,
-    animationtimetotal: 0.3,
+    animationtimetotal: 0.3,  // 0.6秒 → 0.3秒（2倍速）
     drag: false,
     gameover: false,
     cleared: false,
+    isShuffling: false,
     particles: [],
     specialEffects: [],
     screenShake: { active: false, intensity: 0, duration: 0 },
@@ -71,39 +81,124 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
     // キャラクター画像
     playerImage: null,
     enemyImage: null,
-    imagesLoaded: false
+    characterBgImage: null, // キャラ背景画像
+    imagesLoaded: false,
+    // タイルアイコン画像
+    tileImages: {
+      attack: null,
+      defense: null,
+      heal: null,
+      trap: null,
+      orb: null,
+      vertical: null,
+      horizontal: null
+    },
+    tileImagesLoaded: false
   });
 
-  // キャラクター画像の読み込み
+  // キャラクター画像とタイルアイコン画像の読み込み
   useEffect(() => {
     const game = gameStateRef.current;
+    let loadedCount = 0;
+    const totalImages = 10; // 主人公 + 相手キャラ + キャラ背景 + タイル7種
 
-    // 主人公の画像
+    // 主人公の画像（500×500の正方形画像）
     const playerImg = new Image();
-    playerImg.src = '/assets/characters/protagonist/protagonist_default.png';
+    playerImg.src = '/assets/characters/player_portrait.png';
     playerImg.onload = () => {
       game.playerImage = playerImg;
+      loadedCount++;
       checkImagesLoaded();
     };
     playerImg.onerror = () => {
-      console.warn('主人公画像の読み込み失敗');
-      checkImagesLoaded();
+      // フォールバック: protagonist フォルダの画像を試す
+      console.warn('主人公 player_portrait 画像がないため protagonist にフォールバック');
+      const fallbackImg = new Image();
+      fallbackImg.src = '/assets/characters/protagonist/protagonist_default.png';
+      fallbackImg.onload = () => {
+        game.playerImage = fallbackImg;
+        loadedCount++;
+        checkImagesLoaded();
+      };
+      fallbackImg.onerror = () => {
+        console.warn('主人公画像の読み込み失敗');
+        loadedCount++;
+        checkImagesLoaded();
+      };
     };
 
-    // 相手キャラの画像
+    // 相手キャラの画像（battle.png を優先、なければ portrait.png）
     const enemyImg = new Image();
-    enemyImg.src = `/assets/characters/${selectedCharacter}/${selectedCharacter}_default.png`;
+    enemyImg.src = `/assets/characters/${selectedCharacter}/${selectedCharacter}_battle.png`;
     enemyImg.onload = () => {
       game.enemyImage = enemyImg;
+      loadedCount++;
       checkImagesLoaded();
     };
     enemyImg.onerror = () => {
-      console.warn('相手キャラ画像の読み込み失敗');
+      // battle.png がない場合は portrait.png にフォールバック
+      console.warn('相手キャラ battle 画像がないため portrait にフォールバック');
+      const fallbackImg = new Image();
+      fallbackImg.src = `/assets/characters/${selectedCharacter}/${selectedCharacter}_portrait.png`;
+      fallbackImg.onload = () => {
+        game.enemyImage = fallbackImg;
+        loadedCount++;
+        checkImagesLoaded();
+      };
+      fallbackImg.onerror = () => {
+        console.warn('相手キャラ portrait 画像の読み込みも失敗');
+        loadedCount++;
+        checkImagesLoaded();
+      };
+    };
+
+    // キャラ背景画像の読み込み（ABテスト対応）
+    const characterBgImg = new Image();
+    characterBgImg.src = `/assets/ui/${CHARACTER_BG}`;
+    characterBgImg.onload = () => {
+      game.characterBgImage = characterBgImg;
+      loadedCount++;
+      checkImagesLoaded();
+      console.log(`✅ キャラ背景読み込み: ${CHARACTER_BG}`);
+    };
+    characterBgImg.onerror = () => {
+      console.warn(`キャラ背景画像の読み込み失敗: ${CHARACTER_BG}`);
+      loadedCount++;
       checkImagesLoaded();
     };
 
+    // タイルアイコン画像の読み込み
+    const tileImagePaths = {
+      attack: '/assets/tiles/attack.png',
+      defense: '/assets/tiles/defense.png',
+      heal: '/assets/tiles/heal.png',
+      trap: '/assets/tiles/trap.png',
+      orb: '/assets/tiles/orb.png',
+      vertical: '/assets/tiles/vertical.png',
+      horizontal: '/assets/tiles/horizontal.png'
+    };
+
+    Object.keys(tileImagePaths).forEach(key => {
+      const img = new Image();
+      img.src = tileImagePaths[key];
+      img.onload = () => {
+        game.tileImages[key] = img;
+        loadedCount++;
+        checkImagesLoaded();
+      };
+      img.onerror = () => {
+        console.warn(`タイル画像の読み込み失敗: ${key}`);
+        loadedCount++;
+        checkImagesLoaded();
+      };
+    });
+
     function checkImagesLoaded() {
-      game.imagesLoaded = true;
+      if (loadedCount >= totalImages) {
+        game.imagesLoaded = true;
+        game.tileImagesLoaded = true;
+        console.log('全ての画像読み込み完了');
+      }
     }
   }, [selectedCharacter]);
 
@@ -155,7 +250,7 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
       for (let i = 0; i < game.level.columns; i++) {
         game.level.tiles[i] = [];
         for (let j = 0; j < game.level.rows; j++) {
-          game.level.tiles[i][j] = { type: 0, shift: 0, special: null };
+          game.level.tiles[i][j] = { type: 0, shift: 0, special: null, specialDirection: null };
         }
       }
 
@@ -195,10 +290,18 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
         return p.life > 0;
       });
 
-      // 特殊エフェクト更新
+      // 特殊エフェクト更新（終了時にコールバック実行）
       game.specialEffects = game.specialEffects.filter(e => {
         e.time += dt;
-        return e.time < e.duration;
+        const isFinished = e.time >= e.duration;
+
+        // エフェクト終了時に遅延実行アクションを実行
+        if (isFinished && e.onComplete && !e.completedExecuted) {
+          e.completedExecuted = true;
+          e.onComplete();
+        }
+
+        return !isFinished;
       });
 
       // 画面揺れ更新
@@ -210,10 +313,33 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
       }
 
       if (game.gamestate === game.gamestates.ready) {
+        // 手詰まりチェック
+        if (game.moves.length === 0 && !game.isShuffling) {
+          game.isShuffling = true;
+          console.log('⚠ 手詰まり検出！シャッフルします...');
+
+          // 10%ダメージ（半減調整）
+          const deadlockDamage = Math.floor(game.playerMaxHP * 0.1);
+          game.playerHP = Math.max(0, game.playerHP - deadlockDamage);
+          setPlayerHP(game.playerHP);
+          console.log(`💀 手詰まりペナルティ: ${deadlockDamage}ダメージ！`);
+
+          // 画面揺れ
+          game.screenShake.active = true;
+          game.screenShake.intensity = 15;
+          game.screenShake.duration = 0.5;
+
+          // シャッフル実行（少し遅延）
+          setTimeout(() => {
+            reshuffleBoard();
+            game.isShuffling = false;
+          }, 600);
+        }
+
         // ゲームオーバーチェック（プレイヤーHP0以下）
         if (game.playerHP <= 0 && !game.gameover) {
           game.gameover = true;
-          setTimeout(() => onGameOver(), 2000);
+          setTimeout(() => setShowGameOverDialog(true), 1500);
         }
 
         // クリアチェック（相手HP0以下）
@@ -300,102 +426,163 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
       // 論理サイズ（表示サイズ）
       const logicalWidth = 550;
       const logicalHeight = 700;
-      const headerHeight = 245; // 35%
+      const headerHeight = 175; // ヘッダー高さ縮小（ステータスゲージを少し上に）
 
       // 背景（ダークテーマ）
       ctx.fillStyle = '#1a0a0a';
       ctx.fillRect(0, 0, logicalWidth, logicalHeight);
 
-      // ヘッダー（35%）
+      // ヘッダー
       ctx.fillStyle = '#2d1b1b';
       ctx.fillRect(0, 0, logicalWidth, headerHeight);
 
-      // タイトル（中央上部）
-      ctx.fillStyle = '#DC143C';
-      ctx.font = 'bold 22px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('スワップバトル', logicalWidth / 2, 25);
-      ctx.textAlign = 'left';
-
-      // 色説明（タイトル下）
-      ctx.font = '11px sans-serif';
-      const legendY = 50;
-      const legendSpacing = 55;
-      ctx.fillStyle = '#ff4444';
-      ctx.textAlign = 'center';
-      ctx.fillText('⚔攻撃', logicalWidth / 2 - legendSpacing * 2, legendY);
-      ctx.fillStyle = '#44aaff';
-      ctx.fillText('🛡防御', logicalWidth / 2 - legendSpacing, legendY);
-      ctx.fillStyle = '#44ff88';
-      ctx.fillText('❤回復', logicalWidth / 2, legendY);
-      ctx.fillStyle = '#ffdd44';
-      ctx.fillText('⚡技', logicalWidth / 2 + legendSpacing, legendY);
-      ctx.fillStyle = '#eeeeee';
-      ctx.fillText('★必殺', logicalWidth / 2 + legendSpacing * 2, legendY);
-      ctx.textAlign = 'left';
-
       // 【左側】相手キャラクター表示
-      const enemyPortraitX = 60;
-      const enemyPortraitY = 105;
+      const enemyPortraitX = 70;
+      const enemyPortraitY = 115;
       const portraitRadius = 40;
 
       drawCharacterPortrait(ctx, enemyPortraitX, enemyPortraitY, portraitRadius, game.enemyImage, '#ff4444', '相手');
 
       ctx.fillStyle = '#ffffff';
       ctx.font = 'bold 16px sans-serif';
-      ctx.fillText('相手', 110, 80);
+      ctx.fillText('相手', 120, 85);
 
-      // 相手HPバー（横長）
-      drawHPBar(ctx, 110, 95, 180, 20, game.enemyHP, game.enemyMaxHP, '#ff4444');
+      // 相手HPバー
+      drawHPBar(ctx, 120, 100, 150, 18, game.enemyHP, game.enemyMaxHP, '#ff4444');
+
+      // 相手必殺技ゲージ
+      ctx.fillStyle = '#ffdd44';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillText('★必殺', 120, 135);
+      drawGaugeBar(ctx, 120, 140, 150, 16, game.enemyUltimateGauge, 100, '#ffdd44');
 
       // 【右側】プレイヤーキャラクター表示
-      const playerPortraitX = logicalWidth - 60;
-      const playerPortraitY = 105;
+      const playerPortraitX = logicalWidth - 70;
+      const playerPortraitY = 115;
+
+      drawCharacterPortrait(ctx, playerPortraitX, playerPortraitY, portraitRadius, game.playerImage, '#44ff44', 'あなた');
 
       ctx.fillStyle = '#ffffff';
       ctx.font = 'bold 16px sans-serif';
       ctx.textAlign = 'right';
-      ctx.fillText('あなた', logicalWidth - 110, 80);
+      ctx.fillText('あなた', logicalWidth - 120, 85);
       ctx.textAlign = 'left';
 
-      // プレイヤーHPバー（横長）
-      drawHPBar(ctx, logicalWidth - 290, 95, 180, 20, game.playerHP, game.playerMaxHP, '#44ff44');
+      // プレイヤーHPバー
+      drawHPBar(ctx, logicalWidth - 270, 100, 150, 18, game.playerHP, game.playerMaxHP, '#44ff44');
 
-      drawCharacterPortrait(ctx, playerPortraitX, playerPortraitY, portraitRadius, game.playerImage, '#44ff44', 'あなた');
-
-      // 【中央】ターン表示
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 18px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(`TURN ${game.turnCount}`, logicalWidth / 2, 105);
-      ctx.textAlign = 'left';
-
-      // 【下部】必殺技ゲージ（中央大きく）
-      const gaugeX = logicalWidth / 2 - 120;
-      const gaugeY = 150;
+      // プレイヤー必殺技ゲージ
       ctx.fillStyle = '#ffdd44';
-      ctx.font = 'bold 14px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('必殺技ゲージ', logicalWidth / 2, gaugeY - 5);
+      ctx.font = 'bold 12px sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText('★必殺', logicalWidth - 120, 135);
       ctx.textAlign = 'left';
-      drawGaugeBar(ctx, gaugeX, gaugeY, 240, 18, game.ultimateGauge, 100, '#ffdd44');
+      drawGaugeBar(ctx, logicalWidth - 270, 140, 150, 16, game.playerUltimateGauge, 100, '#44ff44');
 
-      // ステータス表示（ゲージ下）
-      const statusY = 190;
+      // ステータス・警告表示（少し上に移動）
+      const statusY = 170;
       ctx.textAlign = 'center';
 
-      if (game.defenseBonus > 0) {
+      // 敵必殺技警告（80%以上）
+      if (game.enemyUltimateGauge >= 80) {
+        ctx.fillStyle = '#ff0000';
+        ctx.font = 'bold 18px sans-serif';
+        ctx.shadowColor = '#ff0000';
+        ctx.shadowBlur = 10;
+        ctx.fillText('⚠ 敵必殺技まもなく！ ⚠', logicalWidth / 2, statusY);
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+      } else if (game.defenseBonus > 0 && game.defenseTurns > 0) {
         ctx.fillStyle = '#44ccff';
         ctx.font = 'bold 14px sans-serif';
-        ctx.fillText(`🛡 防御: +${Math.floor(game.defenseBonus)}%`, logicalWidth / 2 - 80, statusY);
+        ctx.fillText(`🛡️ 防御: ${Math.floor(game.defenseBonus)}%軽減（残り${game.defenseTurns}ターン）`, logicalWidth / 2, statusY);
       }
 
-      if (game.comboMultiplier > 1.0) {
-        ctx.fillStyle = '#ffdd44';
+      // 戦闘ログ（実況）表示 - 必殺技ゲージの下
+      const battleLogY = statusY + 20;
+      const currentTime = Date.now();
+
+      // 2秒以内の最新ログを表示
+      const recentLogs = game.battleLog.filter(log => currentTime - log.timestamp < 2000);
+
+      if (recentLogs.length > 0) {
+        const latestLog = recentLogs[recentLogs.length - 1];
+        const logAge = currentTime - latestLog.timestamp;
+        const opacity = Math.max(0, 1 - (logAge / 2000)); // 2秒でフェードアウト
+
+        ctx.globalAlpha = opacity;
         ctx.font = 'bold 14px sans-serif';
-        ctx.fillText(`⚡ コンボ: x${game.comboMultiplier.toFixed(1)}`, logicalWidth / 2 + 80, statusY);
+
+        // 白いフチ（袋文字）
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 3;
+        ctx.strokeText(latestLog.message, logicalWidth / 2, battleLogY);
+
+        // メッセージ本体
+        ctx.fillStyle = latestLog.color || '#ffff00';
+        ctx.fillText(latestLog.message, logicalWidth / 2, battleLogY);
+
+        ctx.globalAlpha = 1.0;
       }
 
+      ctx.textAlign = 'left';
+
+      // 【立ち絵エリア】190px - 350px
+      const portraitAreaY = headerHeight;
+      const portraitAreaHeight = 160;
+
+      // 立ち絵背景
+      ctx.fillStyle = '#1a0a0a';
+      ctx.fillRect(0, portraitAreaY, logicalWidth, portraitAreaHeight);
+
+      // 区切り線
+      ctx.strokeStyle = '#4a3a3a';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, portraitAreaY);
+      ctx.lineTo(logicalWidth, portraitAreaY);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(0, portraitAreaY + portraitAreaHeight);
+      ctx.lineTo(logicalWidth, portraitAreaY + portraitAreaHeight);
+      ctx.stroke();
+
+      // 立ち絵描画（左: プレイヤー、右: 相手）- 500×500正方形
+      const portraitHeight = portraitAreaHeight; // エリアいっぱいに表示
+      const portraitWidth = portraitHeight; // 縦横比 1:1（正方形）
+
+      // プレイヤー立ち絵は削除（中央に敵キャラのみ表示）
+
+      // 背景画像を立ち絵エリア全体に描画（催眠感を出すサイケデリック背景）
+      if (game.characterBgImage && game.characterBgImage.complete) {
+        ctx.drawImage(
+          game.characterBgImage,
+          0, portraitAreaY, logicalWidth, portraitAreaHeight // 立ち絵エリア全体
+        );
+      }
+
+      // 相手立ち絵（中央に大きく表示）- 500×500の正方形画像
+      if (game.enemyImage && game.enemyImage.complete) {
+        // 中央配置（エリアいっぱい）
+        const enemyX = (logicalWidth - portraitWidth) / 2;
+        const enemyY = portraitAreaY;
+
+        ctx.save();
+        ctx.shadowColor = '#ff4444';
+        ctx.shadowBlur = 20;
+        // 500×500の画像をアスペクト比を保ったまま表示
+        ctx.drawImage(
+          game.enemyImage,
+          enemyX, enemyY, portraitWidth, portraitHeight
+        );
+        ctx.restore();
+
+        // 枠線は削除（臨場感を出すため）
+      }
+
+      // VS表示は削除（中央に敵キャラが表示されるため不要）
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
       ctx.textAlign = 'left';
 
       // 画面揺れ適用
@@ -429,40 +616,58 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
         ctx.restore();
       }
 
+      // 手詰まり表示
+      if (game.isShuffling) {
+        ctx.fillStyle = 'rgba(255, 140, 0, 0.85)';
+        ctx.fillRect(game.level.x, game.level.y, levelwidth, levelheight);
+
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#ff8c00';
+        ctx.font = 'bold 28px sans-serif';
+        ctx.shadowColor = '#ff8c00';
+        ctx.shadowBlur = 10;
+        ctx.fillText('⚠ 手詰まり！', game.level.x + levelwidth / 2, game.level.y + levelheight / 2 - 20);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '18px sans-serif';
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.fillText('盤面をシャッフルします...', game.level.x + levelwidth / 2, game.level.y + levelheight / 2 + 20);
+        ctx.textAlign = 'left';
+      }
+
       // ゲームオーバー/クリア表示
       if (game.gameover) {
         ctx.fillStyle = 'rgba(139, 0, 0, 0.9)';
         ctx.fillRect(game.level.x, game.level.y, levelwidth, levelheight);
 
+        ctx.textAlign = 'center';
         ctx.fillStyle = '#ff4444';
         ctx.font = 'bold 36px sans-serif';
-        const text = '敗北...';
-        const textWidth = ctx.measureText(text).width;
-        ctx.fillText(text, game.level.x + (levelwidth - textWidth) / 2, game.level.y + levelheight / 2 - 20);
+        ctx.fillText('敗北...', game.level.x + levelwidth / 2, game.level.y + levelheight / 2 - 20);
 
         ctx.fillStyle = '#ffffff';
         ctx.font = '18px sans-serif';
-        const text2 = '意識を奪われた...';
-        const textWidth2 = ctx.measureText(text2).width;
-        ctx.fillText(text2, game.level.x + (levelwidth - textWidth2) / 2, game.level.y + levelheight / 2 + 20);
+        ctx.fillText('意識を奪われた...', game.level.x + levelwidth / 2, game.level.y + levelheight / 2 + 20);
+        ctx.textAlign = 'left';
       }
 
       if (game.cleared) {
         ctx.fillStyle = 'rgba(0, 100, 0, 0.85)';
         ctx.fillRect(game.level.x, game.level.y, levelwidth, levelheight);
 
+        ctx.textAlign = 'center';
         ctx.fillStyle = '#00ff00';
         ctx.font = 'bold 36px sans-serif';
-        const text = '勝利！';
-        const textWidth = ctx.measureText(text).width;
-        ctx.fillText(text, game.level.x + (levelwidth - textWidth) / 2, game.level.y + levelheight / 2 - 20);
+        ctx.fillText('勝利！', game.level.x + levelwidth / 2, game.level.y + levelheight / 2 - 20);
 
         ctx.fillStyle = '#ffffff';
         ctx.font = '18px sans-serif';
-        const text2 = '入れ替わりに成功した...';
-        const textWidth2 = ctx.measureText(text2).width;
-        ctx.fillText(text2, game.level.x + (levelwidth - textWidth2) / 2, game.level.y + levelheight / 2 + 20);
+        ctx.fillText('入れ替わりに成功した...', game.level.x + levelwidth / 2, game.level.y + levelheight / 2 + 20);
+        ctx.textAlign = 'left';
       }
+
+      // 効果説明は削除（レイアウト優先）
     };
 
     // タイル描画
@@ -537,163 +742,217 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
     };
 
     const drawTile = (ctx, x, y, r, g, b, tileType, special) => {
-      // キャラクタータイル（円形+大きなアイコン）の描画
+      // アイコンのみ表示（背景・枠線なし）
       const centerX = x + game.level.tilewidth / 2;
       const centerY = y + game.level.tileheight / 2;
-      const radius = game.level.tilewidth * 0.45; // 少し大きく
 
-      // 外側の光彩エフェクト（より強力に）
-      ctx.shadowColor = `rgba(${r}, ${g}, ${b}, 0.8)`;
-      ctx.shadowBlur = 20;
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 0;
-
-      // 外側のグロー（3層）
-      for (let i = 0; i < 3; i++) {
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius + (i * 3), 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${0.3 - i * 0.1})`;
-        ctx.fill();
-      }
-
-      // 影をリセット
-      ctx.shadowColor = 'transparent';
-      ctx.shadowBlur = 0;
-
-      // 影（ドロップシャドウ）
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
-      ctx.shadowBlur = 10;
-      ctx.shadowOffsetX = 4;
-      ctx.shadowOffsetY = 4;
-
-      // 円形の背景
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-
-      // より鮮やかなグラデーション（4段階）
-      const gradient = ctx.createRadialGradient(
-        centerX - radius / 2,
-        centerY - radius / 2,
-        radius / 10,
-        centerX,
-        centerY,
-        radius
-      );
-      gradient.addColorStop(0, `rgb(${Math.min(r + 100, 255)}, ${Math.min(g + 100, 255)}, ${Math.min(b + 100, 255)})`);
-      gradient.addColorStop(0.2, `rgb(${Math.min(r + 60, 255)}, ${Math.min(g + 60, 255)}, ${Math.min(b + 60, 255)})`);
-      gradient.addColorStop(0.6, `rgb(${r}, ${g}, ${b})`);
-      gradient.addColorStop(1, `rgb(${Math.floor(r * 0.5)}, ${Math.floor(g * 0.5)}, ${Math.floor(b * 0.5)})`);
-
-      ctx.fillStyle = gradient;
-      ctx.fill();
-
-      // 影をリセット
-      ctx.shadowColor = 'transparent';
-      ctx.shadowBlur = 0;
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 0;
-
-      // 外側の枠線（濃いめ・太め）
-      ctx.strokeStyle = `rgb(${Math.floor(r * 0.3)}, ${Math.floor(g * 0.3)}, ${Math.floor(b * 0.3)})`;
-      ctx.lineWidth = 4;
-      ctx.stroke();
-
-      // 内側の枠線（光沢効果）
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, radius - 5, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(255, 255, 255, 0.6)`;
-      ctx.lineWidth = 3;
-      ctx.stroke();
-
-      // ハイライト（左上の光沢・強化）
-      ctx.beginPath();
-      ctx.arc(centerX - radius / 2.5, centerY - radius / 2.5, radius / 3, 0, Math.PI * 2);
-      const highlightGradient = ctx.createRadialGradient(
-        centerX - radius / 2.5,
-        centerY - radius / 2.5,
-        0,
-        centerX - radius / 2.5,
-        centerY - radius / 2.5,
-        radius / 3
-      );
-      highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.7)');
-      highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-      ctx.fillStyle = highlightGradient;
-      ctx.fill();
-
-      // キャラクターの絵文字アイコン（大きく）
-      if (tileType !== undefined && game.characters[tileType]) {
+      // キャラクターのアイコン - 特殊タイルの場合は描画しない
+      if (!special && tileType !== undefined && game.characters[tileType]) {
         const character = game.characters[tileType];
-        ctx.fillStyle = 'rgba(255, 255, 255, 1)';
-        ctx.font = 'bold 42px sans-serif'; // タイルサイズに合わせて拡大
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
 
-        // テキストの影（強化）
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-        ctx.shadowBlur = 8;
-        ctx.shadowOffsetX = 3;
-        ctx.shadowOffsetY = 3;
+        // タイル画像が読み込まれていれば画像を表示、なければ絵文字
+        const tileImageKeys = ['attack', 'defense', 'heal', 'trap'];
+        const tileImageKey = tileImageKeys[tileType];
+        const tileImage = game.tileImagesLoaded && game.tileImages[tileImageKey];
 
-        ctx.fillText(character.initial, centerX, centerY);
+        if (tileImage) {
+          // PNG画像を描画
+          const iconSize = game.level.tilewidth * 0.9; // タイルサイズの90%（大きめ）
+          const iconX = centerX - iconSize / 2;
+          const iconY = centerY - iconSize / 2;
 
-        // 影をリセット
-        ctx.shadowColor = 'transparent';
-        ctx.shadowBlur = 0;
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 0;
+          // 影をつける
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+          ctx.shadowBlur = 8;
+          ctx.shadowOffsetX = 2;
+          ctx.shadowOffsetY = 2;
+
+          ctx.drawImage(tileImage, iconX, iconY, iconSize, iconSize);
+
+          // 影をリセット
+          ctx.shadowColor = 'transparent';
+          ctx.shadowBlur = 0;
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 0;
+        } else {
+          // フォールバック: 絵文字を表示
+          ctx.font = 'bold 48px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+          ctx.shadowBlur = 4;
+          ctx.shadowOffsetX = 2;
+          ctx.shadowOffsetY = 2;
+
+          ctx.fillStyle = '#ffffff';
+          ctx.fillText(character.initial, centerX, centerY);
+
+          ctx.shadowColor = 'transparent';
+          ctx.shadowBlur = 0;
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 0;
+        }
       }
 
-      // 特殊アイテムの視覚エフェクト
+      // 特殊アイテムの視覚エフェクト（虹色タイル）
       if (special) {
+        const tileSize = game.level.tilewidth - 4;
+        const tileX = x + 2;
+        const tileY = y + 2;
+
         if (special === 'lineBomb') {
-          // ラインボム: 十字線
-          ctx.strokeStyle = 'rgba(255, 255, 0, 0.9)';
-          ctx.lineWidth = 3;
-          ctx.shadowColor = 'rgba(255, 255, 0, 0.6)';
-          ctx.shadowBlur = 5;
+          // specialDirectionを取得（タイル配列から）
+          const tile = game.level.tiles ?
+            (game.level.tiles[Math.floor((x - game.level.x) / game.level.tilewidth)] || [])[Math.floor((y - game.level.y) / game.level.tileheight)] :
+            null;
+          const direction = tile?.specialDirection || 'horizontal';
+          const isVertical = direction === 'vertical';
 
-          // 横線
-          ctx.beginPath();
-          ctx.moveTo(centerX - radius * 0.6, centerY);
-          ctx.lineTo(centerX + radius * 0.6, centerY);
-          ctx.stroke();
+          // 画像が読み込まれていれば画像を表示
+          const slashImageKey = isVertical ? 'vertical' : 'horizontal';
+          const slashImage = game.tileImagesLoaded && game.tileImages[slashImageKey];
 
-          // 縦線
-          ctx.beginPath();
-          ctx.moveTo(centerX, centerY - radius * 0.6);
-          ctx.lineTo(centerX, centerY + radius * 0.6);
-          ctx.stroke();
+          if (slashImage) {
+            // PNG画像を描画
+            const iconSize = tileSize * 0.9; // 少し小さめに調整
+            const iconX = x + 2 + (tileSize - iconSize) / 2;
+            const iconY = y + 2 + (tileSize - iconSize) / 2;
 
-          // 影をリセット
-          ctx.shadowColor = 'transparent';
-          ctx.shadowBlur = 0;
-        } else if (special === 'colorBomb') {
-          // カラーボム: 爆発マーク（星型）
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-          ctx.shadowColor = 'rgba(255, 100, 0, 0.8)';
-          ctx.shadowBlur = 8;
+            ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
+            ctx.shadowBlur = 15;
 
-          // 星型を描画
-          const spikes = 8;
-          const outerRadius = radius * 0.5;
-          const innerRadius = radius * 0.25;
+            ctx.drawImage(slashImage, iconX, iconY, iconSize, iconSize);
 
-          ctx.beginPath();
-          for (let i = 0; i < spikes * 2; i++) {
-            const rad = (Math.PI * 2 * i) / (spikes * 2);
-            const r = i % 2 === 0 ? outerRadius : innerRadius;
-            const px = centerX + Math.cos(rad) * r;
-            const py = centerY + Math.sin(rad) * r;
-            if (i === 0) ctx.moveTo(px, py);
-            else ctx.lineTo(px, py);
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+          } else {
+            // フォールバック: 虹色のペットボトル
+            let bottleWidth, bottleHeight, bottleX, bottleY;
+
+            if (isVertical) {
+              bottleWidth = tileSize * 0.3;
+              bottleHeight = tileSize * 0.8;
+            } else {
+              bottleWidth = tileSize * 0.8;
+              bottleHeight = tileSize * 0.3;
+            }
+
+            bottleX = centerX - bottleWidth / 2;
+            bottleY = centerY - bottleHeight / 2;
+
+            const bottleGradient = isVertical
+              ? ctx.createLinearGradient(bottleX, bottleY, bottleX, bottleY + bottleHeight)
+              : ctx.createLinearGradient(bottleX, bottleY, bottleX + bottleWidth, bottleY);
+
+            bottleGradient.addColorStop(0, '#ff0000');
+            bottleGradient.addColorStop(0.17, '#ff7f00');
+            bottleGradient.addColorStop(0.33, '#ffff00');
+            bottleGradient.addColorStop(0.5, '#00ff00');
+            bottleGradient.addColorStop(0.67, '#0000ff');
+            bottleGradient.addColorStop(0.83, '#8b00ff');
+            bottleGradient.addColorStop(1, '#ff00ff');
+
+            ctx.fillStyle = bottleGradient;
+            ctx.shadowColor = '#ffffff';
+            ctx.shadowBlur = 15;
+
+            if (isVertical) {
+              ctx.fillRect(bottleX, bottleY + bottleHeight * 0.15, bottleWidth, bottleHeight * 0.85);
+              const capWidth = bottleWidth * 0.7;
+              const capHeight = bottleHeight * 0.15;
+              const capX = centerX - capWidth / 2;
+              ctx.fillRect(capX, bottleY, capWidth, capHeight);
+
+              ctx.strokeStyle = '#ffffff';
+              ctx.lineWidth = 3;
+              ctx.shadowColor = '#ffffff';
+              ctx.shadowBlur = 10;
+              ctx.strokeRect(bottleX, bottleY + bottleHeight * 0.15, bottleWidth, bottleHeight * 0.85);
+              ctx.strokeRect(capX, bottleY, capWidth, capHeight);
+
+              ctx.shadowBlur = 0;
+              ctx.fillStyle = '#ffffff';
+              ctx.font = 'bold 18px sans-serif';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText('↓', centerX, centerY + bottleHeight * 0.15);
+            } else {
+              ctx.fillRect(bottleX + bottleWidth * 0.15, bottleY, bottleWidth * 0.85, bottleHeight);
+              const capWidth = bottleWidth * 0.15;
+              const capHeight = bottleHeight * 0.7;
+              const capY = centerY - capHeight / 2;
+              ctx.fillRect(bottleX, capY, capWidth, capHeight);
+
+              ctx.strokeStyle = '#ffffff';
+              ctx.lineWidth = 3;
+              ctx.shadowColor = '#ffffff';
+              ctx.shadowBlur = 10;
+              ctx.strokeRect(bottleX + bottleWidth * 0.15, bottleY, bottleWidth * 0.85, bottleHeight);
+              ctx.strokeRect(bottleX, capY, capWidth, capHeight);
+
+              ctx.shadowBlur = 0;
+              ctx.fillStyle = '#ffffff';
+              ctx.font = 'bold 18px sans-serif';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText('→', centerX + bottleWidth * 0.1, centerY);
+            }
+
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
           }
-          ctx.closePath();
-          ctx.fill();
+        } else if (special === 'colorBomb') {
+          // 画像が読み込まれていれば画像を表示
+          const orbImage = game.tileImagesLoaded && game.tileImages.orb;
 
-          // 影をリセット
-          ctx.shadowColor = 'transparent';
-          ctx.shadowBlur = 0;
+          if (orbImage) {
+            // PNG画像を描画
+            const iconSize = tileSize * 0.9; // 少し小さめに調整
+            const iconX = x + 2 + (tileSize - iconSize) / 2;
+            const iconY = y + 2 + (tileSize - iconSize) / 2;
+
+            ctx.shadowColor = 'rgba(255, 255, 255, 0.9)';
+            ctx.shadowBlur = 25;
+
+            ctx.drawImage(orbImage, iconX, iconY, iconSize, iconSize);
+
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+          } else {
+            // フォールバック: 虹色のオーブ
+            const orbRadius = tileSize * 0.42;
+            const rainbowGradient = ctx.createRadialGradient(
+              centerX, centerY, 0,
+              centerX, centerY, orbRadius
+            );
+            rainbowGradient.addColorStop(0, '#ffffff');
+            rainbowGradient.addColorStop(0.15, '#ff0000');
+            rainbowGradient.addColorStop(0.3, '#ff7f00');
+            rainbowGradient.addColorStop(0.45, '#ffff00');
+            rainbowGradient.addColorStop(0.6, '#00ff00');
+            rainbowGradient.addColorStop(0.75, '#0000ff');
+            rainbowGradient.addColorStop(0.9, '#8b00ff');
+            rainbowGradient.addColorStop(1, '#ff00ff');
+
+            ctx.fillStyle = rainbowGradient;
+            ctx.shadowColor = '#ffffff';
+            ctx.shadowBlur = 25;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, orbRadius, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 4;
+            ctx.shadowColor = '#ffffff';
+            ctx.shadowBlur = 15;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, orbRadius, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+          }
         }
       }
     };
@@ -740,21 +999,10 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
       ctx.clip();
 
       if (image && image.complete) {
-        // 画像の上部45%（顔部分）を切り取って描画
-        const imgWidth = image.width;
-        const imgHeight = image.height;
-
-        // 顔部分を切り取る設定（上部45%の正方形領域）
-        const sHeight = imgHeight * 0.45; // 高さの上45%
-        const sWidth = sHeight; // 正方形にする
-        const sx = (imgWidth - sWidth) / 2; // 中央寄せ
-        const sy = 0; // 上端から
-
-        // 円形に合わせて描画
+        // 500×500の正方形画像をそのまま円形に表示（クロップなし）
         const size = radius * 2;
         ctx.drawImage(
           image,
-          sx, sy, sWidth, sHeight, // 元画像の切り取り領域
           x - radius, y - radius, size, size // 描画先
         );
       } else {
@@ -802,11 +1050,18 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
       ctx.lineWidth = 2;
       ctx.strokeRect(x, y, width, height);
 
-      // テキスト（HP数値）
-      ctx.fillStyle = '#ffffff';
+      // テキスト（HP数値）- 黒字に白フチで視認性向上
       ctx.font = 'bold 14px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
+
+      // 白いフチ（袋文字効果）
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 3;
+      ctx.strokeText(`${Math.floor(current)} / ${max}`, x + width / 2, y + height / 2);
+
+      // 黒い文字
+      ctx.fillStyle = '#000000';
       ctx.fillText(`${Math.floor(current)} / ${max}`, x + width / 2, y + height / 2);
       ctx.textAlign = 'left';
     };
@@ -817,8 +1072,12 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
       ctx.fillStyle = '#000000';
       ctx.fillRect(x, y, width, height);
 
+      // NaN対策：currentが未定義の場合は0とする
+      const safeCurrent = (current !== undefined && !isNaN(current)) ? current : 0;
+      const safeMax = (max !== undefined && max > 0) ? max : 100;
+
       // ゲージバー
-      const percent = Math.max(0, Math.min(1, current / max));
+      const percent = Math.max(0, Math.min(1, safeCurrent / safeMax));
       ctx.fillStyle = color;
       ctx.fillRect(x, y, width * percent, height);
 
@@ -827,65 +1086,293 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
       ctx.lineWidth = 2;
       ctx.strokeRect(x, y, width, height);
 
-      // テキスト（%）
-      ctx.fillStyle = '#ffffff';
+      // テキスト（%）- 黒字に白フチで視認性向上
       ctx.font = 'bold 14px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(`${Math.floor(current)}%`, x + width / 2, y + height / 2);
+
+      // 白いフチ（袋文字効果）
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 3;
+      ctx.strokeText(`${Math.floor(safeCurrent)}%`, x + width / 2, y + height / 2);
+
+      // 黒い文字
+      ctx.fillStyle = '#000000';
+      ctx.fillText(`${Math.floor(safeCurrent)}%`, x + width / 2, y + height / 2);
       ctx.textAlign = 'left';
     };
 
-    // 特殊エフェクト描画
+    // 戦闘ログ追加関数
+    const addBattleLog = (message, color = '#ffff00') => {
+      const newLog = {
+        message: message,
+        color: color,
+        timestamp: Date.now()
+      };
+
+      game.battleLog.push(newLog);
+      setBattleLog([...game.battleLog]);
+
+      // 古いログを削除（10件以上は削除）
+      if (game.battleLog.length > 10) {
+        game.battleLog.shift();
+      }
+    };
+
+    // イージング関数（滑らかなアニメーション用）
+    const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+    const easeInOutCubic = (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    const easeOutBack = (t) => {
+      const c1 = 1.70158;
+      const c3 = c1 + 1;
+      return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+    };
+
+    // 特殊エフェクト描画（スマホゲーム風多段階演出 + リッチ強化）
     const renderSpecialEffects = (ctx) => {
       game.specialEffects.forEach(e => {
         const progress = e.time / e.duration;
         ctx.save();
 
         if (e.type === 'lineBomb') {
-          // ラインボムエフェクト（ビーム）
-          const alpha = 1 - progress;
-          ctx.globalAlpha = alpha;
+          // ラインボム多段階演出: 予兆(0-0.2) → スラッシュ(0.2-0.5) → ビーム(0.5-0.9) → 残光(0.9-1.0)
 
-          const gradient = e.horizontal
-            ? ctx.createLinearGradient(e.x1, e.y1, e.x2, e.y1)
-            : ctx.createLinearGradient(e.x1, e.y1, e.x1, e.y2);
+          if (progress < 0.2) {
+            // Phase 1: 予兆（エネルギーが溜まる）
+            const phaseProgress = progress / 0.2;
+            const alpha = phaseProgress * 0.6;
+            ctx.globalAlpha = alpha;
 
-          gradient.addColorStop(0, 'rgba(255, 255, 0, 0)');
-          gradient.addColorStop(0.5, `rgba(255, 255, 0, ${alpha})`);
-          gradient.addColorStop(1, 'rgba(255, 255, 0, 0)');
+            // パルス状の光
+            const pulseSize = 20 + Math.sin(phaseProgress * Math.PI * 4) * 10;
+            ctx.shadowColor = '#ffff00';
+            ctx.shadowBlur = 30;
+            ctx.strokeStyle = `rgba(255, 255, 0, ${alpha})`;
+            ctx.lineWidth = pulseSize;
 
-          ctx.fillStyle = gradient;
-          ctx.shadowColor = '#ffff00';
-          ctx.shadowBlur = 20;
+            if (e.horizontal) {
+              ctx.beginPath();
+              ctx.moveTo(e.x1, e.y1);
+              ctx.lineTo(e.x2, e.y2);
+              ctx.stroke();
+            } else {
+              ctx.beginPath();
+              ctx.moveTo(e.x1, e.y1);
+              ctx.lineTo(e.x2, e.y2);
+              ctx.stroke();
+            }
 
-          const width = e.horizontal ? e.x2 - e.x1 : 30;
-          const height = e.horizontal ? 30 : e.y2 - e.y1;
-          ctx.fillRect(e.x1 - (e.horizontal ? 0 : 15), e.y1 - (e.horizontal ? 15 : 0), width, height);
+          } else if (progress < 0.5) {
+            // Phase 2: スラッシュ（白い斬撃線が走る）
+            const phaseProgress = (progress - 0.2) / 0.3;
+            const alpha = 1.0 - phaseProgress * 0.3;
+
+            // 白い斬撃線（複数レイヤー）
+            ctx.globalAlpha = alpha;
+            ctx.shadowColor = '#ffffff';
+            ctx.shadowBlur = 80;
+
+            // 外側の白い線
+            ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+            ctx.lineWidth = 80;
+            ctx.beginPath();
+            if (e.horizontal) {
+              ctx.moveTo(e.x1 + (e.x2 - e.x1) * phaseProgress, e.y1);
+              ctx.lineTo(e.x1, e.y1);
+            } else {
+              ctx.moveTo(e.x1, e.y1 + (e.y2 - e.y1) * phaseProgress);
+              ctx.lineTo(e.x1, e.y1);
+            }
+            ctx.stroke();
+
+            // 内側の黄色い線
+            ctx.strokeStyle = `rgba(255, 255, 0, ${alpha})`;
+            ctx.lineWidth = 40;
+            ctx.beginPath();
+            if (e.horizontal) {
+              ctx.moveTo(e.x1 + (e.x2 - e.x1) * phaseProgress, e.y1);
+              ctx.lineTo(e.x1, e.y1);
+            } else {
+              ctx.moveTo(e.x1, e.y1 + (e.y2 - e.y1) * phaseProgress);
+              ctx.lineTo(e.x1, e.y1);
+            }
+            ctx.stroke();
+
+          } else if (progress < 0.9) {
+            // Phase 3: ビーム（太い光の柱）
+            const phaseProgress = (progress - 0.5) / 0.4;
+            const alpha = 1.0 - phaseProgress * 0.5;
+            ctx.globalAlpha = alpha;
+
+            // 虹色グラデーションビーム
+            const gradient = e.horizontal
+              ? ctx.createLinearGradient(e.x1, e.y1, e.x2, e.y1)
+              : ctx.createLinearGradient(e.x1, e.y1, e.x1, e.y2);
+
+            gradient.addColorStop(0, `rgba(255, 0, 0, ${alpha})`);
+            gradient.addColorStop(0.2, `rgba(255, 255, 0, ${alpha})`);
+            gradient.addColorStop(0.4, `rgba(0, 255, 0, ${alpha})`);
+            gradient.addColorStop(0.6, `rgba(0, 255, 255, ${alpha})`);
+            gradient.addColorStop(0.8, `rgba(0, 0, 255, ${alpha})`);
+            gradient.addColorStop(1, `rgba(255, 0, 255, ${alpha})`);
+
+            ctx.fillStyle = gradient;
+            ctx.shadowColor = '#ffff00';
+            ctx.shadowBlur = 70;
+
+            const width = e.horizontal ? e.x2 - e.x1 : 70;
+            const height = e.horizontal ? 70 : e.y2 - e.y1;
+            ctx.fillRect(e.x1 - (e.horizontal ? 0 : 35), e.y1 - (e.horizontal ? 35 : 0), width, height);
+
+          } else {
+            // Phase 4: 残光（光の粒が残る）
+            const phaseProgress = (progress - 0.9) / 0.1;
+            const alpha = (1.0 - phaseProgress) * 0.5;
+            ctx.globalAlpha = alpha;
+
+            ctx.shadowColor = '#ffff00';
+            ctx.shadowBlur = 40;
+            ctx.fillStyle = `rgba(255, 255, 0, ${alpha})`;
+
+            const width = e.horizontal ? e.x2 - e.x1 : 30;
+            const height = e.horizontal ? 30 : e.y2 - e.y1;
+            ctx.fillRect(e.x1 - (e.horizontal ? 0 : 15), e.y1 - (e.horizontal ? 15 : 0), width, height);
+          }
 
         } else if (e.type === 'colorBomb') {
-          // カラーボムエフェクト（爆発波）
-          const radius = e.radius * progress;
-          const alpha = 1 - progress;
-          ctx.globalAlpha = alpha;
+          // カラーボム多段階演出: 予兆(0-0.3) → 爆発(0.3-0.7) → 残光(0.7-1.0)
 
-          // 外側の波
-          ctx.strokeStyle = `rgba(255, 100, 0, ${alpha})`;
-          ctx.lineWidth = 10;
-          ctx.shadowColor = '#ff6400';
-          ctx.shadowBlur = 30;
-          ctx.beginPath();
-          ctx.arc(e.x, e.y, radius, 0, Math.PI * 2);
-          ctx.stroke();
+          if (progress < 0.3) {
+            // Phase 1: 予兆（フレアが中心に集まる）
+            const phaseProgress = progress / 0.3;
 
-          // 内側の波
-          if (progress > 0.3) {
-            const innerRadius = e.radius * (progress - 0.3) / 0.7;
-            ctx.strokeStyle = `rgba(255, 200, 0, ${alpha * 0.7})`;
-            ctx.lineWidth = 5;
-            ctx.beginPath();
-            ctx.arc(e.x, e.y, innerRadius, 0, Math.PI * 2);
-            ctx.stroke();
+            // フレアを描画（周囲から中心へ）
+            e.flares.forEach((flare, i) => {
+              const t = phaseProgress;
+              const x = flare.startX + (flare.targetX - flare.startX) * t;
+              const y = flare.startY + (flare.targetY - flare.startY) * t;
+              const size = 8 * (1 - t * 0.5);
+              const alpha = 0.8;
+
+              ctx.globalAlpha = alpha;
+              ctx.fillStyle = flare.color;
+              ctx.shadowColor = flare.color;
+              ctx.shadowBlur = 20;
+              ctx.beginPath();
+              ctx.arc(x, y, size, 0, Math.PI * 2);
+              ctx.fill();
+            });
+
+          } else if (progress < 0.7) {
+            // Phase 2: 爆発（ホワイトアウト + レンズフレア + 白い光球 + 複数の衝撃波）
+            const phaseProgress = easeOutCubic((progress - 0.3) / 0.4);
+
+            // ホワイトアウト（画面全体フラッシュ）
+            if (phaseProgress < 0.1) {
+              const flashAlpha = (0.1 - phaseProgress) / 0.1 * 0.6;
+              ctx.globalAlpha = flashAlpha;
+              ctx.fillStyle = '#ffffff';
+              ctx.fillRect(0, 0, 550, 700);
+            }
+
+            // レンズフレア（放射状の光条）
+            if (phaseProgress < 0.5) {
+              const flareAlpha = (0.5 - phaseProgress) / 0.5 * 0.7;
+              for (let i = 0; i < 12; i++) {
+                const angle = (Math.PI * 2 * i) / 12;
+                const length = e.radius * 4 * phaseProgress;
+                ctx.globalAlpha = flareAlpha;
+                const gradient = ctx.createLinearGradient(
+                  e.x, e.y,
+                  e.x + Math.cos(angle) * length,
+                  e.y + Math.sin(angle) * length
+                );
+                gradient.addColorStop(0, `rgba(255, 255, 255, ${flareAlpha})`);
+                gradient.addColorStop(0.5, `rgba(255, 200, 100, ${flareAlpha * 0.5})`);
+                gradient.addColorStop(1, 'rgba(255, 200, 100, 0)');
+                ctx.fillStyle = gradient;
+                ctx.save();
+                ctx.translate(e.x, e.y);
+                ctx.rotate(angle);
+                ctx.fillRect(0, -15, length, 30);
+                ctx.restore();
+              }
+            }
+
+            // 多重グロー（3層）
+            for (let layer = 0; layer < 3; layer++) {
+              const layerSize = e.radius * (0.3 + layer * 0.2) * (1 + phaseProgress);
+              const layerAlpha = (1 - phaseProgress) * (0.8 - layer * 0.2);
+              ctx.globalAlpha = layerAlpha;
+
+              const layerGradient = ctx.createRadialGradient(e.x, e.y, 0, e.x, e.y, layerSize);
+              layerGradient.addColorStop(0, `rgba(255, 255, 255, ${layerAlpha})`);
+              layerGradient.addColorStop(0.3, `rgba(255, 255, 200, ${layerAlpha * 0.8})`);
+              layerGradient.addColorStop(0.6, `rgba(255, 200, 100, ${layerAlpha * 0.4})`);
+              layerGradient.addColorStop(1, 'rgba(255, 100, 0, 0)');
+
+              ctx.fillStyle = layerGradient;
+              ctx.shadowColor = '#ffffff';
+              ctx.shadowBlur = 120 + layer * 30;
+              ctx.beginPath();
+              ctx.arc(e.x, e.y, layerSize, 0, Math.PI * 2);
+              ctx.fill();
+            }
+
+            // 複数の衝撃波（虹色・5層に増量）
+            for (let i = 0; i < 5; i++) {
+              const waveDelay = i * 0.1;
+              const waveProgress = Math.max(0, Math.min(1, (phaseProgress - waveDelay) / (1 - waveDelay)));
+              const easedWaveProgress = easeOutCubic(waveProgress);
+              const waveRadius = e.radius * easedWaveProgress * 2;
+              const waveAlpha = (1 - waveProgress) * 0.7;
+
+              if (waveProgress > 0) {
+                // 外側の太い波
+                ctx.globalAlpha = waveAlpha;
+                ctx.strokeStyle = `hsl(${i * 40}, 100%, 60%)`;
+                ctx.lineWidth = 40 - i * 6;
+                ctx.shadowColor = `hsl(${i * 40}, 100%, 60%)`;
+                ctx.shadowBlur = 100;
+                ctx.beginPath();
+                ctx.arc(e.x, e.y, waveRadius, 0, Math.PI * 2);
+                ctx.stroke();
+
+                // 内側の細い波（グロー強化）
+                ctx.globalAlpha = waveAlpha * 0.6;
+                ctx.strokeStyle = `hsl(${i * 40 + 20}, 100%, 80%)`;
+                ctx.lineWidth = 20 - i * 3;
+                ctx.shadowBlur = 60;
+                ctx.beginPath();
+                ctx.arc(e.x, e.y, waveRadius * 0.95, 0, Math.PI * 2);
+                ctx.stroke();
+              }
+            }
+
+          } else {
+            // Phase 3: 残光（虹色の光の粒が飛び散る）
+            const phaseProgress = (progress - 0.7) / 0.3;
+
+            // フレアを描画（中心から外へ飛び散る）
+            e.flares.forEach((flare, i) => {
+              const t = phaseProgress;
+              const angle = (Math.PI * 2 * i) / e.flares.length;
+              const distance = e.radius * 2 * t;
+              const x = e.x + Math.cos(angle) * distance;
+              const y = e.y + Math.sin(angle) * distance;
+              const size = 6 * (1 - t);
+              const alpha = (1 - t) * 0.7;
+
+              if (size > 0) {
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = flare.color;
+                ctx.shadowColor = flare.color;
+                ctx.shadowBlur = 15;
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fill();
+              }
+            });
           }
         }
 
@@ -918,62 +1405,66 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
       let totalDamage = 0;
       let totalDefense = 0;
       let totalHeal = 0;
-      let comboBoost = 0;
-      let ultimateCharge = 0;
+      let totalSelfDamage = 0;
+      let totalClusters = 0;
 
-      // 各クラスターの効果を集計
+      // 色ごとの合計マッチ数を集計（L字消しなどの複数クラスター対応）
+      const colorMatches = { 0: 0, 1: 0, 2: 0, 3: 0 };
+
       for (let i = 0; i < game.clusters.length; i++) {
         const cluster = game.clusters[i];
         const tileType = game.level.tiles[cluster.column][cluster.row].type;
-        const matchCount = cluster.length;
-
-        switch (tileType) {
-          case 0: // 🔴 赤（攻撃）
-            if (matchCount === 3) totalDamage += 15;
-            else if (matchCount === 4) totalDamage += 25;
-            else totalDamage += 40;
-            break;
-
-          case 1: // 🔵 青（防御）
-            if (matchCount === 3) totalDefense += 30;
-            else if (matchCount === 4) totalDefense += 50;
-            else totalDefense += 80;
-            break;
-
-          case 2: // 🟢 緑（回復）
-            if (matchCount === 3) totalHeal += 10;
-            else if (matchCount === 4) totalHeal += 20;
-            else totalHeal += 35;
-            break;
-
-          case 3: // 🟡 黄（スキル）
-            if (matchCount === 3) comboBoost += 0.5;
-            else if (matchCount === 4) comboBoost += 1.0;
-            else comboBoost += 1.5;
-            break;
-
-          case 4: // ⚪ 白（必殺技）
-            if (matchCount === 3) ultimateCharge += 20;
-            else if (matchCount === 4) ultimateCharge += 40;
-            else ultimateCharge += 70;
-            break;
-        }
+        colorMatches[tileType] += cluster.length;
+        totalClusters++;
       }
 
-      // 防御バフを適用
-      game.defenseBonus += totalDefense;
-      setDefenseBonus(game.defenseBonus);
+      // 色ごとに効果を適用
+      // 👊 パンチ（攻撃）- 3個=基本値、4個=1.2倍、5個以上=特殊タイル生成のみ
+      if (colorMatches[0] > 0) {
+        if (colorMatches[0] === 3) totalDamage += 2;
+        else if (colorMatches[0] === 4) totalDamage += Math.ceil(2 * 1.2); // 2.4 → 3
+        // 5個以上は特殊タイル生成のみで直接ダメージなし
+      }
 
-      // コンボ倍率を適用
-      game.comboMultiplier = Math.min(3.0, 1.0 + comboBoost);
+      // 📱 スマホ（防御）- 2ターン持続 - 3個=基本値、4個=1.2倍、5個以上=特殊タイル生成のみ
+      if (colorMatches[1] > 0) {
+        if (colorMatches[1] === 3) totalDefense += 12;
+        else if (colorMatches[1] === 4) totalDefense += Math.ceil(12 * 1.2); // 14.4 → 15
+        // 5個以上は特殊タイル生成のみで直接防御なし
+      }
 
-      // 攻撃ダメージを計算（コンボ倍率適用）
-      totalDamage = Math.floor(totalDamage * game.comboMultiplier);
+      // ❤️ ハート（回復）- 3個=基本値、4個=1.2倍、5個以上=特殊タイル生成のみ
+      if (colorMatches[2] > 0) {
+        if (colorMatches[2] === 3) totalHeal += 3;
+        else if (colorMatches[2] === 4) totalHeal += Math.ceil(3 * 1.2); // 3.6 → 4
+        // 5個以上は特殊タイル生成のみで直接回復なし
+      }
 
+      // 💣 爆弾（お邪魔）- 3個のみダメージ、4個以上は回避
+      if (colorMatches[3] > 0) {
+        if (colorMatches[3] === 3) {
+          totalSelfDamage += 5;
+        }
+        // 4個以上は何もしない（ダメージ回避、5個以上は特殊タイル生成）
+        console.log(`💣 爆弾: 合計${colorMatches[3]}個消し ${colorMatches[3] >= 4 ? '→ 回避成功！' : '→ ダメージ'}`);
+      }
+
+      // 防御バフを適用（2ターン持続、上書き）
+      if (totalDefense > 0) {
+        game.defenseBonus = totalDefense; // 上書き（蓄積しない）
+        game.defenseTurns = 2; // 2ターン持続
+        setDefenseBonus(game.defenseBonus);
+        setDefenseTurns(game.defenseTurns);
+        console.log(`🛡️ 防御: ${totalDefense}%軽減（2ターン持続）`);
+        addBattleLog(`🛡️ 防御${totalDefense}%UP（2ターン）`, '#44ccff');
+      }
+
+      // 攻撃ダメージを適用
       if (totalDamage > 0) {
         game.enemyHP = Math.max(0, game.enemyHP - totalDamage);
         setEnemyHP(game.enemyHP);
         console.log(`⚔ 攻撃: ${totalDamage}ダメージ！ 相手HP: ${game.enemyHP}`);
+        addBattleLog(`⚔️ 攻撃！ ${totalDamage}ダメージ`, '#ff4444');
 
         // 画面揺れ
         game.screenShake.active = true;
@@ -985,14 +1476,43 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
       if (totalHeal > 0) {
         game.playerHP = Math.min(game.playerMaxHP, game.playerHP + totalHeal);
         setPlayerHP(game.playerHP);
-        console.log(`❤ 回復: ${totalHeal}HP回復！`);
+        console.log(`❤️ 回復: ${totalHeal}HP回復！`);
+        addBattleLog(`❤️ ${totalHeal}HP回復`, '#44ff44');
       }
 
-      // 必殺技ゲージ蓄積
-      if (ultimateCharge > 0) {
-        game.ultimateGauge = Math.min(100, game.ultimateGauge + ultimateCharge);
-        setUltimateGauge(game.ultimateGauge);
-        console.log(`★ 必殺技ゲージ: ${ultimateCharge}%チャージ！`);
+      // お邪魔ブロック（自分にダメージ）
+      if (totalSelfDamage > 0) {
+        game.playerHP = Math.max(0, game.playerHP - totalSelfDamage);
+        setPlayerHP(game.playerHP);
+        console.log(`💣 お邪魔ブロック: ${totalSelfDamage}ダメージ！`);
+        addBattleLog(`💣 罠発動！ ${totalSelfDamage}ダメージ`, '#ff8c00');
+
+        // 画面揺れ
+        game.screenShake.active = true;
+        game.screenShake.intensity = 12;
+        game.screenShake.duration = 0.3;
+      }
+
+      // 必殺技ゲージ蓄積（4個消しのみ20%）
+      if (totalClusters > 0) {
+        let gaugeCharge = 0;
+        for (let i = 0; i < game.clusters.length; i++) {
+          const matchCount = game.clusters[i].length;
+          if (matchCount === 4) gaugeCharge += 20; // 4個消しのみ
+          else if (matchCount >= 5) gaugeCharge += 20; // 5個以上も20%
+          // 3個消しは0%
+        }
+
+        if (gaugeCharge > 0) {
+          game.playerUltimateGauge = Math.min(100, game.playerUltimateGauge + gaugeCharge);
+          setPlayerUltimateGauge(game.playerUltimateGauge);
+          console.log(`★ 必殺技ゲージ: +${gaugeCharge}% (合計: ${game.playerUltimateGauge}%)`);
+
+          // プレイヤー必殺技発動チェック
+          if (game.playerUltimateGauge >= 100) {
+            activatePlayerUltimate();
+          }
+        }
       }
 
       // ターンカウント増加
@@ -1000,16 +1520,82 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
       setTurnCount(game.turnCount);
     };
 
+    // プレイヤー必殺技発動
+    const activatePlayerUltimate = () => {
+      console.log('★★★ プレイヤー必殺技発動！ ★★★');
+
+      // 17.5%ダメージ（半減調整）
+      const ultimateDamage = Math.floor(game.enemyMaxHP * 0.175);
+      game.enemyHP = Math.max(0, game.enemyHP - ultimateDamage);
+      setEnemyHP(game.enemyHP);
+
+      // 画面揺れ（強力）
+      game.screenShake.active = true;
+      game.screenShake.intensity = 20;
+      game.screenShake.duration = 0.6;
+
+      // ゲージリセット
+      game.playerUltimateGauge = 0;
+      setPlayerUltimateGauge(0);
+
+      console.log(`★ プレイヤー必殺技で${ultimateDamage}ダメージ（敵MaxHPの17.5%）！`);
+      addBattleLog(`★ 必殺技発動！ ${ultimateDamage}ダメージ`, '#ffdd44');
+    };
+
+    // 敵必殺技発動
+    const activateEnemyUltimate = () => {
+      console.log('💀💀💀 敵必殺技発動！ 💀💀💀');
+
+      // 17.5%ダメージ（防御無視）（半減調整）
+      const ultimateDamage = Math.floor(game.playerMaxHP * 0.175);
+      game.playerHP = Math.max(0, game.playerHP - ultimateDamage);
+      setPlayerHP(game.playerHP);
+
+      // 画面揺れ（強力）
+      game.screenShake.active = true;
+      game.screenShake.intensity = 25;
+      game.screenShake.duration = 0.8;
+
+      // ゲージリセット
+      game.enemyUltimateGauge = 0;
+      setEnemyUltimateGauge(0);
+
+      console.log(`💀 敵必殺技で${ultimateDamage}ダメージ（プレイヤーMaxHPの17.5%）！`);
+      addBattleLog(`💀 敵必殺技！ ${ultimateDamage}ダメージ`, '#ff00ff');
+    };
+
     // 相手の攻撃
     const enemyAttack = () => {
+      // 防御ターン減衰
+      if (game.defenseTurns > 0) {
+        game.defenseTurns--;
+        setDefenseTurns(game.defenseTurns);
+        if (game.defenseTurns === 0) {
+          game.defenseBonus = 0;
+          setDefenseBonus(0);
+          console.log('🛡️ 防御効果が切れました');
+        }
+      }
+
+      // 必殺技ゲージ蓄積（毎ターン12.5%、8ターンで100%）
+      game.enemyUltimateGauge = Math.min(100, game.enemyUltimateGauge + 12.5);
+      setEnemyUltimateGauge(game.enemyUltimateGauge);
+      console.log(`💀 敵ゲージ: +12.5% (合計: ${game.enemyUltimateGauge}%)`);
+
+      // 敵必殺技発動チェック
+      if (game.enemyUltimateGauge >= 100) {
+        activateEnemyUltimate();
+        return; // 必殺技を使ったら通常攻撃はしない
+      }
+
       // 2ターンに1回攻撃（50%の確率で攻撃）
       if (game.turnCount % 2 !== 0) {
         console.log('相手は様子を見ている...');
         return;
       }
 
-      // ダメージ計算（防御バフで軽減）
-      const baseDamage = game.enemyAttack || 15;
+      // ダメージ計算（防御バフで軽減）- 半減調整
+      const baseDamage = game.enemyAttack || 8;  // 15 → 8 に半減
       const defenseMitigation = Math.min(0.8, game.defenseBonus / 100); // 最大80%軽減
       const finalDamage = Math.max(1, Math.floor(baseDamage * (1 - defenseMitigation))); // 最低1ダメージ
 
@@ -1018,9 +1604,13 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
 
       console.log(`💀 相手の攻撃: ${finalDamage}ダメージ！ (ベース: ${baseDamage}, 防御: -${Math.floor(baseDamage - finalDamage)})`);
 
-      // 防御バフを減衰
-      game.defenseBonus = Math.max(0, game.defenseBonus - 20);
-      setDefenseBonus(game.defenseBonus);
+      // 防御軽減があればログに表示
+      if (defenseMitigation > 0) {
+        const blocked = baseDamage - finalDamage;
+        addBattleLog(`🛡️ 敵の攻撃！ ${finalDamage}ダメージ（${blocked}軽減）`, '#ff8c00');
+      } else {
+        addBattleLog(`💥 敵の攻撃！ ${finalDamage}ダメージ`, '#ff8c00');
+      }
 
       // 画面揺れ
       game.screenShake.active = true;
@@ -1034,7 +1624,6 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
       game.gameover = false;
       game.cleared = false;
       game.turnCount = 0;
-      game.comboMultiplier = 1.0;
       setTurnCount(0);
 
       createLevel();
@@ -1061,6 +1650,49 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
       }
     };
 
+    // 盤面をシャッフル（手詰まり時）
+    const reshuffleBoard = () => {
+      console.log('🔀 盤面をシャッフル中...');
+
+      // 現在のタイルをすべて集める
+      const tiles = [];
+      for (let i = 0; i < game.level.columns; i++) {
+        for (let j = 0; j < game.level.rows; j++) {
+          tiles.push(game.level.tiles[i][j].type);
+        }
+      }
+
+      // Fisher-Yatesアルゴリズムでシャッフル
+      for (let i = tiles.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [tiles[i], tiles[j]] = [tiles[j], tiles[i]];
+      }
+
+      // シャッフルしたタイルを盤面に配置
+      let index = 0;
+      for (let i = 0; i < game.level.columns; i++) {
+        for (let j = 0; j < game.level.rows; j++) {
+          game.level.tiles[i][j].type = tiles[index];
+          game.level.tiles[i][j].special = null; // 特殊効果はリセット
+          index++;
+        }
+      }
+
+      // クラスターを解消
+      resolveClusters();
+
+      // 手を再検索
+      findMoves();
+
+      // もし手がまだなければ、新しいタイルで再生成
+      if (game.moves.length === 0) {
+        console.log('⚠ シャッフル後も手がない！再生成します...');
+        createLevel();
+      }
+
+      console.log(`✅ シャッフル完了！有効な手: ${game.moves.length}個`);
+    };
+
     const getRandomTile = () => {
       return Math.floor(Math.random() * game.tilecolors.length);
     };
@@ -1069,7 +1701,7 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
       findClusters();
 
       while (game.clusters.length > 0) {
-        removeClusters();
+        removeClusters(false);  // 初期化時は特殊タイル生成しない
         shiftTiles();
         findClusters();
       }
@@ -1104,12 +1736,11 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
                 horizontal: true
               };
 
-              // 特殊アイテム生成判定
+              // 特殊アイテム生成判定（5個以上のみ）
               if (matchlength >= 5) {
-                cluster.special = 'colorBomb'; // 5個消し → カラーボム
-              } else if (matchlength === 4) {
-                cluster.special = 'lineBomb'; // 4個消し → ラインボム
+                cluster.special = 'colorBomb'; // 5個消し → カラーボム（横一線）
               }
+              // 4個以下は特殊タイル生成なし
 
               game.clusters.push(cluster);
             }
@@ -1144,16 +1775,68 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
                 horizontal: false
               };
 
-              // 特殊アイテム生成判定
+              // 特殊アイテム生成判定（5個以上のみ）
               if (matchlength >= 5) {
-                cluster.special = 'colorBomb'; // 5個消し → カラーボム
-              } else if (matchlength === 4) {
-                cluster.special = 'lineBomb'; // 4個消し → ラインボム
+                cluster.special = 'colorBomb'; // 5個消し → カラーボム（縦一線）
               }
+              // 4個以下は特殊タイル生成なし
 
               game.clusters.push(cluster);
             }
             matchlength = 1;
+          }
+        }
+      }
+
+      // クラスター検出後、L字/T字を自動検出
+      detectLTShapes();
+    };
+
+    // L字/T字の検出（クラスターの重なりをチェック）
+    const detectLTShapes = () => {
+      // 横クラスターと縦クラスターを分離
+      const horizontalClusters = game.clusters.filter(c => c.horizontal);
+      const verticalClusters = game.clusters.filter(c => !c.horizontal);
+
+      // 各横クラスターと各縦クラスターの重なりをチェック
+      for (let h of horizontalClusters) {
+        for (let v of verticalClusters) {
+          // クラスターが重なっているかチェック（同じタイルを共有）
+          const hTiles = [];
+          for (let i = 0; i < h.length; i++) {
+            hTiles.push({ column: h.column + i, row: h.row });
+          }
+
+          const vTiles = [];
+          for (let i = 0; i < v.length; i++) {
+            vTiles.push({ column: v.column, row: v.row + i });
+          }
+
+          // 重なりタイルを検出
+          const overlap = hTiles.filter(ht =>
+            vTiles.some(vt => vt.column === ht.column && vt.row === ht.row)
+          );
+
+          if (overlap.length > 0) {
+            // 重なりあり → L字/T字の可能性
+            // ユニークなタイル数を計算
+            const uniqueTiles = new Set();
+            hTiles.forEach(t => uniqueTiles.add(`${t.column},${t.row}`));
+            vTiles.forEach(t => uniqueTiles.add(`${t.column},${t.row}`));
+
+            if (uniqueTiles.size >= 5) {
+              // 5個以上 → L字/T字確定
+              h.isLTShape = true;
+              v.isLTShape = true;
+              h.ltShapePartner = v;
+              v.ltShapePartner = h;
+              h.overlapTile = overlap[0]; // 重なりタイル（生成位置の参考）
+              v.overlapTile = overlap[0];
+              // 特殊タイル生成のために special フラグを設定（横クラスターのみ、重複防止）
+              h.special = 'lineBomb';
+              // v.special は設定しない（重複防止のため横クラスターだけで処理）
+              console.log(`🔷 L字/T字検出: ユニークタイル${uniqueTiles.size}個 → ラインボム生成予約`);
+            }
           }
         }
       }
@@ -1191,59 +1874,91 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
       game.clusters = [];
     };
 
-    const removeClusters = () => {
-      // まず特殊アイテムの発動をチェック
+    const removeClusters = (generateSpecial = true) => {
+      // 特殊タイルの自動発動は無効化（クリックでのみ発動）
+      // クラスター内に特殊タイルがあっても、削除せずスキップする
+
+      // 通常のクラスター削除処理
       for (let i = 0; i < game.clusters.length; i++) {
         const cluster = game.clusters[i];
         let coffset = 0;
         let roffset = 0;
 
-        // クラスター内に既存の特殊アイテムがあるかチェック
+        // 特殊アイテムを生成する場合、最後にスワップした位置または中央の1つを特殊タイルとして残す
+        let specialTilePos = null;
+        if (generateSpecial && cluster.special) {
+          // 最後にスワップした位置がこのクラスター内にあるかチェック
+          const swappedCol = game.lastSwappedTile.column;
+          const swappedRow = game.lastSwappedTile.row;
+
+          let isInCluster = false;
+          if (cluster.horizontal) {
+            // 横クラスター：同じ行で、列がクラスターの範囲内
+            if (swappedRow === cluster.row &&
+                swappedCol >= cluster.column &&
+                swappedCol < cluster.column + cluster.length) {
+              isInCluster = true;
+              specialTilePos = { column: swappedCol, row: swappedRow };
+            }
+          } else {
+            // 縦クラスター：同じ列で、行がクラスターの範囲内
+            if (swappedCol === cluster.column &&
+                swappedRow >= cluster.row &&
+                swappedRow < cluster.row + cluster.length) {
+              isInCluster = true;
+              specialTilePos = { column: swappedCol, row: swappedRow };
+            }
+          }
+
+          // スワップ位置がクラスター内になければ、中央位置を使用
+          if (!isInCluster) {
+            const centerIndex = Math.floor(cluster.length / 2);
+            if (cluster.horizontal) {
+              specialTilePos = { column: cluster.column + centerIndex, row: cluster.row };
+            } else {
+              specialTilePos = { column: cluster.column, row: cluster.row + centerIndex };
+            }
+          }
+        }
+
         for (let j = 0; j < cluster.length; j++) {
           const currentCol = cluster.column + coffset;
           const currentRow = cluster.row + roffset;
           const tile = game.level.tiles[currentCol][currentRow];
 
-          // 既存の特殊アイテムを発動
-          if (tile.special === 'lineBomb') {
-            activateLineBomb(currentCol, currentRow);
-          } else if (tile.special === 'colorBomb') {
-            activateColorBomb(currentCol, currentRow);
+          // 既存の特殊タイルはスキップ（削除しない）
+          if (tile.special === 'lineBomb' || tile.special === 'colorBomb') {
+            // 特殊タイルはそのまま残す
+            if (cluster.horizontal) {
+              coffset++;
+            } else {
+              roffset++;
+            }
+            continue;
           }
-
-          if (cluster.horizontal) {
-            coffset++;
-          } else {
-            roffset++;
-          }
-        }
-      }
-
-      // 次に通常のクラスター削除処理
-      for (let i = 0; i < game.clusters.length; i++) {
-        const cluster = game.clusters[i];
-        let coffset = 0;
-        let roffset = 0;
-
-        // 特殊アイテムを生成する場合、中央の1つを特殊タイルとして残す
-        let specialTilePos = null;
-        if (cluster.special) {
-          // クラスターの中央位置を計算
-          const centerIndex = Math.floor(cluster.length / 2);
-          if (cluster.horizontal) {
-            specialTilePos = { column: cluster.column + centerIndex, row: cluster.row };
-          } else {
-            specialTilePos = { column: cluster.column, row: cluster.row + centerIndex };
-          }
-        }
-
-        for (let j = 0; j < cluster.length; j++) {
-          const currentCol = cluster.column + coffset;
-          const currentRow = cluster.row + roffset;
 
           // 特殊タイル位置なら、特殊アイテムとして残す
           if (specialTilePos && currentCol === specialTilePos.column && currentRow === specialTilePos.row) {
-            game.level.tiles[currentCol][currentRow].special = cluster.special;
+            // L字/T字の場合は、スワップ方向に応じたラインボムを生成
+            if (cluster.isLTShape) {
+              // 既に特殊タイルが生成されていないかチェック（L字/T字は2つのクラスターで処理される）
+              if (!game.level.tiles[currentCol][currentRow].special) {
+                game.level.tiles[currentCol][currentRow].special = 'lineBomb';
+                game.level.tiles[currentCol][currentRow].specialDirection = game.lastSwapDirection;
+                console.log(`🌈 L字/T字ラインボム生成: (${currentCol}, ${currentRow}) 方向=${game.lastSwapDirection} (スワップ方向)`);
+              }
+            } else {
+              // 通常の特殊タイル生成
+              game.level.tiles[currentCol][currentRow].special = cluster.special;
+              // 方向情報を保存（ラインボムの場合）
+              if (cluster.special === 'lineBomb') {
+                const direction = cluster.horizontal ? 'horizontal' : 'vertical';
+                game.level.tiles[currentCol][currentRow].specialDirection = direction;
+                console.log(`🌈 ラインボム生成: (${currentCol}, ${currentRow}) 方向=${direction} (${cluster.horizontal ? '横' : '縦'}消し)`);
+              } else if (cluster.special === 'colorBomb') {
+                console.log(`💎 カラーボム生成: (${currentCol}, ${currentRow}) (${cluster.horizontal ? '横' : '縦'}一線5個以上消し)`);
+              }
+            }
             // タイプは元のまま残す（色情報を保持）
           } else {
             game.level.tiles[currentCol][currentRow].type = -1;
@@ -1270,19 +1985,30 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
       }
     };
 
-    // ラインボム発動：横または縦1列を全消去
+    // ラインボム発動：横または縦1列を全消去（方向固定）
     const activateLineBomb = (col, row) => {
       console.log(`⚡ ラインボム発動！ at (${col}, ${row})`);
 
-      // ランダムで横または縦を決定
-      const horizontal = Math.random() < 0.5;
+      // タイルから方向情報を取得
+      const tile = game.level.tiles[col][row];
+      const direction = tile.specialDirection;
+      console.log(`タイル情報: special=${tile.special}, specialDirection=${direction}`);
+
+      if (!direction) {
+        console.warn(`⚠️ 警告: specialDirectionが設定されていません！デフォルトで横に設定します。`);
+      }
+
+      const horizontal = direction === 'horizontal' || !direction; // デフォルトは横
+      console.log(`発動方向: ${horizontal ? '横（→）' : '縦（↓）'}`);
+
+
 
       // タイル座標を取得
       const coord = getTileCoordinate(col, row, 0, 0);
       const centerX = coord.tilex + game.level.tilewidth / 2;
       const centerY = coord.tiley + game.level.tileheight / 2;
 
-      // ビームエフェクト追加
+      // スラッシュ&ビームエフェクト追加（多段階: 予兆→スラッシュ→ビーム→残光）
       if (horizontal) {
         game.specialEffects.push({
           type: 'lineBomb',
@@ -1292,21 +2018,47 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
           x2: game.level.x + game.level.columns * game.level.tilewidth,
           y2: centerY,
           time: 0,
-          duration: 0.4
-        });
+          duration: 2.0,  // 2秒の長い演出
+          onComplete: () => {
+            // 演出終了後に横1列削除
+            for (let i = 0; i < game.level.columns; i++) {
+              const tileCoord = getTileCoordinate(i, row, 0, 0);
+              createParticles(
+                tileCoord.tilex + game.level.tilewidth / 2,
+                tileCoord.tiley + game.level.tileheight / 2,
+                50,  // パーティクル増量（リッチ感UP）
+                '#ffff00'
+              );
+              game.level.tiles[i][row].type = -1;
+              game.level.tiles[i][row].special = null;
+            }
 
-        // 横1列削除
-        for (let i = 0; i < game.level.columns; i++) {
-          const tileCoord = getTileCoordinate(i, row, 0, 0);
-          createParticles(
-            tileCoord.tilex + game.level.tilewidth / 2,
-            tileCoord.tiley + game.level.tileheight / 2,
-            8,
-            '#ffff00'
-          );
-          game.level.tiles[i][row].type = -1;
-          game.level.tiles[i][row].special = null;
-        }
+            // タイルシフト情報を計算
+            for (let i = 0; i < game.level.columns; i++) {
+              let shift = 0;
+              for (let j = game.level.rows - 1; j >= 0; j--) {
+                if (game.level.tiles[i][j].type === -1) {
+                  shift++;
+                  game.level.tiles[i][j].shift = 0;
+                } else {
+                  game.level.tiles[i][j].shift = shift;
+                }
+              }
+            }
+
+            // タイルを実際に落として新しいタイルを補充
+            shiftTiles();
+
+            // 新しいクラスターをチェック
+            findClusters();
+            if (game.clusters.length > 0) {
+              // 連鎖が発生する場合
+              game.gamestate = game.gamestates.resolve;
+              game.animationstate = 2;
+              game.animationtime = 0;
+            }
+          }
+        });
       } else {
         game.specialEffects.push({
           type: 'lineBomb',
@@ -1316,27 +2068,54 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
           x2: centerX,
           y2: game.level.y + game.level.rows * game.level.tileheight,
           time: 0,
-          duration: 0.4
-        });
+          duration: 2.0,  // 2秒の長い演出
+          onComplete: () => {
+            // 演出終了後に縦1列削除
+            for (let j = 0; j < game.level.rows; j++) {
+              const tileCoord = getTileCoordinate(col, j, 0, 0);
+              createParticles(
+                tileCoord.tilex + game.level.tilewidth / 2,
+                tileCoord.tiley + game.level.tileheight / 2,
+                50,  // パーティクル増量（リッチ感UP）
+                '#ffff00'
+              );
+              game.level.tiles[col][j].type = -1;
+              game.level.tiles[col][j].special = null;
+            }
 
-        // 縦1列削除
-        for (let j = 0; j < game.level.rows; j++) {
-          const tileCoord = getTileCoordinate(col, j, 0, 0);
-          createParticles(
-            tileCoord.tilex + game.level.tilewidth / 2,
-            tileCoord.tiley + game.level.tileheight / 2,
-            8,
-            '#ffff00'
-          );
-          game.level.tiles[col][j].type = -1;
-          game.level.tiles[col][j].special = null;
-        }
+            // タイルシフト情報を計算
+            for (let i = 0; i < game.level.columns; i++) {
+              let shift = 0;
+              for (let j = game.level.rows - 1; j >= 0; j--) {
+                if (game.level.tiles[i][j].type === -1) {
+                  shift++;
+                  game.level.tiles[i][j].shift = 0;
+                } else {
+                  game.level.tiles[i][j].shift = shift;
+                }
+              }
+            }
+
+            // タイルを実際に落として新しいタイルを補充
+            shiftTiles();
+
+            // 新しいクラスターをチェック
+            findClusters();
+            if (game.clusters.length > 0) {
+              // 連鎖が発生する場合
+              game.gamestate = game.gamestates.resolve;
+              game.animationstate = 2;
+              game.animationtime = 0;
+            }
+          }
+        });
       }
 
-      // ボーナスダメージ（ラインボムは強力）
-      game.enemyHP = Math.max(0, game.enemyHP - 30);
+      // ボーナスダメージ（ラインボムは強力）- 半減調整
+      game.enemyHP = Math.max(0, game.enemyHP - 15);
       setEnemyHP(game.enemyHP);
-      console.log(`⚡ ラインボムで30ダメージ！`);
+      console.log(`⚡ ラインボムで15ダメージ！`);
+      addBattleLog(`⚡ ラインボム！ 15ダメージ`, '#ffaa00');
     };
 
     // カラーボム発動：周囲3×3を爆破
@@ -1348,46 +2127,88 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
       const centerX = coord.tilex + game.level.tilewidth / 2;
       const centerY = coord.tiley + game.level.tileheight / 2;
 
-      // 爆発エフェクト追加
+      // 核爆発エフェクト追加（多段階: 予兆→爆発→残光）
       game.specialEffects.push({
         type: 'colorBomb',
         x: centerX,
         y: centerY,
         radius: game.level.tilewidth * 2.5,
         time: 0,
-        duration: 0.6
-      });
+        duration: 2.8,  // 2.8秒の長い演出
+        flares: [], // フレア（光の粒）を格納
+        onComplete: () => {
+          // 演出終了後に周囲3×3範囲を削除
+          for (let i = -1; i <= 1; i++) {
+            for (let j = -1; j <= 1; j++) {
+              const targetCol = col + i;
+              const targetRow = row + j;
 
-      // 画面揺れ
-      game.screenShake.active = true;
-      game.screenShake.intensity = 15;
-      game.screenShake.duration = 0.5;
+              if (targetCol >= 0 && targetCol < game.level.columns &&
+                  targetRow >= 0 && targetRow < game.level.rows) {
+                const tileCoord = getTileCoordinate(targetCol, targetRow, 0, 0);
+                createParticles(
+                  tileCoord.tilex + game.level.tilewidth / 2,
+                  tileCoord.tiley + game.level.tileheight / 2,
+                  80,  // パーティクル大幅増量（リッチ感UP）
+                  '#ff6400'
+                );
+                game.level.tiles[targetCol][targetRow].type = -1;
+                game.level.tiles[targetCol][targetRow].special = null;
+              }
+            }
+          }
 
-      // 周囲3×3範囲を削除
-      for (let i = -1; i <= 1; i++) {
-        for (let j = -1; j <= 1; j++) {
-          const targetCol = col + i;
-          const targetRow = row + j;
+          // タイルシフト情報を計算
+          for (let i = 0; i < game.level.columns; i++) {
+            let shift = 0;
+            for (let j = game.level.rows - 1; j >= 0; j--) {
+              if (game.level.tiles[i][j].type === -1) {
+                shift++;
+                game.level.tiles[i][j].shift = 0;
+              } else {
+                game.level.tiles[i][j].shift = shift;
+              }
+            }
+          }
 
-          if (targetCol >= 0 && targetCol < game.level.columns &&
-              targetRow >= 0 && targetRow < game.level.rows) {
-            const tileCoord = getTileCoordinate(targetCol, targetRow, 0, 0);
-            createParticles(
-              tileCoord.tilex + game.level.tilewidth / 2,
-              tileCoord.tiley + game.level.tileheight / 2,
-              12,
-              '#ff6400'
-            );
-            game.level.tiles[targetCol][targetRow].type = -1;
-            game.level.tiles[targetCol][targetRow].special = null;
+          // タイルを実際に落として新しいタイルを補充
+          shiftTiles();
+
+          // 新しいクラスターをチェック
+          findClusters();
+          if (game.clusters.length > 0) {
+            // 連鎖が発生する場合
+            game.gamestate = game.gamestates.resolve;
+            game.animationstate = 2;
+            game.animationtime = 0;
           }
         }
+      });
+
+      // 初期フレアを生成（中心に集まる光の粒）- 数を増やしてリッチに
+      const effect = game.specialEffects[game.specialEffects.length - 1];
+      for (let i = 0; i < 24; i++) {  // 16 → 24（1.5倍）
+        const angle = (Math.PI * 2 * i) / 24;
+        const distance = game.level.tilewidth * 3;
+        effect.flares.push({
+          startX: centerX + Math.cos(angle) * distance,
+          startY: centerY + Math.sin(angle) * distance,
+          targetX: centerX,
+          targetY: centerY,
+          color: `hsl(${i * 15}, 100%, 60%)`
+        });
       }
 
-      // ボーナスダメージ（カラーボムは超強力）
-      game.enemyHP = Math.max(0, game.enemyHP - 50);
+      // 画面揺れ（強度を3倍、時間を2倍）
+      game.screenShake.active = true;
+      game.screenShake.intensity = 45;  // 30 → 45（1.5倍）
+      game.screenShake.duration = 1.5;  // 1.0秒 → 1.5秒
+
+      // ボーナスダメージ（カラーボムは超強力）- 半減調整
+      game.enemyHP = Math.max(0, game.enemyHP - 25);
       setEnemyHP(game.enemyHP);
-      console.log(`💥 カラーボムで50ダメージ！`);
+      console.log(`💥 カラーボムで25ダメージ！`);
+      addBattleLog(`💥 カラーボム！ 25ダメージ`, '#ff00ff');
     };
 
     const shiftTiles = () => {
@@ -1408,13 +2229,30 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
     };
 
     const swap = (x1, y1, x2, y2) => {
+      // type, special, specialDirection を交換（特殊タイルの落下に必要）
       const typeswap = game.level.tiles[x1][y1].type;
+      const specialswap = game.level.tiles[x1][y1].special;
+      const specialDirectionSwap = game.level.tiles[x1][y1].specialDirection;
+
       game.level.tiles[x1][y1].type = game.level.tiles[x2][y2].type;
+      game.level.tiles[x1][y1].special = game.level.tiles[x2][y2].special;
+      game.level.tiles[x1][y1].specialDirection = game.level.tiles[x2][y2].specialDirection;
+
       game.level.tiles[x2][y2].type = typeswap;
+      game.level.tiles[x2][y2].special = specialswap;
+      game.level.tiles[x2][y2].specialDirection = specialDirectionSwap;
     };
 
     const mouseSwap = (c1, r1, c2, r2) => {
       game.currentmove = { column1: c1, row1: r1, column2: c2, row2: r2 };
+      // 最後に動かしたタイルの位置を記録（c2, r2が移動先）
+      game.lastSwappedTile = { column: c2, row: r2 };
+      // スワップ方向を記録
+      if (c1 === c2) {
+        game.lastSwapDirection = 'vertical'; // 縦スワップ（同じ列）
+      } else {
+        game.lastSwapDirection = 'horizontal'; // 横スワップ（同じ行）
+      }
       game.level.selectedtile.selected = false;
       game.animationstate = 2;
       game.animationtime = 0;
@@ -1456,6 +2294,32 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
       const mt = getMouseTile(pos);
 
       if (mt.valid) {
+        const clickedTile = game.level.tiles[mt.x][mt.y];
+
+        // 特殊タイルをクリックした場合、即座に発動
+        if (clickedTile.special === 'lineBomb') {
+          console.log('🧃 レインボードリンクをクリック！');
+          activateLineBomb(mt.x, mt.y);
+          // 選択をクリア
+          game.level.selectedtile.selected = false;
+          // タイルシフトと連鎖チェックのためにresolve状態へ
+          game.animationstate = 1; // シフト状態
+          game.animationtime = 0;
+          game.gamestate = game.gamestates.resolve;
+          return;
+        } else if (clickedTile.special === 'colorBomb') {
+          console.log('⚛️ レインボーオーブをクリック！');
+          activateColorBomb(mt.x, mt.y);
+          // 選択をクリア
+          game.level.selectedtile.selected = false;
+          // タイルシフトと連鎖チェックのためにresolve状態へ
+          game.animationstate = 1; // シフト状態
+          game.animationtime = 0;
+          game.gamestate = game.gamestates.resolve;
+          return;
+        }
+
+        // 通常タイルの処理
         // すでに選択されているタイルをクリックした場合
         if (game.level.selectedtile.selected) {
           if (mt.x === game.level.selectedtile.column && mt.y === game.level.selectedtile.row) {
@@ -1530,6 +2394,63 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
     };
   }, [onClear, onGameOver, stage]);
 
+  // コンテニュー処理
+  const handleContinue = () => {
+    if (!saveData || !updateSaveData) {
+      console.error('セーブデータが利用できません');
+      return;
+    }
+
+    // 現在のキャラクターのコンテニュー回数を取得
+    const continueKey = `${selectedCharacter}_continues`;
+    const currentContinues = saveData[continueKey] || 0;
+
+    if (currentContinues >= 3) {
+      // 3回使い切った場合、ステージ1にリセット
+      alert('コンテニュー回数を使い切りました。ステージ1からやり直します。');
+      const updatedSaveData = {
+        ...saveData,
+        [continueKey]: 0 // コンテニュー回数をリセット
+      };
+      updateSaveData(updatedSaveData);
+
+      // ステージ1にリセット
+      if (onResetToStage1) {
+        onResetToStage1();
+      }
+      return;
+    }
+
+    // コンテニュー回数を増やす
+    const updatedSaveData = {
+      ...saveData,
+      [continueKey]: currentContinues + 1
+    };
+    updateSaveData(updatedSaveData);
+
+    console.log(`コンテニュー使用: ${currentContinues + 1}/3回目`);
+
+    // HP全回復してゲーム再開
+    const game = gameStateRef.current;
+    game.playerHP = playerMaxHP;
+    game.enemyHP = game.enemyMaxHP;
+    game.gameover = false;
+    setPlayerHP(playerMaxHP);
+    setEnemyHP(game.enemyMaxHP);
+    setShowGameOverDialog(false);
+  };
+
+  // タイトルに戻る
+  const handleReturnToTitle = () => {
+    setShowGameOverDialog(false);
+    onGameOver();
+  };
+
+  // コンテニュー残り回数を計算
+  const continueKey = `${selectedCharacter}_continues`;
+  const currentContinues = saveData ? (saveData[continueKey] || 0) : 0;
+  const remainingContinues = 3 - currentContinues;
+
   return (
     <div className="match3-puzzle-container">
       <div className="match3-canvas-wrapper">
@@ -1538,6 +2459,134 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
           className="match3-canvas"
         />
       </div>
+
+      {/* ゲームオーバーダイアログ */}
+      {showGameOverDialog && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: '#2d1b1b',
+            border: '3px solid #DC143C',
+            borderRadius: '15px',
+            padding: '40px',
+            textAlign: 'center',
+            maxWidth: '400px',
+            boxShadow: '0 0 30px rgba(220, 20, 60, 0.5)'
+          }}>
+            <h2 style={{
+              color: '#ff4444',
+              fontSize: '32px',
+              marginBottom: '20px',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
+            }}>
+              敗北...
+            </h2>
+
+            <p style={{
+              color: '#ffffff',
+              fontSize: '16px',
+              marginBottom: '10px'
+            }}>
+              意識を奪われてしまった...
+            </p>
+
+            {remainingContinues > 0 ? (
+              <p style={{
+                color: '#ffdd44',
+                fontSize: '14px',
+                marginBottom: '30px'
+              }}>
+                残りコンテニュー: {remainingContinues}回
+              </p>
+            ) : (
+              <p style={{
+                color: '#ff4444',
+                fontSize: '14px',
+                marginBottom: '30px',
+                fontWeight: 'bold'
+              }}>
+                ⚠ コンテニュー回数を使い切りました ⚠
+              </p>
+            )}
+
+            <div style={{
+              display: 'flex',
+              gap: '20px',
+              justifyContent: 'center'
+            }}>
+              <button
+                onClick={handleReturnToTitle}
+                style={{
+                  padding: '15px 30px',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  backgroundColor: '#555555',
+                  color: '#ffffff',
+                  border: '2px solid #888888',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  minWidth: '140px'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = '#666666';
+                  e.target.style.transform = 'scale(1.05)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = '#555555';
+                  e.target.style.transform = 'scale(1)';
+                }}
+              >
+                タイトルに戻る
+              </button>
+
+              <button
+                onClick={handleContinue}
+                disabled={remainingContinues <= 0}
+                style={{
+                  padding: '15px 30px',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  backgroundColor: remainingContinues > 0 ? '#44ff44' : '#333333',
+                  color: remainingContinues > 0 ? '#000000' : '#666666',
+                  border: `2px solid ${remainingContinues > 0 ? '#00ff00' : '#555555'}`,
+                  borderRadius: '8px',
+                  cursor: remainingContinues > 0 ? 'pointer' : 'not-allowed',
+                  transition: 'all 0.2s',
+                  minWidth: '140px',
+                  opacity: remainingContinues > 0 ? 1 : 0.5
+                }}
+                onMouseEnter={(e) => {
+                  if (remainingContinues > 0) {
+                    e.target.style.backgroundColor = '#55ff55';
+                    e.target.style.transform = 'scale(1.05)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (remainingContinues > 0) {
+                    e.target.style.backgroundColor = '#44ff44';
+                    e.target.style.transform = 'scale(1)';
+                  }
+                }}
+              >
+                コンテニュー
+                <br />
+                <span style={{ fontSize: '12px' }}>（HP全回復）</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

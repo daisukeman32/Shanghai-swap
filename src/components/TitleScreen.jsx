@@ -7,29 +7,52 @@ function TitleScreen({ onStart, onContinue, onGallery, saveData }) {
   const [selectedCharacter, setSelectedCharacter] = useState('airi'); // デフォルトは愛莉
 
   const characters = [
-    { id: 'airi', name: '愛莉', fullName: '星野 愛莉', className: 'character-1', image: '/assets/characters/airi/airi_default.png' },
-    { id: 'kaho', name: '夏帆', fullName: '夏目 夏帆', className: 'character-2', image: '/assets/characters/character2.png' },
-    { id: 'mitsuki', name: '美月', fullName: '水瀬 美月', className: 'character-3', image: '/assets/characters/character3.png' },
-    { id: 'misaki', name: '美咲', fullName: '木村 美咲', className: 'character-4', image: '/assets/characters/character4.png' }
+    { id: 'airi', name: '愛莉', fullName: '星野 愛莉', className: 'character-1', image: '/assets/characters/airi/airi_title.png' },
+    { id: 'kaho', name: '夏帆', fullName: '夏目 夏帆', className: 'character-2', image: '/assets/characters/kaho/kaho_title.png' },
+    { id: 'mitsuki', name: '美月', fullName: '水瀬 美月', className: 'character-3', image: '/assets/characters/mitsuki/mitsuki_title.png' },
+    { id: 'misaki', name: '美咲', fullName: '木村 美咲', className: 'character-4', image: '/assets/characters/misaki/misaki_title.png' }
   ];
+
+  // セーブデータの状態を確認
+  const hasProgress = saveData && saveData.playerName && saveData.characterProgress;
 
   // 続きから情報を取得
   const getContinueInfo = () => {
-    if (!saveData || !saveData.currentProgress) return null;
+    if (!hasProgress) return null;
 
-    const currentCharId = saveData.currentProgress.characterId;
-    if (!currentCharId) return null;
+    // 最後にプレイしたキャラクターを探す
+    let lastCharId = null;
+    let lastStage = 0;
 
-    const char = characters.find(c => c.id === currentCharId);
-    const stage = saveData.characterProgress?.[currentCharId]?.currentStage || 1;
+    for (const [charId, progress] of Object.entries(saveData.characterProgress)) {
+      if (progress && progress.currentStage > lastStage) {
+        lastCharId = charId;
+        lastStage = progress.currentStage;
+      }
+    }
 
+    if (!lastCharId) return null;
+
+    const char = characters.find(c => c.id === lastCharId);
     return {
+      characterId: lastCharId,
       characterName: char ? char.name : '不明',
-      stage: stage
+      stage: lastStage
     };
   };
 
   const continueInfo = getContinueInfo();
+
+  // スタートボタンのハンドラー（自動判定）
+  const handleStart = () => {
+    if (continueInfo) {
+      // セーブデータがあれば続きから
+      onContinue();
+    } else {
+      // なければ選択中のキャラではじめから
+      onStart(selectedCharacter);
+    }
+  };
 
   const handleCharacterSelect = (characterId) => {
     // ロックされているキャラは選択不可
@@ -83,18 +106,24 @@ function TitleScreen({ onStart, onContinue, onGallery, saveData }) {
 
         {/* メニューボタン */}
         <div className="menu-buttons">
-          <button className="menu-button" onClick={() => onStart(selectedCharacter)}>
-            ▶ はじめから
+          {/* メインスタートボタン */}
+          <button className="menu-button main-start-button" onClick={handleStart} autoFocus>
+            {continueInfo ? (
+              <>
+                <div className="button-main">▶ スタート</div>
+                <div className="button-sub">
+                  {continueInfo.characterName} ステージ{continueInfo.stage}から再開
+                </div>
+              </>
+            ) : (
+              <div className="button-main">▶ スタート</div>
+            )}
           </button>
 
-          {hasSaveData && (
-            <button className="menu-button continue-button" onClick={onContinue}>
-              <div className="button-main">▶ つづきから</div>
-              {continueInfo && (
-                <div className="button-sub">
-                  {continueInfo.characterName} ステージ{continueInfo.stage}から
-                </div>
-              )}
+          {/* 新しく始めるリンク（セーブデータがある場合のみ表示） */}
+          {continueInfo && (
+            <button className="menu-button secondary-button" onClick={() => onStart(selectedCharacter)}>
+              最初から始める（{characters.find(c => c.id === selectedCharacter)?.name}）
             </button>
           )}
 

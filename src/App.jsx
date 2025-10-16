@@ -105,6 +105,10 @@ function App() {
       // 次のキャラクターを解放
       updatedSaveData = unlockNextCharacter(updatedSaveData, selectedCharacter);
 
+      // コンテニュー回数をリセット（クリア時）
+      const continueKey = `${selectedCharacter}_continues`;
+      updatedSaveData[continueKey] = 0;
+
       setSaveData(updatedSaveData);
 
       // タイトルへ戻る
@@ -117,6 +121,20 @@ function App() {
       setNextDialogueId(nextDialogueId); // rewards.csvのnext_dialogue_idを使用
       changeScene('conversation');
     }
+  };
+
+  // セーブデータ更新
+  const handleUpdateSaveData = (updatedData) => {
+    setSaveData(updatedData);
+  };
+
+  // ステージ1にリセット（コンテニュー使い切り時）
+  const handleResetToStage1 = () => {
+    const updatedSaveData = resetCharacterStage(saveData, selectedCharacter);
+    setSaveData(updatedSaveData);
+    setCurrentStage(1);
+    setNextDialogueId(null);
+    changeScene('conversation');
   };
 
   if (loading) {
@@ -163,9 +181,12 @@ function App() {
       {currentScene === 'puzzle' && (
         <Match3Puzzle
           onClear={() => changeScene('reward')}
-          onGameOver={() => changeScene('conversation')}
+          onGameOver={() => changeScene('title')}
           stage={currentStage}
           selectedCharacter={selectedCharacter}
+          saveData={saveData}
+          updateSaveData={handleUpdateSaveData}
+          onResetToStage1={handleResetToStage1}
         />
       )}
 

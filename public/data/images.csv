@@ -48,3 +48,55 @@ BG_007,background,,normal,/assets/backgrounds/BG_007_reward.jpg,true,ご褒美�
 UI_001,ui_element,,normal,/assets/ui/UI_001_button.png,true,ボタン素材
 UI_002,ui_element,,normal,/assets/ui/UI_002_frame.png,true,会話フレーム
 UI_003,ui_element,,normal,/assets/ui/UI_003_choice_box.png,true,選択肢ボックス
+SWAP_AIRI_001,character_sprite,airi_swap,swap_curious,/assets/characters/airi/airi_swap_curious.png,true,愛莉swap・入れ替わり直後の好奇心
+SWAP_AIRI_002,character_sprite,airi_swap,swap_smirk,/assets/characters/airi/airi_swap_smirk.png,true,愛莉swap・邪悪な笑み
+SWAP_AIRI_003,character_sprite,airi_swap,swap_dark,/assets/characters/airi/airi_swap_dark.png,true,愛莉swap・暗い表情
+SWAP_AIRI_004,character_sprite,airi_swap,swap_touching_chest,/assets/characters/airi/airi_swap_touching_chest.png,true,愛莉swap・胸を触察（NSFW_Light）
+SWAP_AIRI_005,character_sprite,airi_swap,swap_with_book,/assets/characters/airi/airi_swap_with_book.png,true,愛莉swap・BL本発見
+SWAP_AIRI_006,character_sprite,airi_swap,swap_undressing,/assets/characters/airi/airi_swap_undressing.png,true,愛莉swap・脱衣中（NSFW_Medium）
+SWAP_AIRI_007,character_sprite,airi_swap,swap_embarrassing_pose,/assets/characters/airi/airi_swap_embarrassing_pose.png,true,愛莉swap・恥ずかしいポーズ（NSFW_Medium）
+SWAP_AIRI_008,character_sprite,airi_swap,swap_exposed_top,/assets/characters/airi/airi_swap_exposed_top.png,true,愛莉swap・上半身露出（NSFW_Medium）
+SWAP_AIRI_009,character_sprite,airi_swap,swap_pleasure_light,/assets/characters/airi/airi_swap_pleasure_light.png,true,愛莉swap・軽い快楽表情（NSFW_Medium）
+SWAP_AIRI_010,character_sprite,airi_swap,swap_fully_exposed,/assets/characters/airi/airi_swap_fully_exposed.png,true,愛莉swap・全裸（NSFW_Hard）
+SWAP_AIRI_011,character_sprite,airi_swap,swap_toys,/assets/characters/airi/airi_swap_toys.png,true,愛莉swap・道具使用（NSFW_Hard）
+SWAP_AIRI_012,character_sprite,airi_swap,swap_pleasure_medium,/assets/characters/airi/airi_swap_pleasure_medium.png,true,愛莉swap・中程度快楽（NSFW_Hard）
+SWAP_AIRI_013,character_sprite,airi_swap,swap_pleasure_intense,/assets/characters/airi/airi_swap_pleasure_intense.png,true,愛莉swap・強い快楽（NSFW_Hard）
+SWAP_AIRI_014,character_sprite,airi_swap,swap_climax,/assets/characters/airi/airi_swap_climax.png,true,愛莉swap・絶頂表情（NSFW_Hard）
+SWAP_KAHO_001,character_sprite,kaho_swap,swap_curious,/assets/characters/kaho/kaho_swap_curious.png,true,夏帆swap・筋肉質な体確認
+SWAP_KAHO_002,character_sprite,kaho_swap,swap_smirk,/assets/characters/kaho/kaho_swap_smirk.png,true,夏帆swap・邪悪な笑み
+SWAP_KAHO_003,character_sprite,kaho_swap,swap_dark,/assets/characters/kaho/kaho_swap_dark.png,true,夏帆swap・暗い表情
+SWAP_KAHO_004,character_sprite,kaho_swap,swap_sportswear,/assets/characters/kaho/kaho_swap_sportswear.png,true,夏帆swap・スポーツウェア姿（NSFW_Light）
+SWAP_KAHO_005,character_sprite,kaho_swap,swap_touching_chest,/assets/characters/kaho/kaho_swap_touching_chest.png,true,夏帆swap・Dカップ触察（NSFW_Light）
+SWAP_KAHO_006,character_sprite,kaho_swap,swap_with_book,/assets/characters/kaho/kaho_swap_with_book.png,true,夏帆swap・間違った理論書
+SWAP_KAHO_007,character_sprite,kaho_swap,swap_undressing_sportswear,/assets/characters/kaho/kaho_swap_undressing_sportswear.png,true,夏帆swap・スポーツウェア脱衣（NSFW_Medium）
+SWAP_KAHO_008,character_sprite,kaho_swap,swap_equipment_pose,/assets/characters/kaho/kaho_swap_equipment_pose.png,true,夏帆swap・体育用具使用（NSFW_Medium）
+SWAP_KAHO_009,character_sprite,kaho_swap,swap_exposed,/assets/characters/kaho/kaho_swap_exposed.png,true,夏帆swap・全裸（NSFW_Hard）
+SWAP_KAHO_010,character_sprite,kaho_swap,swap_bench_press,/assets/characters/kaho/kaho_swap_bench_press.png,true,夏帆swap・ベンチプレス台調教（NSFW_Hard）
+SWAP_KAHO_011,character_sprite,kaho_swap,swap_balance_ball,/assets/characters/kaho/kaho_swap_balance_ball.png,true,夏帆swap・バランスボール（NSFW_Hard）
+SWAP_KAHO_012,character_sprite,kaho_swap,swap_pleasure_medium,/assets/characters/kaho/kaho_swap_pleasure_medium.png,true,夏帆swap・中程度快楽（NSFW_Hard）
+SWAP_KAHO_013,character_sprite,kaho_swap,swap_pleasure_intense,/assets/characters/kaho/kaho_swap_pleasure_intense.png,true,夏帆swap・強い快楽（NSFW_Hard）
+SWAP_KAHO_014,character_sprite,kaho_swap,swap_climax,/assets/characters/kaho/kaho_swap_climax.png,true,夏帆swap・絶頂表情（NSFW_Hard）
+SWAP_MITSUKI_001,character_sprite,mitsuki_swap,swap_curious,/assets/characters/mitsuki/mitsuki_swap_curious.png,true,美月swap・知的美貌確認
+SWAP_MITSUKI_002,character_sprite,mitsuki_swap,swap_no_glasses,/assets/characters/mitsuki/mitsuki_swap_no_glasses.png,true,美月swap・メガネなし無防備
+SWAP_MITSUKI_003,character_sprite,mitsuki_swap,swap_smirk,/assets/characters/mitsuki/mitsuki_swap_smirk.png,true,美月swap・邪悪な笑み
+SWAP_MITSUKI_004,character_sprite,mitsuki_swap,swap_dark,/assets/characters/mitsuki/mitsuki_swap_dark.png,true,美月swap・暗い表情
+SWAP_MITSUKI_005,character_sprite,mitsuki_swap,swap_with_diary,/assets/characters/mitsuki/mitsuki_swap_with_diary.png,true,美月swap・学級日誌発見
+SWAP_MITSUKI_006,character_sprite,mitsuki_swap,swap_undressing_no_glasses,/assets/characters/mitsuki/mitsuki_swap_undressing_no_glasses.png,true,美月swap・メガネなし脱衣（NSFW_Medium）
+SWAP_MITSUKI_007,character_sprite,mitsuki_swap,swap_exposed_no_glasses,/assets/characters/mitsuki/mitsuki_swap_exposed_no_glasses.png,true,美月swap・メガネなし全裸（NSFW_Hard）
+SWAP_MITSUKI_008,character_sprite,mitsuki_swap,swap_with_stationary,/assets/characters/mitsuki/mitsuki_swap_with_stationary.png,true,美月swap・文房具調教（NSFW_Hard）
+SWAP_MITSUKI_009,character_sprite,mitsuki_swap,swap_glasses_control,/assets/characters/mitsuki/mitsuki_swap_glasses_control.png,true,美月swap・メガネ支配（NSFW_Hard）
+SWAP_MITSUKI_010,character_sprite,mitsuki_swap,swap_pleasure_medium,/assets/characters/mitsuki/mitsuki_swap_pleasure_medium.png,true,美月swap・中程度快楽（NSFW_Hard）
+SWAP_MITSUKI_011,character_sprite,mitsuki_swap,swap_pleasure_intense,/assets/characters/mitsuki/mitsuki_swap_pleasure_intense.png,true,美月swap・強い快楽（NSFW_Hard）
+SWAP_MITSUKI_012,character_sprite,mitsuki_swap,swap_climax,/assets/characters/mitsuki/mitsuki_swap_climax.png,true,美月swap・絶頂表情（NSFW_Hard）
+SWAP_MISAKI_001,character_sprite,misaki_swap,swap_curious,/assets/characters/misaki/misaki_swap_curious.png,true,美咲swap・違和感
+SWAP_MISAKI_002,character_sprite,misaki_swap,swap_confused,/assets/characters/misaki/misaki_swap_confused.png,true,美咲swap・困惑
+SWAP_MISAKI_003,character_sprite,misaki_swap,swap_dark,/assets/characters/misaki/misaki_swap_dark.png,true,美咲swap・不気味
+SWAP_MISAKI_004,character_sprite,misaki_swap,swap_desperate_attempt,/assets/characters/misaki/misaki_swap_desperate_attempt.png,true,美咲swap・必死の調教試行（NSFW_Medium）
+SWAP_MISAKI_005,character_sprite,misaki_swap,swap_failing,/assets/characters/misaki/misaki_swap_failing.png,true,美咲swap・失敗焦燥
+SWAP_MISAKI_006,character_sprite,misaki_swap,swap_violated,/assets/characters/misaki/misaki_swap_violated.png,true,美咲swap・逆襲開始（NSFW_Hard・BADエンド）
+SWAP_MISAKI_007,character_sprite,misaki_swap,swap_pain,/assets/characters/misaki/misaki_swap_pain.png,true,美咲swap・苦痛表情（NSFW_Hard・BADエンド）
+SWAP_MISAKI_008,character_sprite,misaki_swap,swap_desperate,/assets/characters/misaki/misaki_swap_desperate.png,true,美咲swap・必死懇願（NSFW_Hard・BADエンド）
+SWAP_MISAKI_009,character_sprite,misaki_swap,swap_climax_forced,/assets/characters/misaki/misaki_swap_climax_forced.png,true,美咲swap・強制絶頂（NSFW_Hard・BADエンド）
+SWAP_MISAKI_010,character_sprite,misaki_swap,swap_ahegao,/assets/characters/misaki/misaki_swap_ahegao.png,true,美咲swap・アヘ顔（NSFW_Hard・BADエンド）
+SWAP_MISAKI_011,character_sprite,misaki_swap,swap_broken,/assets/characters/misaki/misaki_swap_broken.png,true,美咲swap・精神崩壊（NSFW_Hard・BADエンド）
+SWAP_MISAKI_012,character_sprite,misaki_swap,swap_ahegao_dying,/assets/characters/misaki/misaki_swap_ahegao_dying.png,true,美咲swap・アヘ顔で首絞め（NSFW_Hard・BADエンド）
