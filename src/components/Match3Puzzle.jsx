@@ -78,6 +78,7 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
     startCutinImage: null,
     excellentCutinImage: null,
     clearCompleteCutinImage: null,
+    gameplayBackgroundImage: null, // ゲームプレイエリア背景画像
     imagesLoaded: false,
     // タイルアイコン画像
     tileImages: {
@@ -94,7 +95,7 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
   useEffect(() => {
     const game = gameStateRef.current;
     let loadedCount = 0;
-    const totalImages = 12; // 主人公 + 相手キャラ + キャラ背景 + タイル5種 + カットイン4種
+    const totalImages = 13; // 主人公 + 相手キャラ + キャラ背景 + ゲームプレイ背景 + タイル5種 + カットイン4種
 
     // 主人公の画像（500×500の正方形画像）
     const playerImg = new Image();
@@ -182,6 +183,21 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
         checkImagesLoaded();
       };
     });
+
+    // ゲームプレイ背景画像の読み込み（キャラクター別）
+    const gameplayBgImg = new Image();
+    gameplayBgImg.src = `/assets/backgrounds/classroom_${selectedCharacter}.png`;
+    gameplayBgImg.onload = () => {
+      game.gameplayBackgroundImage = gameplayBgImg;
+      loadedCount++;
+      checkImagesLoaded();
+      console.log(`✅ ゲームプレイ背景読み込み完了: classroom_${selectedCharacter}.png`);
+    };
+    gameplayBgImg.onerror = () => {
+      console.warn(`ゲームプレイ背景画像の読み込み失敗: classroom_${selectedCharacter}.png`);
+      loadedCount++;
+      checkImagesLoaded();
+    };
 
     // タイルアイコン画像の読み込み（新しいパス）
     const tileImagePaths = {
@@ -522,7 +538,7 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
 
       // 立ち絵エリア
       const portraitAreaY = headerHeight;
-      const portraitAreaHeight = 160;
+      const portraitAreaHeight = 240; // 160 → 240に拡大（+80px、隙間を埋める）
 
       // 立ち絵背景
       ctx.fillStyle = '#1a0a0a';
@@ -568,11 +584,25 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
       ctx.shadowColor = 'transparent';
       ctx.shadowBlur = 0;
 
-      // レベル背景
+      // ゲームプレイエリア背景画像（立ち絵エリアの下、不透明度60%）
+      const gameplayBgStartY = portraitAreaY + portraitAreaHeight + 10; // 立ち絵終端 + 10px隙間
+      const gameplayBgHeight = logicalHeight - gameplayBgStartY; // 画面下まで
+
+      if (game.gameplayBackgroundImage && game.gameplayBackgroundImage.complete) {
+        ctx.save();
+        ctx.globalAlpha = 0.2; // 不透明度20%（80%透過）- 教室背景を薄く表示
+        ctx.drawImage(
+          game.gameplayBackgroundImage,
+          0, gameplayBgStartY, logicalWidth, gameplayBgHeight
+        );
+        ctx.restore();
+      }
+
+      // レベル背景（完全削除 - 教室背景を表示するため）
       const levelwidth = game.level.columns * game.level.tilewidth;
       const levelheight = game.level.rows * game.level.tileheight;
-      ctx.fillStyle = '#000000';
-      ctx.fillRect(game.level.x - 4, game.level.y - 4, levelwidth + 8, levelheight + 8);
+      // ctx.fillStyle = '#000000';
+      // ctx.fillRect(game.level.x - 4, game.level.y - 4, levelwidth + 8, levelheight + 8);
 
       // タイル描画
       renderTiles(ctx);
