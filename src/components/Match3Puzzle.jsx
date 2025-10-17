@@ -24,6 +24,12 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
   const [gameKey, setGameKey] = useState(0); // ゲームリセット用キー
   const [gameStarted, setGameStarted] = useState(false); // ゲーム開始フラグ
   const [warning30Played, setWarning30Played] = useState(false); // 30秒警告再生済みフラグ
+  const [startButtonClicked, setStartButtonClicked] = useState(false); // STARTボタンクリック済みフラグ
+
+  // 🎮 チートコード関連
+  const [keySequence, setKeySequence] = useState([]); // 入力されたキーシーケンス
+  const [cheatModeActive, setCheatModeActive] = useState(false); // 救済ボタン表示フラグ
+  const CHEAT_CODE = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 's', 'w', 'a', 'p'];
 
   // 🔊 効果音管理用ref
   const soundsRef = useRef({
@@ -345,9 +351,9 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
   // 🔊 スタートカットイン表示時に音声再生
   useEffect(() => {
     if (showCutin && cutinType === 'start') {
-      // スタートカットイン表示時にカットイン音を再生
-      playSound('cutin');
-      console.log('🔊 スタートカットイン音再生');
+      // スタートカットイン表示時にカットイン音を再生（フェード付き）
+      playSoundWithFade('cutin', 200);
+      console.log('🔊 スタートカットイン音再生（フェード付き）');
     }
   }, [showCutin, cutinType]);
 
@@ -361,6 +367,7 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
       setCutinType('start');
       setShowCutin(true);
       setWarning30Played(false); // 30秒警告フラグリセット
+      setStartButtonClicked(false); // STARTボタンフラグリセット
       console.log('🔄 ゲームリセット - スタートカットイン表示');
     }
   }, [gameKey]);
@@ -416,8 +423,10 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
 
   // タイムアップチェック
   useEffect(() => {
-    if (timeRemaining <= 0 && !gameStateRef.current.gameover && !gameStateRef.current.cleared) {
+    // ⏰ refも確認して滑り込み時計を正しく判定
+    if (timeRemaining <= 0 && timeRemainingRef.current <= 0 && !gameStateRef.current.gameover && !gameStateRef.current.cleared) {
       gameStateRef.current.gameover = true;
+      console.log('⏱️ タイムアップ！ゲームオーバー');
       // 🔊 ゲームオーバー効果音を即座に再生
       playSound('gameoverSound');
       setTimeout(() => {
@@ -436,8 +445,8 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
       setCutinType('first');
       setShowCutin(true);
 
-      // 🔊 カットイン音再生
-      playSound('cutin');
+      // 🔊 カットイン音再生（フェード付きで音割れ防止）
+      playSoundWithFade('cutin', 200);
 
       // カットイン音の0.3秒後にセリフ「よしあと一回のみ」（フェード付き）
       setTimeout(() => {
@@ -471,8 +480,8 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
       setTimeout(() => {
         setCutinType('excellent');
         setShowCutin(true);
-        // 🔊 カットイン音再生
-        playSound('cutin');
+        // 🔊 カットイン音再生（フェード付き）
+        playSoundWithFade('cutin', 200);
 
         setTimeout(() => {
           setShowCutin(false);
@@ -480,8 +489,8 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
           setTimeout(() => {
             setCutinType('clearComplete');
             setShowCutin(true);
-            // 🔊 カットイン音 + セリフ「ひひひ！やったぜいれかわりだ！」
-            playSound('cutin');
+            // 🔊 カットイン音 + セリフ「ひひひ！やったぜいれかわりだ！」（フェード付き）
+            playSoundWithFade('cutin', 200);
             setTimeout(() => {
               playSoundWithFade('clearVoice', 300); // フェード付き
             }, 300); // カットイン音の後、0.3秒後にセリフ再生
@@ -580,7 +589,8 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
           // 🔊 シャッフル警告音再生
           playSound('shuffleWarning');
 
-          // ペナルティ: 10秒減少
+          // ペナルティ: 10秒減少（即座にrefも更新）
+          timeRemainingRef.current = Math.max(0, timeRemainingRef.current - 10);
           setTimeRemaining(prev => Math.max(0, prev - 10));
           addFloatingText(game.level.x + (game.level.columns * game.level.tilewidth) / 2,
                          game.level.y + (game.level.rows * game.level.tileheight) / 2,
@@ -1089,6 +1099,8 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
       // 時計タイル（type 2）: 時間回復
       if (colorMatches[2] >= 3) {
         const timeBonus = colorMatches[2] >= 4 ? 6 : 3;
+        // ⏰ 即座にrefを更新して滑り込み時計を反映
+        timeRemainingRef.current = timeRemainingRef.current + timeBonus;
         setTimeRemaining(prev => prev + timeBonus);
         addFloatingText(
           game.level.x + (game.level.columns * game.level.tilewidth) / 2,
@@ -1096,11 +1108,13 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
           `+${timeBonus}秒`,
           '#00ff00'
         );
-        console.log(`⏰ 時間回復: +${timeBonus}秒`);
+        console.log(`⏰ 時間回復: +${timeBonus}秒 (即座反映: ${timeRemainingRef.current}秒)`);
       }
 
       // ドクロタイル（type 3）: 時間減少（3個のみペナルティ、4個以上はペナルティなし）
       if (colorMatches[3] === 3) {
+        // 💀 即座にrefを更新
+        timeRemainingRef.current = Math.max(0, timeRemainingRef.current - 10);
         setTimeRemaining(prev => Math.max(0, prev - 10));
         addFloatingText(
           game.level.x + (game.level.columns * game.level.tilewidth) / 2,
@@ -1108,7 +1122,7 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
           '-10秒',
           '#ff4444'
         );
-        console.log('💀 ドクロペナルティ: -10秒');
+        console.log(`💀 ドクロペナルティ: -10秒 (即座反映: ${timeRemainingRef.current}秒)`);
       } else if (colorMatches[3] >= 4) {
         addFloatingText(
           game.level.x + (game.level.columns * game.level.tilewidth) / 2,
@@ -1503,7 +1517,15 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
 
   // スタートボタンクリック処理
   const handleStartClick = () => {
+    // 連打防止：既にクリック済みなら無視
+    if (startButtonClicked) {
+      console.log('🎮 STARTボタン - 既にクリック済みのため無視');
+      return;
+    }
+
     console.log('🎮 STARTボタンクリック - カウントダウン開始！');
+    setStartButtonClicked(true); // フラグを立てる
+
     // 🔊 カウントダウン開始音再生
     playSound('countdownStart');
 
@@ -1515,9 +1537,64 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
     }, 3000); // 3秒待機
   };
 
+  // 🎮 チートコード検出用キーボードリスナー
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // ゲーム開始後のみチートコード入力を受付
+      if (!gameStarted && showCutin) return;
+
+      // 入力されたキーをシーケンスに追加
+      setKeySequence(prev => {
+        const newSequence = [...prev, e.key];
+
+        // シーケンスが長すぎる場合は古いものを削除（最大12個）
+        if (newSequence.length > CHEAT_CODE.length) {
+          newSequence.shift();
+        }
+
+        // チートコードと一致するかチェック
+        const isMatch = CHEAT_CODE.every((key, index) => newSequence[index] === key);
+
+        if (isMatch && newSequence.length === CHEAT_CODE.length) {
+          console.log('🎮 チートコード発動！救済ボタン出現！');
+          setCheatModeActive(true);
+          playSound('heart5'); // 成功音
+          return []; // シーケンスをリセット
+        }
+
+        return newSequence;
+      });
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [gameStarted, showCutin]);
+
+  // 🎮 救済ボタン（即座にクリア）
+  const handleCheatClear = () => {
+    console.log('🎮 救済ボタンクリック - 即座にリワード画面へ！');
+    playSound('buttonClick');
+
+    // 演出なしで即座にクリア処理を実行してリワード画面へ遷移
+    gameStateRef.current.cleared = true;
+    setCheatModeActive(false); // ボタンを非表示
+
+    // 次のシーン（リワード画面）へ即座に遷移
+    setTimeout(() => {
+      onClear();
+    }, 500); // 0.5秒後に遷移
+  };
+
   return (
     <div className="match3-container">
       <canvas ref={canvasRef} className="match3-canvas" />
+
+      {/* 🎮 救済ボタン（チートモード時のみ表示） */}
+      {cheatModeActive && !gameStateRef.current.cleared && !gameStateRef.current.gameover && (
+        <button className="cheat-clear-button" onClick={handleCheatClear}>
+          ✨ 救済クリア ✨
+        </button>
+      )}
 
       {/* カットイン表示 */}
       {showCutin && (() => {

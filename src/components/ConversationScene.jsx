@@ -20,6 +20,8 @@ function ConversationScene({ gameData, playerName, selectedCharacter, currentSta
   const [currentChoices, setCurrentChoices] = useState([]);
   const [selectedChoiceIndex, setSelectedChoiceIndex] = useState(0);
   const [isMouthOpen, setIsMouthOpen] = useState(false); // 口パク状態管理
+  const [showChoiceImage, setShowChoiceImage] = useState(false); // 選択肢画像表示フラグ
+  const [choiceImagePath, setChoiceImagePath] = useState(null); // 選択肢画像パス
 
   const currentDialogue = gameData?.dialogues?.find(
     d => d.dialogue_id === currentDialogueId
@@ -224,11 +226,32 @@ function ConversationScene({ gameData, playerName, selectedCharacter, currentSta
 
     setShowChoices(false);
 
-    if (choice.is_correct === 'true') {
-      setCurrentDialogueId(choice.next_dialogue_id);
+    // 選択肢に画像がある場合は画像を表示
+    if (choice.choice_image && choice.choice_image.trim() !== '') {
+      console.log('選択肢画像を表示:', choice.choice_image);
+      setChoiceImagePath(choice.choice_image);
+      setShowChoiceImage(true);
+
+      // 画像表示後、次のダイアログへ進む準備
+      // 実際の遷移は画像クリック時に実行
+      setTimeout(() => {
+        // 自動的に3秒後に画像を閉じる
+        setShowChoiceImage(false);
+        if (choice.is_correct === 'true') {
+          setCurrentDialogueId(choice.next_dialogue_id);
+        } else {
+          // BADエンド
+          setCurrentDialogueId(choice.next_dialogue_id);
+        }
+      }, 3000); // 3秒表示
     } else {
-      // BADエンド
-      setCurrentDialogueId(choice.next_dialogue_id);
+      // 画像がない場合は即座に次のダイアログへ
+      if (choice.is_correct === 'true') {
+        setCurrentDialogueId(choice.next_dialogue_id);
+      } else {
+        // BADエンド
+        setCurrentDialogueId(choice.next_dialogue_id);
+      }
     }
   };
 
@@ -308,8 +331,8 @@ function ConversationScene({ gameData, playerName, selectedCharacter, currentSta
 
   return (
     <div className="conversation-scene" style={{ background: bgColor }} onClick={handleScreenClick}>
-      {/* 背景画像レイヤー */}
-      {bgImage && (
+      {/* 背景画像レイヤー（第1ステージは非表示） */}
+      {bgImage && currentStage > 1 && (
         <div className="background-layer">
           <img src={bgImage} alt="背景" className="background-image" />
         </div>
@@ -381,6 +404,32 @@ function ConversationScene({ gameData, playerName, selectedCharacter, currentSta
               )}
             </button>
           ))}
+        </div>
+      )}
+
+      {/* 選択肢画像表示（全画面モーダル） */}
+      {showChoiceImage && choiceImagePath && (
+        <div
+          className="choice-image-modal"
+          onClick={() => {
+            setShowChoiceImage(false);
+            // 画像クリックで即座に次の会話へ
+            const nextChoice = currentChoices.find(c => c.choice_image === choiceImagePath);
+            if (nextChoice) {
+              if (nextChoice.is_correct === 'true') {
+                setCurrentDialogueId(nextChoice.next_dialogue_id);
+              } else {
+                setCurrentDialogueId(nextChoice.next_dialogue_id);
+              }
+            }
+          }}
+        >
+          <img
+            src={choiceImagePath}
+            alt="選択肢画像"
+            className="choice-image-fullscreen"
+          />
+          <div className="choice-image-hint">クリックで続きへ</div>
         </div>
       )}
     </div>

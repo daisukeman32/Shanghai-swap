@@ -7,10 +7,10 @@
   justify-content: flex-end;
   overflow: hidden;
   transition: background 0.5s ease;
-  background: linear-gradient(180deg, #1a0a0a 0%, #2d1b1b 100%);
+  background: #000000; /* 16:9背景画像用に黒背景 */
 }
 
-/* 背景画像レイヤー */
+/* 背景画像レイヤー - 16:9全画面表示 */
 .background-layer {
   position: absolute;
   top: 0;
@@ -18,15 +18,18 @@
   width: 100%;
   height: 100%;
   z-index: 0;
-  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000000;
 }
 
 .background-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;  /* 16:9のアスペクト比を維持して全画面表示 */
   object-position: center;
-  opacity: 0.95;
+  opacity: 1;
   animation: backgroundFadeIn 1s ease-out;
 }
 
@@ -36,7 +39,7 @@
     transform: scale(1.05);
   }
   to {
-    opacity: 0.95;
+    opacity: 1;
     transform: scale(1);
   }
 }
@@ -142,7 +145,7 @@
 
 /* テキストボックス */
 .textbox {
-  position: absolute;
+  position: absolute; /* 画面に対して絶対位置、かつ子要素の基準点 */
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
@@ -201,13 +204,27 @@
 }
 
 .next-indicator {
-  text-align: center;
-  padding: 10px;
+  position: absolute;
+  bottom: 15px;
+  right: 25px;
+  padding: 8px 15px;
   font-size: 16px;
   color: #DC143C;
   cursor: pointer;
   animation: blink 1.5s infinite;
   font-weight: bold;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  border: 2px solid #DC143C;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.next-indicator:hover {
+  background: rgba(220, 20, 60, 0.1);
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(220, 20, 60, 0.4);
 }
 
 @keyframes blink {
@@ -311,6 +328,56 @@
     transform: translateY(-50%) scale(1) rotate(0);
     opacity: 1;
   }
+}
+
+/* 選択肢画像表示（全画面モーダル） */
+.choice-image-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  cursor: pointer;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.choice-image-fullscreen {
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+  box-shadow: 0 0 50px rgba(255, 255, 255, 0.3);
+  animation: zoomIn 0.5s ease-out;
+}
+
+@keyframes zoomIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.choice-image-hint {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 20px;
+  font-weight: bold;
+  color: white;
+  background: rgba(220, 20, 60, 0.9);
+  padding: 12px 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  animation: blink 1.5s infinite;
 }
 
 /* レスポンシブ */

@@ -323,6 +323,46 @@
   }
 }
 
+/* 🎮 救済ボタン（チートコード用） */
+.cheat-clear-button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
+  color: #ffffff;
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding: 12px 24px;
+  border: 3px solid #ffffff;
+  border-radius: 12px;
+  cursor: pointer;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.8), 0 4px 8px rgba(0, 0, 0, 0.6);
+  transition: all 0.2s ease;
+  animation: cheatButtonPulse 1.5s infinite;
+  z-index: 10000;
+}
+
+.cheat-clear-button:hover {
+  background: linear-gradient(135deg, #ffed4e 0%, #ffc107 100%);
+  transform: scale(1.05);
+  box-shadow: 0 0 40px rgba(255, 215, 0, 1), 0 6px 12px rgba(0, 0, 0, 0.8);
+}
+
+.cheat-clear-button:active {
+  transform: scale(0.98);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.9), 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+@keyframes cheatButtonPulse {
+  0%, 100% {
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.8), 0 4px 8px rgba(0, 0, 0, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 50px rgba(255, 215, 0, 1), 0 6px 12px rgba(0, 0, 0, 0.8);
+  }
+}
+
 /* Responsive adjustments */
 @media (max-height: 700px) {
   .match3-title {
