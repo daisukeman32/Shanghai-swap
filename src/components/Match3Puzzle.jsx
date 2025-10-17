@@ -23,6 +23,28 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
   const [retryCount, setRetryCount] = useState(0); // リトライ回数
   const [gameKey, setGameKey] = useState(0); // ゲームリセット用キー
   const [gameStarted, setGameStarted] = useState(false); // ゲーム開始フラグ
+  const [warning30Played, setWarning30Played] = useState(false); // 30秒警告再生済みフラグ
+
+  // 🔊 効果音管理用ref
+  const soundsRef = useRef({
+    swap: null,            // スワップ音（決定ボタンを押す33）
+    invalidSwap: null,     // 無効なスワップ音
+    match3: null,          // 3個マッチ音
+    match4plus: null,      // 4個以上マッチ音
+    heart5: null,          // ハート5個揃え音
+    tileFall: null,        // タイル落下音
+    cutin: null,           // カットイン音
+    countdownStart: null,  // カウントダウン開始音
+    gameoverSound: null,   // ゲームオーバー効果音
+    girlFirstHeart: null,  // 女の子の声（1回目）「あれ？なんか気持ちよくなってきた」
+    girlSecondHeart: null, // 女の子の声（2回目）「あぁきもちいい」
+    firstHeartVoice: null, // 1回目ハート成功セリフ「よしあと一回のみ」
+    clearVoice: null,      // クリア時セリフ「ひひひ！やったぜいれかわりだ！」
+    gameoverVoice: null,   // ゲームオーバー時セリフ「次こそは必ずいれかわってやる！」
+    warning30sec: null,    // 30秒警告音
+    shuffleWarning: null,  // シャッフル警告音
+    buttonClick: null      // ボタンクリック音
+  });
 
   const gameStateRef = useRef({
     level: {
@@ -232,7 +254,104 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
     }
   }, [selectedCharacter]);
 
-  // ゲームリセット時の処理（初回マウント時は gameKey=0 なのでスキップ）
+  // 🔊 効果音読み込み
+  useEffect(() => {
+    soundsRef.current = {
+      swap: new Audio('/assets/sounds/swap.mp3'),
+      invalidSwap: new Audio('/assets/sounds/invalid_swap.mp3'),
+      match3: new Audio('/assets/sounds/match3.mp3'),
+      match4plus: new Audio('/assets/sounds/match4plus.mp3'),
+      heart5: new Audio('/assets/sounds/heart5.mp3'),
+      tileFall: new Audio('/assets/sounds/tile_fall.mp3'),
+      cutin: new Audio('/assets/sounds/cutin.mp3'),
+      countdownStart: new Audio('/assets/sounds/countdown_start.mp3'),
+      gameoverSound: new Audio('/assets/sounds/gameover_sound.mp3'),
+      girlFirstHeart: new Audio('/assets/sounds/girl_first_heart.mp3'),
+      girlSecondHeart: new Audio('/assets/sounds/girl_second_heart.mp3'),
+      firstHeartVoice: new Audio('/assets/sounds/first_heart_voice.mp3'),
+      clearVoice: new Audio('/assets/sounds/clear_voice.mp3'),
+      gameoverVoice: new Audio('/assets/sounds/gameover_voice.mp3'),
+      warning30sec: new Audio('/assets/sounds/warning_30sec.mp3'),
+      shuffleWarning: new Audio('/assets/sounds/shuffle_warning.mp3'),
+      buttonClick: new Audio('/assets/sounds/button_click.mp3')
+    };
+
+    // 音量設定（0.0～1.0）
+    Object.values(soundsRef.current).forEach(audio => {
+      if (audio) audio.volume = 0.7;
+    });
+
+    console.log('🔊 効果音読み込み完了（SE + ボイス 17種類）');
+  }, []);
+
+  // 効果音再生ヘルパー関数
+  const playSound = (soundName) => {
+    const sound = soundsRef.current[soundName];
+    if (sound) {
+      sound.currentTime = 0; // 再生位置をリセット
+      sound.play().catch(err => console.warn(`効果音再生失敗: ${soundName}`, err));
+    }
+  };
+
+  // 🎵 フェードイン/フェードアウト付き音声再生
+  const playSoundWithFade = (soundName, fadeDuration = 300) => {
+    const sound = soundsRef.current[soundName];
+    if (!sound) return;
+
+    sound.currentTime = 0;
+    sound.volume = 0; // フェードイン用に0から開始
+
+    const fadeInSteps = 20; // フェードインのステップ数
+    const fadeInInterval = fadeDuration / fadeInSteps;
+    const volumeStep = 0.7 / fadeInSteps; // 最終音量0.7まで
+
+    // フェードイン
+    let currentStep = 0;
+    const fadeInTimer = setInterval(() => {
+      currentStep++;
+      sound.volume = Math.min(0.7, volumeStep * currentStep);
+
+      if (currentStep >= fadeInSteps) {
+        clearInterval(fadeInTimer);
+      }
+    }, fadeInInterval);
+
+    // 再生開始
+    sound.play().catch(err => console.warn(`効果音再生失敗: ${soundName}`, err));
+
+    // フェードアウト（音声終了の少し前から）
+    sound.onended = null; // 既存のイベントリスナーをクリア
+    const duration = sound.duration * 1000; // ミリ秒に変換
+
+    if (duration > fadeDuration * 2) {
+      setTimeout(() => {
+        const fadeOutSteps = 20;
+        const fadeOutInterval = fadeDuration / fadeOutSteps;
+        let fadeOutStep = 0;
+
+        const fadeOutTimer = setInterval(() => {
+          fadeOutStep++;
+          sound.volume = Math.max(0, 0.7 - (volumeStep * fadeOutStep));
+
+          if (fadeOutStep >= fadeOutSteps) {
+            clearInterval(fadeOutTimer);
+            sound.volume = 0.7; // 次回再生用に音量をリセット
+          }
+        }, fadeOutInterval);
+      }, duration - fadeDuration - 100); // 終了前にフェードアウト開始
+    }
+  };
+
+  // 🔊 スタートカットイン表示時に音声再生
+  useEffect(() => {
+    if (showCutin && cutinType === 'start') {
+      // スタートカットイン表示時にカットイン音を再生
+      playSound('cutin');
+      console.log('🔊 スタートカットイン音再生');
+    }
+  }, [showCutin, cutinType]);
+
+  // ゲームリセット時の処理（初回マウント時は gameKey=0 なのでスキップ)
   useEffect(() => {
     if (gameKey > 0) {
       // リトライ時のみ実行
@@ -241,9 +360,19 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
       setHypnosisCount(0);
       setCutinType('start');
       setShowCutin(true);
+      setWarning30Played(false); // 30秒警告フラグリセット
       console.log('🔄 ゲームリセット - スタートカットイン表示');
     }
   }, [gameKey]);
+
+  // 🔊 30秒警告音
+  useEffect(() => {
+    if (timeRemaining === 30 && !warning30Played && !gameStateRef.current.gameover && !gameStateRef.current.cleared) {
+      playSound('warning30sec');
+      setWarning30Played(true);
+      console.log('🔊 30秒警告音再生');
+    }
+  }, [timeRemaining, warning30Played]);
 
   // タイマー処理（1秒ごとにカウントダウン）
   useEffect(() => {
@@ -289,17 +418,45 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
   useEffect(() => {
     if (timeRemaining <= 0 && !gameStateRef.current.gameover && !gameStateRef.current.cleared) {
       gameStateRef.current.gameover = true;
-      setTimeout(() => setShowGameOverDialog(true), 1000);
+      // 🔊 ゲームオーバー効果音を即座に再生
+      playSound('gameoverSound');
+      setTimeout(() => {
+        setShowGameOverDialog(true);
+        // 🔊 ゲームオーバー時セリフ「次こそは必ずいれかわってやる！」（フェード付き）
+        playSoundWithFade('gameoverVoice', 300);
+      }, 1000);
     }
   }, [timeRemaining]);
 
   // 催眠カウント達成チェック
   useEffect(() => {
     if (hypnosisCount === 1 && !gameStateRef.current.cleared) {
-      // 1回目のハート揃え成功時にカットイン表示
+      // 1回目のハート揃え成功時
+      // 新しい順序：カットイン表示 → カットイン音 + 「よしあと一回のみ」→「あれ？なんか気持ちよくなってきた」
       setCutinType('first');
       setShowCutin(true);
-      setTimeout(() => setShowCutin(false), 2500); // 2.5秒表示
+
+      // 🔊 カットイン音再生
+      playSound('cutin');
+
+      // カットイン音の0.3秒後にセリフ「よしあと一回のみ」（フェード付き）
+      setTimeout(() => {
+        playSoundWithFade('firstHeartVoice', 300);
+
+        // 「よしあと一回のみ」の再生時間を取得して、終了後に女の子の声を再生
+        const firstHeartVoiceSound = soundsRef.current.firstHeartVoice;
+        if (firstHeartVoiceSound) {
+          const voiceDuration = firstHeartVoiceSound.duration * 1000; // ミリ秒に変換
+
+          // 音声終了後に女の子の声「あれ？なんか気持ちよくなってきた」を再生（フェード付き）
+          setTimeout(() => {
+            playSoundWithFade('girlFirstHeart', 300);
+          }, voiceDuration + 200); // 音声終了 + 0.2秒の間隔
+        }
+      }, 300);
+
+      // 2.5秒後にカットイン非表示
+      setTimeout(() => setShowCutin(false), 2500);
     }
 
     if (hypnosisCount === 2 && !gameStateRef.current.cleared) {
@@ -307,22 +464,35 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
       gameStateRef.current.cleared = true;
       console.log('🎉 クリア判定！タイマー停止');
 
-      // Excellentカットイン表示
-      setCutinType('excellent');
-      setShowCutin(true);
+      // 🔊 女の子の声「あぁきもちいい」を即座に再生（フェード付き）
+      playSoundWithFade('girlSecondHeart', 300);
+
+      // 0.8秒後にExcellentカットイン表示
       setTimeout(() => {
-        setShowCutin(false);
-        // Excellent表示後、解除完了カットインを表示
+        setCutinType('excellent');
+        setShowCutin(true);
+        // 🔊 カットイン音再生
+        playSound('cutin');
+
         setTimeout(() => {
-          setCutinType('clearComplete');
-          setShowCutin(true);
+          setShowCutin(false);
+          // Excellent表示後、解除完了カットインを表示
           setTimeout(() => {
-            setShowCutin(false);
-            // 解除完了表示後、次のシーンへ
-            onClear();
-          }, 2500);
-        }, 500);
-      }, 2500);
+            setCutinType('clearComplete');
+            setShowCutin(true);
+            // 🔊 カットイン音 + セリフ「ひひひ！やったぜいれかわりだ！」
+            playSound('cutin');
+            setTimeout(() => {
+              playSoundWithFade('clearVoice', 300); // フェード付き
+            }, 300); // カットイン音の後、0.3秒後にセリフ再生
+            setTimeout(() => {
+              setShowCutin(false);
+              // 解除完了表示後、次のシーンへ
+              onClear();
+            }, 2500);
+          }, 500);
+        }, 2500);
+      }, 800); // 女の子の声の後、0.8秒後にExcellentカットイン表示
     }
   }, [hypnosisCount, onClear]);
 
@@ -407,6 +577,9 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
           game.isShuffling = true;
           console.log('⚠ 手詰まり検出！シャッフルします...');
 
+          // 🔊 シャッフル警告音再生
+          playSound('shuffleWarning');
+
           // ペナルティ: 10秒減少
           setTimeRemaining(prev => Math.max(0, prev - 10));
           addFloatingText(game.level.x + (game.level.columns * game.level.tilewidth) / 2,
@@ -476,6 +649,8 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
             swap(game.currentmove.column1, game.currentmove.row1,
                  game.currentmove.column2, game.currentmove.row2);
             game.gamestate = game.gamestates.ready;
+            // 🔊 無効なスワップ音再生
+            playSound('invalidSwap');
           }
         }
 
@@ -874,15 +1049,33 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
     const applyTileEffects = () => {
       // 色ごとの合計マッチ数を集計
       const colorMatches = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 };
+      let maxClusterLength = 0;
 
       for (let i = 0; i < game.clusters.length; i++) {
         const cluster = game.clusters[i];
         const tileType = game.level.tiles[cluster.column][cluster.row].type;
         colorMatches[tileType] += cluster.length;
+        maxClusterLength = Math.max(maxClusterLength, cluster.length);
       }
 
       // ハートタイル（type 0）: 5個マッチでゴールカウンター+1
-      if (colorMatches[0] >= 5) {
+      const isHeart5Match = colorMatches[0] >= 5;
+
+      // 🔊 マッチ音再生
+      if (isHeart5Match) {
+        // ハート5個揃えの時は専用の効果音のみ再生
+        playSound('heart5');
+      } else {
+        // 通常のマッチ音再生
+        if (maxClusterLength >= 4) {
+          playSound('match4plus');
+        } else if (maxClusterLength === 3) {
+          playSound('match3');
+        }
+      }
+
+      // ハート5個成功時の処理
+      if (isHeart5Match) {
         setHypnosisCount(prev => prev + 1);
         addFloatingText(
           game.level.x + (game.level.columns * game.level.tilewidth) / 2,
@@ -1053,6 +1246,7 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
 
     // タイルシフト
     const shiftTiles = () => {
+      let hasFallen = false;
       for (let i = 0; i < game.level.columns; i++) {
         let shift = 0;
         for (let j = game.level.rows - 1; j >= 0; j--) {
@@ -1065,6 +1259,7 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
               const temp = game.level.tiles[i][j].type;
               game.level.tiles[i][j].type = game.level.tiles[i][j + shift].type;
               game.level.tiles[i][j + shift].type = temp;
+              hasFallen = true;
             }
             game.level.tiles[i][j].shift = 0;
           }
@@ -1073,7 +1268,13 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
         for (let j = 0; j < shift; j++) {
           game.level.tiles[i][j].type = getRandomTile();
           game.level.tiles[i][j].shift = 0;
+          hasFallen = true;
         }
+      }
+
+      // 🔊 タイル落下音再生（タイルが落下した場合のみ）
+      if (hasFallen) {
+        playSound('tileFall');
       }
     };
 
@@ -1178,6 +1379,9 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
               game.gamestate = game.gamestates.resolve;
               game.animationstate = 2;
               game.animationtime = 0;
+
+              // 🔊 スワップ音再生
+              playSound('swap');
             } else {
               game.level.selectedtile.column = tx;
               game.level.selectedtile.row = ty;
@@ -1244,6 +1448,9 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
           game.animationtime = 0;
           game.isDragging = true; // ドラッグスワップ実行済みフラグ
 
+          // 🔊 スワップ音再生
+          playSound('swap');
+
           console.log(`🎮 ドラッグスワップ: (${game.dragStartTileX},${game.dragStartTileY}) → (${targetTileX},${targetTileY})`);
         }
       }
@@ -1277,6 +1484,8 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
   // リトライ処理
   const handleRetry = () => {
     if (retryCount < 3) {
+      // 🔊 ボタンクリック音再生
+      playSound('buttonClick');
       setRetryCount(prev => prev + 1);
       setShowGameOverDialog(false);
       gameStateRef.current.gameover = false;
@@ -1285,11 +1494,25 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
     }
   };
 
+  // タイトルへボタン処理
+  const handleGoToTitle = () => {
+    // 🔊 ボタンクリック音再生
+    playSound('buttonClick');
+    onGameOver();
+  };
+
   // スタートボタンクリック処理
   const handleStartClick = () => {
-    console.log('🎮 STARTボタンクリック - ゲーム開始！');
-    // カットインを即座に閉じる（これによりタイマーが自動的に開始される）
-    setShowCutin(false);
+    console.log('🎮 STARTボタンクリック - カウントダウン開始！');
+    // 🔊 カウントダウン開始音再生
+    playSound('countdownStart');
+
+    // 3秒のカウントダウン後にゲーム開始
+    setTimeout(() => {
+      console.log('🎮 カウントダウン完了 - ゲーム開始！');
+      // カットインを閉じる（これによりタイマーが自動的に開始される）
+      setShowCutin(false);
+    }, 3000); // 3秒待機
   };
 
   return (
@@ -1354,7 +1577,7 @@ function Match3Puzzle({ onClear, onGameOver, stage = 1, selectedCharacter = 'air
           {retryCount < 3 && (
             <button onClick={handleRetry}>リトライ（残り{3 - retryCount}回）</button>
           )}
-          <button onClick={onGameOver}>タイトルへ</button>
+          <button onClick={handleGoToTitle}>タイトルへ</button>
         </div>
       )}
     </div>
